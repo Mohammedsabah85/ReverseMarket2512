@@ -354,7 +354,7 @@ p {
     display: block;
     width: 22px;
     height: 2px;
-    background: var(--text-primary);
+   /* background: var(--text-primary);*/
     margin: 0 auto;
     position: relative;
     transition: var(--transition-normal);
@@ -366,7 +366,7 @@ p {
     position: absolute;
     width: 22px;
     height: 2px;
-    background: var(--text-primary);
+  /*  background: var(--text-primary);*/
     left: 0;
     transition: var(--transition-normal);
 }

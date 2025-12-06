@@ -990,4 +990,79 @@
   <data name="AdditionalAdminSecurity" xml:space="preserve">
     <value>أمان إضافي للمشرفين</value>
   </data>
+  <data name="Chat" xml:space="preserve">
+    <value>المحادثات</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>الإشعارات</value>
+  </data>
+  <data name="Messages" xml:space="preserve">
+    <value>الرسائل</value>
+  </data>
+  <data name="TypeMessage" xml:space="preserve">
+    <value>اكتب رسالتك...</value>
+  </data>
+  <data name="NoMessages" xml:space="preserve">
+    <value>لا توجد رسائل</value>
+  </data>
+  <data name="NoNotifications" xml:space="preserve">
+    <value>لا توجد إشعارات</value>
+  </data>
+  <data name="MarkAsRead" xml:space="preserve">
+    <value>تحديد كمقروء</value>
+  </data>
+  <data name="MarkAllAsRead" xml:space="preserve">
+    <value>تحديد الكل كمقروء</value>
+  </data>
+  <data name="AddRequestDescription" xml:space="preserve">
+    <value>إضافة وصف الطلب</value>
+  </data>
+  <data name="BasicInfo" xml:space="preserve">
+    <value>معلومات اساسية</value>
+  </data>
+  <data name="RequestTitleExample" xml:space="preserve">
+    <value>مثال على عنوان الطلب</value>
+  </data>
+  <data name="RequestDescriptionPlaceholder" xml:space="preserve">
+    <value>وصف الطلب</value>
+  </data>
+  <data name="BetterDetailsNote" xml:space="preserve">
+    <value>ملاحظة تفاصيل أفضل</value>
+  </data>
+  <data name="MainCategory" xml:space="preserve">
+    <value>الفئة الرئيسية</value>
+  </data>
+  <data name="SelectCategory" xml:space="preserve">
+    <value>اختر الفئة</value>
+  </data>
+  <data name="SubCategory1" xml:space="preserve">
+    <value>الفئة الفرعية 1</value>
+  </data>
+  <data name="SelectSubCategory1" xml:space="preserve">
+    <value>حدد الفئة الفرعية 1</value>
+  </data>
+  <data name="SubCategory2" xml:space="preserve">
+    <value>الفئة الفرعية 2</value>
+  </data>
+  <data name="SelectSubCategory2" xml:space="preserve">
+    <value>حدد الفئة الفرعية 2</value>
+  </data>
+  <data name="Images" xml:space="preserve">
+    <value>صورة</value>
+  </data>
+  <data name="UploadImages" xml:space="preserve">
+    <value>رفع الصور</value>
+  </data>
+  <data name="ClickToUpload" xml:space="preserve">
+    <value>انقر للتحميل</value>
+  </data>
+  <data name="OrDragImages" xml:space="preserve">
+    <value>أو اسحب الصور</value>
+  </data>
+  <data name="UploadImagesNote" xml:space="preserve">
+    <value>ملاحظة تحميل الصور</value>
+  </data>
+  <data name="RequestReviewNote" xml:space="preserve">
+    <value>طلب ملاحظة المراجعة</value>
+  </data>
 </root>

@@ -22,7 +22,7 @@
 <html lang="@currentLanguage" dir="@direction">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="description" content="@Localizer["SiteDescription"]" />
     <meta name="keywords" content="سوق عكسي, طلبات, متاجر, العراق" />
     <meta name="author" content="@Localizer["SiteName"]" />
@@ -48,7 +48,6 @@
               crossorigin="anonymous">
     }
 
-
     <!-- Font Awesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
           rel="stylesheet"
@@ -65,23 +64,18 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     }
 
-    <link rel="stylesheet" href="~/css/styles-complete.css" />
-    <link rel="stylesheet" href="~/css/notifications.css" />
-    <link rel="stylesheet" href="~/css/mobile-responsive.css" />
-    <link rel="stylesheet" href="~/css/mobile-fixes.css" />
-   
-
+    <link rel="stylesheet" href="~/css/styles-complete.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/notifications.css" asp-append-version="true" />
+    <!-- ملف CSS الجديد للموبايل - يجب أن يكون آخر ملف -->
+    <link rel="stylesheet" href="~/css/mobile-navbar-fix.css" asp-append-version="true" />
 
     @await RenderSectionAsync("Styles", required: false)
-
-
-
-
 </head>
 
 <body>
     <header class="main-header">
-        <div class="top-bar d-none d-md-block">
+        <!-- الشريط العلوي - يظهر فقط على الشاشات الكبيرة -->
+        <div class="top-bar d-none d-lg-block">
             <div class="container">
                 <div class="contact-info">
                     @if (!string.IsNullOrEmpty(siteSettings?.ContactPhone))
@@ -130,7 +124,8 @@
         </div>
 
         <nav class="navbar navbar-expand-lg main-navbar">
-            <div class="container">
+            <div class="container position-relative">
+                <!-- الشعار -->
                 <a class="navbar-brand" href="/">
                     @if (!string.IsNullOrEmpty(siteSettings?.SiteLogo))
                     {
@@ -140,68 +135,72 @@
                     {
                         <i class="fas fa-store brand-icon"></i>
                     }
-                    @Localizer["SiteName"]
+                    <span class="d-none d-sm-inline">@Localizer["SiteName"]</span>
                 </a>
 
-                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <!-- زر القائمة للموبايل -->
+                <button class="navbar-toggler" type="button" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- القائمة الرئيسية -->
+                <div class="navbar-collapse" id="navbarNav">
+                    <!-- روابط التنقل الرئيسية -->
                     <ul class="navbar-nav @(direction == "rtl" ? "ms-auto" : "me-auto")">
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")" href="/">
-                                <i class="fas fa-home @(direction == "rtl" ? "ms-1" : "me-1")"></i>
+                                <i class="fas fa-home @(direction == "rtl" ? "ms-2" : "me-2")"></i>
                                 @Localizer["Home"]
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Requests" ? "active" : "")" href="/Requests">
-                                <i class="fas fa-list @(direction == "rtl" ? "ms-1" : "me-1")"></i>
+                                <i class="fas fa-list @(direction == "rtl" ? "ms-2" : "me-2")"></i>
                                 @Localizer["Requests"]
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Stores" ? "active" : "")" href="/Stores">
-                                <i class="fas fa-store @(direction == "rtl" ? "ms-1" : "me-1")"></i>
+                                <i class="fas fa-store @(direction == "rtl" ? "ms-2" : "me-2")"></i>
                                 @Localizer["Stores"]
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "About" ? "active" : "")" href="/Home/About">
-                                <i class="fas fa-info-circle @(direction == "rtl" ? "ms-1" : "me-1")"></i>
+                                <i class="fas fa-info-circle @(direction == "rtl" ? "ms-2" : "me-2")"></i>
                                 @Localizer["About"]
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Contact" ? "active" : "")" href="/Home/Contact">
-                                <i class="fas fa-envelope @(direction == "rtl" ? "ms-1" : "me-1")"></i>
+                                <i class="fas fa-envelope @(direction == "rtl" ? "ms-2" : "me-2")"></i>
                                 @Localizer["Contact"]
                             </a>
                         </li>
                     </ul>
 
+                    <!-- القوائم الثانوية -->
                     <ul class="navbar-nav">
-
-
-                        <!-- Notifications Bell -->
+                        <!-- جرس الإشعارات -->
                         @if (isLoggedIn)
                         {
                             <li class="nav-item">
-                                @await Html.PartialAsync("_NotificationBell")
+                                <a href="/Notifications" class="nav-link notification-bell position-relative">
+                                    <i class="fas fa-bell @(direction == "rtl" ? "ms-2" : "me-2")"></i>
+                                    <span class="d-lg-none">@Localizer["Notifications"]</span>
+                                    <span class="badge bg-danger rounded-pill" id="notification-badge" style="display: none;">0</span>
+                                </a>
                             </li>
                         }
-                        <!-- Language Selector - محسن للموبايل -->
+
+                        <!-- قائمة اللغات - محسنة -->
                         <li class="nav-item dropdown language-selector">
                             <a class="nav-link dropdown-toggle language-dropdown" href="#" id="languageMenu"
-                               role="button" data-bs-toggle="dropdown" aria-expanded="false"
-                               data-bs-auto-close="true">
+                               role="button" aria-expanded="false">
                                 <span class="flag">@currentLangInfo.Flag</span>
-                                <span class="d-none d-sm-inline">@currentLangInfo.NativeName</span>
-                                <span class="d-sm-none">اللغة</span>
+                                <span>@currentLangInfo.NativeName</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" id="languageDropdown" 
-                                style="min-width: 200px; z-index: 9999;">
+                            <ul class="dropdown-menu dropdown-menu-end" id="languageDropdown">
                                 @foreach (var language in supportedLanguages)
                                 {
                                     <li>
@@ -210,13 +209,12 @@
                                             <input type="hidden" name="culture" value="@language.Code" />
                                             <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
                                             <button type="submit"
-                                                    class="dropdown-item d-flex align-items-center justify-content-between @(currentLanguage == language.Code ? "active" : "")"
-                                                    @(currentLanguage == language.Code ? "disabled" : "")
-                                                    style="border: none; background: none; width: 100%; text-align: right; padding: 0.75rem 1rem;">
-                                                <div class="d-flex align-items-center">
-                                                    <span class="flag me-2">@language.Flag</span>
+                                                    class="dropdown-item @(currentLanguage == language.Code ? "active" : "")"
+                                                    @(currentLanguage == language.Code ? "disabled" : "")>
+                                                <span class="d-flex align-items-center">
+                                                    <span class="flag @(direction == "rtl" ? "ms-2" : "me-2")">@language.Flag</span>
                                                     <span>@language.NativeName</span>
-                                                </div>
+                                                </span>
                                                 @if (currentLanguage == language.Code)
                                                 {
                                                     <i class="fas fa-check text-success"></i>
@@ -228,14 +226,14 @@
                             </ul>
                         </li>
 
-                        <!-- User Menu -->
+                        <!-- قائمة المستخدم -->
                         @if (isLoggedIn)
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle user-dropdown" href="#" id="userMenu"
-                                   role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                   role="button" aria-expanded="false">
                                     <div class="user-avatar">@(userName?.FirstOrDefault() ?? 'U')</div>
-                                    <span class="d-none d-md-inline">@userName</span>
+                                    <span>@userName</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     @if (isAdmin)
@@ -270,13 +268,13 @@
                                         <li>
                                             <a class="dropdown-item" href="/Chat">
                                                 <i class="fas fa-comments @(direction == "rtl" ? "ms-2" : "me-2")"></i>
-                                                المحادثات
+                                                @Localizer["Conversations"]
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item" href="/Notifications">
                                                 <i class="fas fa-bell @(direction == "rtl" ? "ms-2" : "me-2")"></i>
-                                                الإشعارات
+                                                @Localizer["Notifications"]
                                             </a>
                                         </li>
                                     }
@@ -297,37 +295,32 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link" href="/Requests/Create">
-                                    <i class="fas fa-plus @(direction == "rtl" ? "ms-1" : "me-1")"></i>
+                                    <i class="fas fa-plus @(direction == "rtl" ? "ms-2" : "me-2")"></i>
                                     @Localizer["AddRequest"]
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="btn btn-outline-custom" href="/Account/Login">
                                     <i class="fas fa-sign-in-alt"></i>
-                                    @Localizer["Login"]
+                                    <span>@Localizer["Login"]</span>
                                 </a>
                             </li>
                         }
                     </ul>
-
-
-         
                 </div>
             </div>
         </nav>
     </header>
 
     <main role="main" class="fade-in">
+        <!-- رسائل التنبيه -->
         <div class="messages-container">
             @if (TempData["SuccessMessage"] != null)
             {
                 <div class="container mt-3">
-                    <div class="alert alert-success alert-dismissible fade show animate__animated animate__slideInDown" role="alert">
-                        <i class="fas fa-check-circle"></i>
-                        <div>
-                            <strong>@Localizer["Success"]!</strong>
-                            @TempData["SuccessMessage"]
-                        </div>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle @(direction == "rtl" ? "ms-2" : "me-2")"></i>
+                        <strong>@Localizer["Success"]!</strong> @TempData["SuccessMessage"]
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 </div>
@@ -336,12 +329,9 @@
             @if (TempData["ErrorMessage"] != null)
             {
                 <div class="container mt-3">
-                    <div class="alert alert-danger alert-dismissible fade show animate__animated animate__slideInDown" role="alert">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <div>
-                            <strong>@Localizer["Error"]!</strong>
-                            @TempData["ErrorMessage"]
-                        </div>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle @(direction == "rtl" ? "ms-2" : "me-2")"></i>
+                        <strong>@Localizer["Error"]!</strong> @TempData["ErrorMessage"]
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 </div>
@@ -350,12 +340,9 @@
             @if (TempData["WarningMessage"] != null)
             {
                 <div class="container mt-3">
-                    <div class="alert alert-warning alert-dismissible fade show animate__animated animate__slideInDown" role="alert">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <div>
-                            <strong>تنبيه!</strong>
-                            @TempData["WarningMessage"]
-                        </div>
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle @(direction == "rtl" ? "ms-2" : "me-2")"></i>
+                        <strong>@Localizer["Warning"]!</strong> @TempData["WarningMessage"]
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 </div>
@@ -364,12 +351,9 @@
             @if (TempData["InfoMessage"] != null)
             {
                 <div class="container mt-3">
-                    <div class="alert alert-info alert-dismissible fade show animate__animated animate__slideInDown" role="alert">
-                        <i class="fas fa-info-circle"></i>
-                        <div>
-                            <strong>معلومة!</strong>
-                            @TempData["InfoMessage"]
-                        </div>
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <i class="fas fa-info-circle @(direction == "rtl" ? "ms-2" : "me-2")"></i>
+                        <strong>@Localizer["Info"]!</strong> @TempData["InfoMessage"]
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 </div>
@@ -379,10 +363,11 @@
         @RenderBody()
     </main>
 
+    <!-- الفوتر -->
     <footer class="main-footer">
         <div class="container">
             <div class="row g-4">
-                <!-- Logo and About Section -->
+                <!-- قسم الشعار والوصف -->
                 <div class="col-lg-3 col-md-6 footer-section">
                     @if (!string.IsNullOrEmpty(siteSettings?.SiteLogo))
                     {
@@ -407,7 +392,7 @@
                     </p>
                 </div>
 
-                <!-- Social Media Links -->
+                <!-- روابط السوشيال ميديا -->
                 <div class="col-lg-2 col-md-6 footer-section">
                     <h5>@Localizer["SocialMedia"]</h5>
                     <ul class="list-unstyled">
@@ -446,7 +431,7 @@
                     </ul>
                 </div>
 
-                <!-- Contact Information -->
+                <!-- معلومات الاتصال -->
                 <div class="col-lg-3 col-md-6 footer-section">
                     <h5>@Localizer["Contact"]</h5>
                     <ul class="list-unstyled">
@@ -477,7 +462,7 @@
                     </ul>
                 </div>
 
-                <!-- Important Links -->
+                <!-- الروابط المهمة -->
                 <div class="col-lg-4 col-md-6 footer-section">
                     <h5>@Localizer["ImportantLinks"]</h5>
                     <div class="row">
@@ -516,7 +501,7 @@
                                     @Localizer["Copyright"]
                                 }
                             }
-                            <span class="@(direction == "rtl" ? "me-2 ms-2" : "mx-2")">|</span>
+                            <span class="mx-2">|</span>
                             <i class="fas fa-heart text-danger"></i>
                             @if (currentLanguage == "ar")
                             {
@@ -538,7 +523,7 @@
     </footer>
 
     <!-- التنقل السفلي للموبايل -->
-    <nav class="mobile-bottom-nav d-sm-none">
+    <nav class="mobile-bottom-nav d-lg-none">
         <ul class="nav">
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")" href="/">
@@ -579,46 +564,23 @@
         </ul>
     </nav>
 
-    <button id="backToTop" class="btn btn-custom position-fixed" style="bottom: 2rem; @(direction == "rtl" ? "left" : "right"): 2rem; z-index: 1000; display: none; border-radius: 50%; width: 50px; height: 50px;">
+    <!-- زر العودة للأعلى -->
+    <button id="backToTop" class="btn btn-custom position-fixed" style="bottom: 5rem; @(direction == "rtl" ? "left" : "right"): 1rem; z-index: 1000; display: none; border-radius: 50%; width: 45px; height: 45px;">
         <i class="fas fa-arrow-up"></i>
     </button>
+
+    <!-- JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
             integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
 
     <script src="~/js/site-unified.js" asp-append-version="true"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
-    <script src="~/js/notification-manager.js"></script>
-    <script src="~/js/language-manager.js"></script>
-    <script src="~/js/mobile-navigation.js"></script>
-
-   
-
-    <script>
-        // التحقق من تحميل jQuery
-        if (typeof jQuery === 'undefined') {
-            console.error('❌ jQuery غير محمل');
-            alert('خطأ: jQuery غير محمل. تحقق من الاتصال بالإنترنت.');
-        } else {
-            console.log('✅ jQuery محمل بنجاح - الإصدار:', jQuery.fn.jquery);
-        }
-
-        if (typeof bootstrap === 'undefined') {
-            console.error('❌ Bootstrap غير محمل');
-            alert('خطأ: Bootstrap غير محمل. تحقق من الاتصال بالإنترنت.');
-        } else {
-            console.log('✅ Bootstrap محمل بنجاح');
-        }
-
-        console.log('🌐 اللغة الحالية:', '@currentLanguage');
-        console.log('📂 الاتجاه:', '@direction');
-        console.log('👤 تسجيل دخول:', @isLoggedIn.ToString().ToLower());
-        console.log('🔐 اسم المستخدم:', '@userName');
-    </script>
+    <script src="~/js/notification-manager.js" asp-append-version="true"></script>
+    <!-- ملف JavaScript الجديد للموبايل -->
+    <script src="~/js/mobile-nav-fix.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-
-

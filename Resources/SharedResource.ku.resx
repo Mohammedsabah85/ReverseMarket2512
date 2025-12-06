@@ -1,5 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -58,16 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  
-  <!-- Site Information -->
   <data name="SiteName" xml:space="preserve">
     <value>بازاڕی پێچەوانە</value>
   </data>
   <data name="SiteDescription" xml:space="preserve">
     <value>پلاتفۆرمی بەستنەوەی کڕیاران بە فرۆشگاکان لە عێراق</value>
   </data>
-  
-  <!-- Navigation -->
   <data name="Home" xml:space="preserve">
     <value>سەرەکی</value>
   </data>
@@ -101,8 +156,6 @@
   <data name="AdminPanel" xml:space="preserve">
     <value>پانێڵی بەڕێوەبەر</value>
   </data>
-  
-  <!-- Welcome Section -->
   <data name="Welcome" xml:space="preserve">
     <value>بەخێربێیت بۆ بازاڕی پێچەوانە</value>
   </data>
@@ -115,8 +168,6 @@
   <data name="BrowseRequests" xml:space="preserve">
     <value>گەڕان بە داواکاریەکاندا</value>
   </data>
-  
-  <!-- Search -->
   <data name="Search" xml:space="preserve">
     <value>گەڕان</value>
   </data>
@@ -135,8 +186,6 @@
   <data name="DiscoverProducts" xml:space="preserve">
     <value>بەرهەم و خزمەتگوزاریەکان بدۆزەرەوە</value>
   </data>
-  
-  <!-- Requests Section -->
   <data name="RecentRequests" xml:space="preserve">
     <value>داواکاریە تازە زیادکراوەکان</value>
   </data>
@@ -158,17 +207,6 @@
   <data name="ViewAllRequests" xml:space="preserve">
     <value>بینینی هەموو داواکاریەکان</value>
   </data>
-  <data name="AllRequests" xml:space="preserve">
-    <value>هەموو داواکاریەکان</value>
-  </data>
-  <data name="SearchInTitleOrDescription" xml:space="preserve">
-    <value>بەپێی ناونیشان یان وردەکارییەکان بگەڕێ</value>
-  </data>
-  <data name="BrowseAvailableRequests" xml:space="preserve">
-    <value>گەڕان بە داواکارییە بەردەستەکاندا</value>
-  </data>
-  
-  <!-- How It Works -->
   <data name="HowItWorks" xml:space="preserve">
     <value>بازاڕی پێچەوانە چۆن کار دەکات؟</value>
   </data>
@@ -199,8 +237,6 @@
   <data name="Step4Description" xml:space="preserve">
     <value>پێشنیارەکان بەراورد بکە و گونجاوترین هەڵبژێرە</value>
   </data>
-  
-  <!-- Statistics -->
   <data name="CompletedRequests" xml:space="preserve">
     <value>داواکاری تەواوکراو</value>
   </data>
@@ -213,16 +249,12 @@
   <data name="AvailableCategories" xml:space="preserve">
     <value>پۆلی بەردەست</value>
   </data>
-  
-  <!-- Pagination -->
   <data name="Previous" xml:space="preserve">
     <value>پێشوو</value>
   </data>
   <data name="Next" xml:space="preserve">
     <value>دواتر</value>
   </data>
-  
-  <!-- Common Fields -->
   <data name="Advertisement" xml:space="preserve">
     <value>ڕێکلام</value>
   </data>
@@ -259,8 +291,6 @@
   <data name="FullName" xml:space="preserve">
     <value>ناوی تەواو</value>
   </data>
-  
-  <!-- Contact Page -->
   <data name="ContactInfo" xml:space="preserve">
     <value>زانیاری پەیوەندی</value>
   </data>
@@ -297,11 +327,6 @@
   <data name="MessageSentSuccess" xml:space="preserve">
     <value>پەیامەکەت بە سەرکەوتوویی نێردرا</value>
   </data>
-  <data name="ContactUs" xml:space="preserve">
-    <value>پەیوەندیمان پێوە بکە</value>
-  </data>
-  
-  <!-- FAQ -->
   <data name="FAQ" xml:space="preserve">
     <value>پرسیارە باوەکان</value>
   </data>
@@ -317,8 +342,6 @@
   <data name="FAQ2Answer" xml:space="preserve">
     <value>بەڵێ، زیادکردنی داواکاری و گەڕان بە پێشنیارەکاندا تەواو خۆڕاییە بۆ کڕیارەکان</value>
   </data>
-  
-  <!-- Privacy Policy -->
   <data name="PrivacyPolicy" xml:space="preserve">
     <value>سیاسەتی تایبەتێتی</value>
   </data>
@@ -430,14 +453,15 @@
   <data name="PolicyChangesText" xml:space="preserve">
     <value>ڕەنگە ئەم سیاسەتە لە کاتێکەوە بۆ کاتێک نوێ بکەینەوە. ئاگادارت دەکەینەوە لە هەر گۆڕانکاریەکی گرنگ</value>
   </data>
+  <data name="ContactUs" xml:space="preserve">
+    <value>پەیوەندیمان پێوە بکە</value>
+  </data>
   <data name="ContactPrivacyText" xml:space="preserve">
     <value>ئەگەر پرسیارت هەیە دەربارەی سیاسەتی تایبەتێتی، تکایە پەیوەندیمان پێوە بکە</value>
   </data>
   <data name="BackToHome" xml:space="preserve">
     <value>گەڕانەوە بۆ سەرەکی</value>
   </data>
-  
-  <!-- Terms of Use -->
   <data name="TermsOfUse" xml:space="preserve">
     <value>مەرجەکانی بەکارهێنان</value>
   </data>
@@ -525,8 +549,6 @@
   <data name="ContactTermsText" xml:space="preserve">
     <value>ئەگەر پرسیارت هەیە دەربارەی مەرجەکانی بەکارهێنان، تکایە پەیوەندیمان پێوە بکە</value>
   </data>
-  
-  <!-- Common Actions -->
   <data name="Save" xml:space="preserve">
     <value>پاشەکەوتکردن</value>
   </data>
@@ -548,8 +570,6 @@
   <data name="ViewAll" xml:space="preserve">
     <value>بینینی هەموو</value>
   </data>
-  
-  <!-- Status Messages -->
   <data name="Loading" xml:space="preserve">
     <value>بارکردن...</value>
   </data>
@@ -571,8 +591,6 @@
   <data name="NoDataAvailable" xml:space="preserve">
     <value>هیچ داتایەک بەردەست نییە</value>
   </data>
-  
-  <!-- Status Labels -->
   <data name="Active" xml:space="preserve">
     <value>چالاک</value>
   </data>
@@ -591,8 +609,6 @@
   <data name="Status" xml:space="preserve">
     <value>دۆخ</value>
   </data>
-  
-  <!-- Date/Time -->
   <data name="Date" xml:space="preserve">
     <value>بەروار</value>
   </data>
@@ -602,22 +618,12 @@
   <data name="UpdatedAt" xml:space="preserve">
     <value>بەرواری نوێکردنەوە</value>
   </data>
-  
-  <!-- Footer -->
   <data name="ImportantLinks" xml:space="preserve">
     <value>بەستەرە گرنگەکان</value>
   </data>
   <data name="Copyright" xml:space="preserve">
     <value>© 2025 بازاڕی پێچەوانە. هەموو مافەکان پارێزراون</value>
   </data>
-  <data name="AllRightsReserved" xml:space="preserve">
-    <value>هەموو مافەکان پارێزراون</value>
-  </data>
-  <data name="MadeWithLoveInIraq" xml:space="preserve">
-    <value>بە خۆشەویستی دروستکراوە لە عێراق</value>
-  </data>
-  
-  <!-- Language -->
   <data name="LanguageChanged" xml:space="preserve">
     <value>زمان بە سەرکەوتوویی گۆڕدرا</value>
   </data>
@@ -627,8 +633,6 @@
   <data name="LanguageError" xml:space="preserve">
     <value>هەڵە لە گۆڕینی زمان</value>
   </data>
-  
-  <!-- About Page -->
   <data name="AboutSubtitle" xml:space="preserve">
     <value>پلاتفۆرمێکی داهێنەر بۆ بەستنەوەی کڕیاران بە فرۆشیارەکان</value>
   </data>
@@ -668,8 +672,6 @@
   <data name="StartNow" xml:space="preserve">
     <value>ئێستا دەست پێ بکە</value>
   </data>
-  
-  <!-- Social Media -->
   <data name="SocialMedia" xml:space="preserve">
     <value>تۆڕە کۆمەڵایەتیەکان</value>
   </data>
@@ -685,16 +687,24 @@
   <data name="YouTube" xml:space="preserve">
     <value>یوتیوب</value>
   </data>
-  
-  <!-- Database References -->
   <data name="TermsFromDatabase" xml:space="preserve">
     <value>مەرجەکانی بەکارهێنان لە بنکەدراوە</value>
   </data>
   <data name="IntellectualPropertyFromDatabase" xml:space="preserve">
     <value>مافی موڵکی زیهنی لە بنکەدراوە</value>
   </data>
-  
-  <!-- Stores -->
+  <data name="AllRightsReserved" xml:space="preserve">
+    <value>هەموو مافەکان پارێزراون</value>
+  </data>
+  <data name="AllRequests" xml:space="preserve">
+    <value>هەموو داواکاریەکان</value>
+  </data>
+  <data name="SearchInTitleOrDescription" xml:space="preserve">
+    <value>بەپێی ناونیشان یان وردەکارییەکان بگەڕێ</value>
+  </data>
+  <data name="BrowseAvailableRequests" xml:space="preserve">
+    <value>گەڕان بە داواکارییە بەردەستەکاندا</value>
+  </data>
   <data name="StoresDirectory" xml:space="preserve">
     <value>بەڕێوەبەرایەتی فرۆشگاکان</value>
   </data>
@@ -707,8 +717,6 @@
   <data name="RegisterYourStore" xml:space="preserve">
     <value>فرۆشگاکەت تۆمار بکە</value>
   </data>
-  
-  <!-- Login Page -->
   <data name="EnterPhoneToLogin" xml:space="preserve">
     <value>بۆ چوونەژوورەوە ژمارەی تەلەفۆنەکەت بنووسە</value>
   </data>
@@ -717,9 +725,6 @@
   </data>
   <data name="IAgreeToThe" xml:space="preserve">
     <value>ڕازیم بە</value>
-  </data>
-  <data name="And" xml:space="preserve">
-    <value>و</value>
   </data>
   <data name="VerificationCodeViaWhatsApp" xml:space="preserve">
     <value>کۆدی پشتڕاستکردنەوە لە ڕێگەی واتساپ</value>
@@ -733,10 +738,12 @@
   <data name="ForEveryone" xml:space="preserve">
     <value>بۆ هەمووان بەردەستە</value>
   </data>
-  
-  <!-- NEW COMPLETED TRANSLATIONS -->
-  
-  <!-- Phone Status -->
+  <data name="And" xml:space="preserve">
+    <value>و</value>
+  </data>
+  <data name="MadeWithLoveInIraq" xml:space="preserve">
+    <value>بە خۆشەویستی دروستکراوە لە عێراق</value>
+  </data>
   <data name="RegisteredVerifiedNumber" xml:space="preserve">
     <value>ژمارەی تۆمارکراو و چالاککراو</value>
   </data>
@@ -755,8 +762,6 @@
   <data name="CreateNewAccount" xml:space="preserve">
     <value>دروستکردنی هەژمارەی نوێ</value>
   </data>
-  
-  <!-- Phone Verification -->
   <data name="PhoneVerification" xml:space="preserve">
     <value>پشتڕاستکردنەوەی تەلەفۆن</value>
   </data>
@@ -769,8 +774,6 @@
   <data name="VerifiedPhoneNumber" xml:space="preserve">
     <value>ژمارەی تەلەفۆنی چالاککراو</value>
   </data>
-  
-  <!-- Personal Information -->
   <data name="FirstName" xml:space="preserve">
     <value>ناوی یەکەم</value>
   </data>
@@ -792,8 +795,6 @@
   <data name="Female" xml:space="preserve">
     <value>مێ</value>
   </data>
-  
-  <!-- Location Information -->
   <data name="LocationInfo" xml:space="preserve">
     <value>زانیاری شوێن</value>
   </data>
@@ -860,8 +861,6 @@
   <data name="AddressOptional" xml:space="preserve">
     <value>ناونیشان (ئیختیاری)</value>
   </data>
-  
-  <!-- Account Type -->
   <data name="AccountType" xml:space="preserve">
     <value>جۆری هەژمار</value>
   </data>
@@ -877,8 +876,6 @@
   <data name="SellerDescription" xml:space="preserve">
     <value>دەمەوێت بەرهەمەکانم پیشان بدەم و پەیوەندی بە کڕیارەکانەوە بگرم</value>
   </data>
-  
-  <!-- Store Information -->
   <data name="StoreInfo" xml:space="preserve">
     <value>زانیاری فرۆشگا</value>
   </data>
@@ -900,8 +897,6 @@
   <data name="WebsiteUrl3" xml:space="preserve">
     <value>بەستەری زیادەی تر (ئیختیاری)</value>
   </data>
-  
-  <!-- Profile Image -->
   <data name="ProfileImage" xml:space="preserve">
     <value>وێنەی پرۆفایل</value>
   </data>
@@ -911,16 +906,12 @@
   <data name="ImagePreview" xml:space="preserve">
     <value>پیشاندانی وێنە</value>
   </data>
-  
-  <!-- User Status -->
   <data name="ExistingVerifiedUser" xml:space="preserve">
     <value>بەکارهێنەری تۆمارکراو و چالاککراو</value>
   </data>
   <data name="ExistingUnverifiedUser" xml:space="preserve">
     <value>بەکارهێنەری تۆمارکراو و چالاکنەکراو</value>
   </data>
-  
-  <!-- Verification -->
   <data name="EnterLoginCode" xml:space="preserve">
     <value>کۆدی چوونەژوورەوە بنووسە</value>
   </data>
@@ -969,8 +960,6 @@
   <data name="Seconds" xml:space="preserve">
     <value>چرکە</value>
   </data>
-  
-  <!-- Security -->
   <data name="AdditionalSecurity" xml:space="preserve">
     <value>ئاسایشی زیادە</value>
   </data>
@@ -980,8 +969,6 @@
   <data name="VerificationCodeValid10Minutes" xml:space="preserve">
     <value>کۆدی پشتڕاستکردنەوە بۆ 10 خولەک کاردەکات</value>
   </data>
-  
-  <!-- Admin Verification -->
   <data name="AdminVerification" xml:space="preserve">
     <value>پشتڕاستکردنەوەی بەڕێوەبەر</value>
   </data>
@@ -1003,5 +990,79 @@
   <data name="AdditionalAdminSecurity" xml:space="preserve">
     <value>چینێکی زیادەی ئاسایش بۆ بەڕێوەبەران</value>
   </data>
-  
+  <data name="Chat" xml:space="preserve">
+    <value>چات</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>ئاگادارکردنەوەکان</value>
+  </data>
+  <data name="Messages" xml:space="preserve">
+    <value>پەیامەکان</value>
+  </data>
+  <data name="TypeMessage" xml:space="preserve">
+    <value>نامە بنووسە</value>
+  </data>
+  <data name="NoMessages" xml:space="preserve">
+    <value>بێ نامە</value>
+  </data>
+  <data name="NoNotifications" xml:space="preserve">
+    <value>بێ ئاگادارکردنەوە</value>
+  </data>
+  <data name="MarkAsRead" xml:space="preserve">
+    <value>مارک وەک خوێندنەوە</value>
+  </data>
+  <data name="MarkAllAsRead" xml:space="preserve">
+    <value>هەموویان وەک خوێندنەوە نیشانە بکە</value>
+  </data>
+  <data name="AddRequestDescription" xml:space="preserve">
+    <value>وەسفکردنی داواکاری زیاد بکە</value>
+  </data>
+  <data name="BasicInfo" xml:space="preserve">
+    <value>زانیاری بنەڕەتی</value>
+  </data>
+  <data name="RequestTitleExample" xml:space="preserve">
+    <value>نموونەی ناونیشانی داواکاری</value>
+  </data>
+  <data name="RequestDescriptionPlaceholder" xml:space="preserve">
+    <value>داواکاری وەسف شوێنگر</value>
+  </data>
+  <data name="BetterDetailsNote" xml:space="preserve">
+    <value>وردەکاری باشتر تێبینی</value>
+  </data>
+  <data name="MainCategory" xml:space="preserve">
+    <value>پۆلی سەرەکی</value>
+  </data>
+  <data name="SelectCategory" xml:space="preserve">
+    <value>پۆل هەڵبژێرە</value>
+  </data>
+  <data name="SubCategory1" xml:space="preserve">
+    <value>پۆلی لاوەکی 1</value>
+  </data>
+  <data name="SelectSubCategory1" xml:space="preserve">
+    <value>پۆلی لاوەکی 1 هەڵبژێرە</value>
+  </data>
+  <data name="SubCategory2" xml:space="preserve">
+    <value>پۆلی لاوەکی ٢</value>
+  </data>
+  <data name="SelectSubCategory2" xml:space="preserve">
+    <value>پۆلی لاوەکی 2 هەڵبژێرە</value>
+  </data>
+  <data name="Images" xml:space="preserve">
+    <value>وێنەکان</value>
+  </data>
+  <data name="UploadImages" xml:space="preserve">
+    <value>وێنە بارکردن</value>
+  </data>
+  <data name="ClickToUpload" xml:space="preserve">
+    <value>بۆ بارکردن کلیک بکە</value>
+  </data>
+  <data name="OrDragImages" xml:space="preserve">
+    <value>یان وێنەکان بکێشە</value>
+  </data>
+  <data name="UploadImagesNote" xml:space="preserve">
+    <value>وێنە بارکردن تێبینی</value>
+  </data>
+  <data name="RequestReviewNote" xml:space="preserve">
+    <value>داوای پێداچوونەوە بکە تێبینی</value>
+  </data>
 </root>
