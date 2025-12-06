@@ -1,0 +1,283 @@
+@model List<ApplicationUser>
+@{
+    ViewData["Title"] = "إدارة المتاجر";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>
+        <i class="fas fa-store me-2"></i>
+        إدارة المتاجر
+    </h3>
+    <div class="btn-group">
+        <a href="/Admin/Stores/PendingApproval" class="btn btn-warning">
+            <i class="fas fa-clock me-2"></i>
+            المتاجر المعلقة
+        </a>
+        <a href="/Admin/Stores/PendingUrlChanges" class="btn btn-info">
+            <i class="fas fa-link me-2"></i>
+            الروابط المعلقة
+        </a>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card-admin mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">البحث</label>
+                <input type="text" 
+                       name="searchTerm" 
+                       class="form-control" 
+                       placeholder="ابحث باسم المتجر أو المالك..."
+                       value="@ViewBag.SearchTerm">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">حالة التفعيل</label>
+                <select name="isActive" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="true" selected="@(ViewBag.IsActive == true)">مفعل</option>
+                    <option value="false" selected="@(ViewBag.IsActive == false)">موقف</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">حالة الاعتماد</label>
+                <select name="isApproved" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="true" selected="@(ViewBag.IsApproved == true)">معتمد</option>
+                    <option value="false" selected="@(ViewBag.IsApproved == false)">غير معتمد</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-2"></i>
+                    بحث
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <i class="fas fa-store fa-2x mb-2"></i>
+            <h4>@Model.Count</h4>
+            <p class="mb-0">إجمالي المتاجر</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-success">
+            <i class="fas fa-check-circle fa-2x mb-2"></i>
+            <h4>@Model.Count(s => s.IsStoreApproved)</h4>
+            <p class="mb-0">معتمد</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-primary">
+            <i class="fas fa-toggle-on fa-2x mb-2"></i>
+            <h4>@Model.Count(s => s.IsActive)</h4>
+            <p class="mb-0">مفعل</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-warning">
+            <i class="fas fa-clock fa-2x mb-2"></i>
+            <h4>@Model.Count(s => !s.IsStoreApproved)</h4>
+            <p class="mb-0">في الانتظار</p>
+        </div>
+    </div>
+</div>
+
+<!-- Stores Table -->
+<div class="card-admin">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-admin">
+                    <thead>
+                        <tr>
+                            <th>المتجر</th>
+                            <th>المالك</th>
+                            <th>الاتصال</th>
+                            <th>الفئات</th>
+                            <th>الحالة</th>
+                            <th>التاريخ</th>
+                            <th style="width: 200px;">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var store in Model)
+                        {
+                            <tr class="@(!store.IsActive ? "table-secondary" : "")">
+                                <td>
+                                    <div>
+                                        <strong>@store.StoreName</strong>
+                                        @if (!string.IsNullOrEmpty(store.StoreDescription))
+                                        {
+                                            <br>
+                                            <small class="text-muted">
+                                                @(store.StoreDescription.Length > 50 
+                                                    ? store.StoreDescription.Substring(0, 50) + "..." 
+                                                    : store.StoreDescription)
+                                            </small>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    @store.FirstName @store.LastName
+                                    @if (!string.IsNullOrEmpty(store.City))
+                                    {
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-map-marker-alt"></i> @store.City
+                                        </small>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(store.PhoneNumber))
+                                    {
+                                        <div class="mb-1">
+                                            <i class="fas fa-phone text-success"></i>
+                                            <small>@store.PhoneNumber</small>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(store.Email))
+                                    {
+                                        <div>
+                                            <i class="fas fa-envelope text-primary"></i>
+                                            <small>@store.Email</small>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    @if (store.StoreCategories.Any())
+                                    {
+                                        foreach (var cat in store.StoreCategories.Take(2))
+                                        {
+                                            <span class="badge bg-primary mb-1">@cat.Category.Name</span>
+                                        }
+                                        @if (store.StoreCategories.Count > 2)
+                                        {
+                                            <span class="badge bg-secondary">+@(store.StoreCategories.Count - 2)</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">لا يوجد</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (store.IsStoreApproved)
+                                    {
+                                        <span class="badge bg-success mb-1">
+                                            <i class="fas fa-check"></i> معتمد
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning mb-1">
+                                            <i class="fas fa-clock"></i> معلق
+                                        </span>
+                                    }
+                                    <br>
+                                    @if (store.IsActive)
+                                    {
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-toggle-on"></i> مفعل
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-toggle-off"></i> موقف
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        @store.CreatedAt.ToString("dd/MM/yyyy")
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="btn-group-vertical btn-group-sm w-100" role="group">
+                                        <!-- تعديل -->
+                                        <a href="/Admin/Stores/Edit/@store.Id" 
+                                           class="btn btn-outline-primary btn-sm mb-1">
+                                            <i class="fas fa-edit"></i> تعديل
+                                        </a>
+
+                                        <!-- تفعيل/إيقاف -->
+                                        <form method="post" 
+                                              asp-action="ToggleActive" 
+                                              asp-route-id="@store.Id" 
+                                              style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            @if (store.IsActive)
+                                            {
+                                                <button type="submit" 
+                                                        class="btn btn-outline-warning btn-sm w-100 mb-1"
+                                                        onclick="return confirm('هل تريد إيقاف هذا المتجر؟')">
+                                                    <i class="fas fa-pause"></i> إيقاف
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" 
+                                                        class="btn btn-outline-success btn-sm w-100 mb-1"
+                                                        onclick="return confirm('هل تريد تفعيل هذا المتجر؟')">
+                                                    <i class="fas fa-play"></i> تفعيل
+                                                </button>
+                                            }
+                                        </form>
+
+                                        <!-- حذف -->
+                                        <button type="button" 
+                                                class="btn btn-outline-danger btn-sm"
+                                                onclick="deleteStore('@store.Id', '@store.StoreName')">
+                                            <i class="fas fa-trash"></i> حذف
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-store fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">لا توجد متاجر</h5>
+                <p class="text-muted">لم يتم العثور على أي متاجر بالمعايير المحددة</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteStore(id, name) {
+            if (confirm(`هل أنت متأكد من حذف متجر "${name}"؟\n\nتحذير: هذا الإجراء لا يمكن التراجع عنه!`)) {
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/Admin/Stores/Delete/${id}`;
+
+                var token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    var tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = token.value;
+                    form.appendChild(tokenInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+}

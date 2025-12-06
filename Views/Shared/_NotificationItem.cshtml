@@ -1,0 +1,268 @@
+@model ReverseMarket.Models.Notification
+@* Views/Shared/_NotificationItem.cshtml *@
+@* Partial View لعرض إشعار واحد *@
+
+<div class="notification-item @(!Model.IsRead ? "unread" : "")" 
+     data-notification-id="@Model.Id">
+    
+    <div class="d-flex align-items-start">
+        <!-- أيقونة الإشعار -->
+        <div class="notification-icon me-3">
+            <i class="fas @GetNotificationIcon(Model.Type)" 
+               style="color: @GetNotificationColor(Model.Type)"></i>
+        </div>
+
+        <!-- محتوى الإشعار -->
+        <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+                <h6 class="mb-0">
+                    @if (!Model.IsRead)
+                    {
+                        <span class="badge bg-primary me-1">جديد</span>
+                    }
+                    @Model.Title
+                </h6>
+                <small class="text-muted ms-2" title="@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")">
+                    @GetRelativeTime(Model.CreatedAt)
+                </small>
+            </div>
+
+            <p class="mb-2 text-muted">@Model.Message</p>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-@GetNotificationBadgeColor(Model.Type) me-1">
+                        @GetNotificationTypeText(Model.Type)
+                    </span>
+                    
+                    @if (Model.EmailSent)
+                    {
+                        <i class="fas fa-envelope text-success" title="تم الإرسال بالإيميل"></i>
+                    }
+                    @if (Model.WhatsAppSent)
+                    {
+                        <i class="fab fa-whatsapp text-success" title="تم الإرسال بالواتساب"></i>
+                    }
+                </div>
+
+                <div class="notification-actions">
+                    @if (!string.IsNullOrEmpty(Model.Link))
+                    {
+                        <a href="@Model.Link" class="btn btn-sm btn-outline-primary" 
+                           onclick="markNotificationAsRead(@Model.Id)">
+                            <i class="fas fa-external-link-alt"></i> عرض
+                        </a>
+                    }
+                    
+                    @if (!Model.IsRead)
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-success" 
+                                onclick="markNotificationAsRead(@Model.Id)">
+                            <i class="fas fa-check"></i> تحديد كمقروء
+                        </button>
+                    }
+                    
+                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                            onclick="deleteNotification(@Model.Id)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetNotificationIcon(NotificationType type)
+    {
+        return type switch
+        {
+            NotificationType.RequestApproved => "fa-check-circle",
+            NotificationType.RequestRejected => "fa-times-circle",
+            NotificationType.NewRequestForStore => "fa-shopping-cart",
+            NotificationType.AdminAnnouncement => "fa-bullhorn",
+            NotificationType.StoreApproved => "fa-store",
+            NotificationType.StoreRejected => "fa-store-slash",
+            NotificationType.UrlChangeApproved => "fa-link",
+            NotificationType.UrlChangeRejected => "fa-unlink",
+            NotificationType.SystemNotification => "fa-cog",
+            _ => "fa-bell"
+        };
+    }
+
+    string GetNotificationColor(NotificationType type)
+    {
+        return type switch
+        {
+            NotificationType.RequestApproved => "#28a745",
+            NotificationType.RequestRejected => "#dc3545",
+            NotificationType.NewRequestForStore => "#007bff",
+            NotificationType.AdminAnnouncement => "#ffc107",
+            NotificationType.StoreApproved => "#28a745",
+            NotificationType.StoreRejected => "#dc3545",
+            NotificationType.UrlChangeApproved => "#28a745",
+            NotificationType.UrlChangeRejected => "#dc3545",
+            NotificationType.SystemNotification => "#6c757d",
+            _ => "#17a2b8"
+        };
+    }
+
+    string GetNotificationBadgeColor(NotificationType type)
+    {
+        return type switch
+        {
+            NotificationType.RequestApproved => "success",
+            NotificationType.RequestRejected => "danger",
+            NotificationType.NewRequestForStore => "primary",
+            NotificationType.AdminAnnouncement => "warning",
+            NotificationType.StoreApproved => "success",
+            NotificationType.StoreRejected => "danger",
+            NotificationType.UrlChangeApproved => "success",
+            NotificationType.UrlChangeRejected => "danger",
+            NotificationType.SystemNotification => "secondary",
+            _ => "info"
+        };
+    }
+
+    string GetNotificationTypeText(NotificationType type)
+    {
+        return type switch
+        {
+            NotificationType.RequestApproved => "طلب معتمد",
+            NotificationType.RequestRejected => "طلب مرفوض",
+            NotificationType.NewRequestForStore => "طلب جديد",
+            NotificationType.AdminAnnouncement => "إعلان إداري",
+            NotificationType.StoreApproved => "متجر معتمد",
+            NotificationType.StoreRejected => "متجر مرفوض",
+            NotificationType.UrlChangeApproved => "روابط معتمدة",
+            NotificationType.UrlChangeRejected => "روابط مرفوضة",
+            NotificationType.SystemNotification => "إشعار النظام",
+            _ => "عام"
+        };
+    }
+
+    string GetRelativeTime(DateTime dateTime)
+    {
+        var timeSpan = DateTime.Now - dateTime;
+
+        if (timeSpan.TotalMinutes < 1)
+            return "الآن";
+        if (timeSpan.TotalMinutes < 60)
+            return $"منذ {(int)timeSpan.TotalMinutes} دقيقة";
+        if (timeSpan.TotalHours < 24)
+            return $"منذ {(int)timeSpan.TotalHours} ساعة";
+        if (timeSpan.TotalDays < 7)
+            return $"منذ {(int)timeSpan.TotalDays} يوم";
+        if (timeSpan.TotalDays < 30)
+            return $"منذ {(int)(timeSpan.TotalDays / 7)} أسبوع";
+        if (timeSpan.TotalDays < 365)
+            return $"منذ {(int)(timeSpan.TotalDays / 30)} شهر";
+        return $"منذ {(int)(timeSpan.TotalDays / 365)} سنة";
+    }
+}
+
+<style>
+    .notification-item {
+        padding: 15px;
+        border-bottom: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .notification-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .notification-item.unread {
+        background-color: #e7f3ff;
+        border-right: 4px solid #007bff;
+    }
+
+    .notification-icon {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        border-radius: 50%;
+        font-size: 1.25rem;
+    }
+
+    .notification-actions .btn {
+        margin-left: 5px;
+    }
+
+    @@media (max-width: 768px) {
+        .notification-item {
+            padding: 10px;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .notification-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .notification-actions .btn {
+            margin-left: 0;
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    function markNotificationAsRead(notificationId) {
+        fetch('/Notifications/MarkAsRead?id=' + notificationId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+            }
+        }).then(() => {
+            // تحديث UI
+            const item = document.querySelector(`[data-notification-id="${notificationId}"]`);
+            if (item) {
+                item.classList.remove('unread');
+                const badge = item.querySelector('.badge.bg-primary');
+                if (badge) badge.remove();
+            }
+            // تحديث العداد
+            if (typeof notificationManager !== 'undefined') {
+                notificationManager.updateBadgeCount();
+            }
+        });
+    }
+
+    function deleteNotification(notificationId) {
+        if (!confirm('هل أنت متأكد من حذف هذا الإشعار؟')) {
+            return;
+        }
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/Notifications/Delete';
+
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'id';
+        idInput.value = notificationId;
+
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '__RequestVerificationToken';
+        tokenInput.value = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+        form.appendChild(idInput);
+        form.appendChild(tokenInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>

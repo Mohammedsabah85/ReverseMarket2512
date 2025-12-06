@@ -1,0 +1,449 @@
+﻿@model VerifyPhoneViewModel
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["VerifyPhone"];
+    var loginType = ViewBag.LoginType as string;
+    var isExistingUnverified = loginType == "ExistingUnverifiedUser";
+    var isNewUser = loginType == "NewUser";
+}
+
+<div class="container-custom">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card-custom">
+                <div class="text-center mb-4">
+                    @if (isExistingUnverified)
+                    {
+                        <i class="fas fa-shield-alt fa-3x text-warning mb-3"></i>
+                        <h1 class="h3 text-warning">@Localizer["VerifyPhone"]</h1>
+                        <p class="text-muted">@Localizer["AccountExistsVerificationNeeded"]</p>
+                    }
+                    else
+                    {
+                        <i class="fas fa-phone-alt fa-3x text-primary mb-3"></i>
+                        <h1 class="h3 text-primary">@Localizer["VerifyPhone"]</h1>
+                        <p class="text-muted">@Localizer["NewNumberVerifyFirst"]</p>
+                    }
+
+                    <p class="fw-bold text-primary">@ViewBag.PhoneNumber</p>
+                    <p class="text-muted small">@Localizer["CheckWhatsApp"]</p>
+                </div>
+
+                @if (isExistingUnverified)
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>@Localizer["Warning"]:</strong> @Localizer["AccountExistsUnverifiedAfterVerification"]
+                    </div>
+                }
+                else if (isNewUser)
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>@Localizer["Welcome"]!</strong> @Localizer["NewUserAfterVerification"]
+                    </div>
+                }
+
+                <form asp-action="VerifyPhone" method="post" id="verifyForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="VerificationCode" class="form-label">@Localizer["VerificationCode"] *</label>
+                        <input asp-for="VerificationCode" class="form-control text-center fs-4"
+                               placeholder="0000" maxlength="4" required style="letter-spacing: 8px;"
+                               autocomplete="one-time-code">
+                        <span asp-validation-for="VerificationCode" class="text-danger"></span>
+                        <div class="form-text">@Localizer["Enter4DigitCode"]</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-custom w-100" id="verifyBtn">
+                        <i class="fas fa-check me-2"></i>
+                        @if (isExistingUnverified)
+                        {
+                            <text>@Localizer["VerifyAndLogin"]</text>
+                        }
+                        else
+                        {
+                            <text>@Localizer["VerifyAndContinue"]</text>
+                        }
+                    </button>
+                </form>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <p class="text-muted small mb-2">@Localizer["DidNotReceiveCode"]</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="resendCode()" id="resendBtn">
+                            <i class="fas fa-redo me-1"></i>
+                            @Localizer["Resend"]
+                        </button>
+                        <a href="/Account/Login" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>
+                            @Localizer["ChangeNumber"]
+                        </a>
+                    </div>
+
+                    <div id="resendTimer" class="mt-2" style="display: none;">
+                        <small class="text-muted">@Localizer["CanResendIn"] <span id="countdown">60</span> @Localizer["Seconds"]</small>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h6 class="text-primary mb-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        @if (isExistingUnverified)
+                        {
+                            <text>@Localizer["ActivateAccount"]</text>
+                        }
+                        else
+                        {
+                            <text>@Localizer["NextStep"]</text>
+                        }
+                    </h6>
+                    <p class="small mb-0">
+                        @if (isExistingUnverified)
+                        {
+                            <text>@Localizer["AfterVerificationDirectLogin"]</text>
+                        }
+                        else
+                        {
+                            <text>@Localizer["AfterVerificationCompleteData"]</text>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let countdownInterval;
+        let countdownTime = 60;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('VerificationCode');
+            const form = document.getElementById('verifyForm');
+
+            input.focus();
+
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                e.target.value = value;
+
+                if (value.length === 4) {
+                    setTimeout(() => {
+                        if (e.target.value.length === 4) {
+                            form.submit();
+                        }
+                    }, 500);
+                }
+            });
+
+            startCountdown();
+        });
+
+        function resendCode() {
+            const resendBtn = document.getElementById('resendBtn');
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> @Localizer["Sending"]';
+
+            fetch('/Account/ResendCode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message || '@Localizer["CodeResentSuccessfully"]', 'success');
+                    countdownTime = 60;
+                    startCountdown();
+                    document.getElementById('VerificationCode').value = '';
+                    document.getElementById('VerificationCode').focus();
+                } else {
+                    showMessage(data.message || '@Localizer["ResendError"]', 'error');
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i> @Localizer["Resend"]';
+                }
+            })
+            .catch(error => {
+                showMessage('@Localizer["NetworkError"]', 'error');
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i> @Localizer["Resend"]';
+            });
+        }
+
+        function startCountdown() {
+            const resendBtn = document.getElementById('resendBtn');
+            const timerDiv = document.getElementById('resendTimer');
+            const countdownSpan = document.getElementById('countdown');
+
+            resendBtn.style.display = 'none';
+            timerDiv.style.display = 'block';
+
+            countdownInterval = setInterval(() => {
+                countdownTime--;
+                countdownSpan.textContent = countdownTime;
+
+                if (countdownTime <= 0) {
+                    clearInterval(countdownInterval);
+                    timerDiv.style.display = 'none';
+                    resendBtn.style.display = 'inline-block';
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i> @Localizer["Resend"]';
+                }
+            }, 1000);
+        }
+
+        function showMessage(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            const container = document.querySelector('.container-custom');
+            container.insertBefore(alertDiv, container.firstChild);
+
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
+    </script>
+}
+
+@* @model VerifyPhoneViewModel
+@{
+    ViewData["Title"] = "تأكيد رقم الهاتف";
+    var loginType = ViewBag.LoginType as string;
+    var isExistingUnverified = loginType == "ExistingUnverifiedUser";
+    var isNewUser = loginType == "NewUser";
+}
+
+<div class="container-custom">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card-custom">
+                <div class="text-center mb-4">
+                    @if (isExistingUnverified)
+                    {
+                        <i class="fas fa-shield-alt fa-3x text-warning mb-3"></i>
+                        <h1 class="h3 text-warning">تأكيد رقم الهاتف</h1>
+                        <p class="text-muted">حسابك موجود ولكن يحتاج تأكيد رقم الهاتف</p>
+                    }
+                    else
+                    {
+                        <i class="fas fa-phone-alt fa-3x text-primary mb-3"></i>
+                        <h1 class="h3 text-primary">تأكيد رقم الهاتف</h1>
+                        <p class="text-muted">رقم جديد! يرجى تأكيد رقم الهاتف أولاً</p>
+                    }
+
+                    <p class="fw-bold text-primary">@ViewBag.PhoneNumber</p>
+                    <p class="text-muted small">تحقق من رسائل واتساب</p>
+                </div>
+
+                @if (isExistingUnverified)
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>تنبيه:</strong> حسابك موجود ولكن رقم الهاتف غير مؤكد. بعد التأكيد ستتمكن من الدخول مباشرة.
+                    </div>
+                }
+                else if (isNewUser)
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>مرحباً بك!</strong> يبدو أنك مستخدم جديد. بعد تأكيد الرقم ستحتاج لإكمال بيانات حسابك.
+                    </div>
+                }
+
+                <form asp-action="VerifyPhone" method="post" id="verifyForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="VerificationCode" class="form-label">رمز التأكيد *</label>
+                        <input asp-for="VerificationCode" class="form-control text-center fs-4"
+                               placeholder="0000" maxlength="4" required style="letter-spacing: 8px;"
+                               autocomplete="one-time-code">
+                        <span asp-validation-for="VerificationCode" class="text-danger"></span>
+                        <div class="form-text">أدخل الرمز المكون من 4 أرقام</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-custom w-100" id="verifyBtn">
+                        <i class="fas fa-check me-2"></i>
+                        @if (isExistingUnverified)
+                        {
+                            <text>تأكيد الرمز وتسجيل الدخول</text>
+                        }
+                        else
+                        {
+                            <text>تأكيد الرمز والمتابعة</text>
+                        }
+                    </button>
+                </form>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <p class="text-muted small mb-2">لم تتلق الرمز؟</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="resendCode()" id="resendBtn">
+                            <i class="fas fa-redo me-1"></i>
+                            إعادة الإرسال
+                        </button>
+                        <a href="/Account/Login" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>
+                            تغيير الرقم
+                        </a>
+                    </div>
+
+                    <div id="resendTimer" class="mt-2" style="display: none;">
+                        <small class="text-muted">يمكنك إعادة الإرسال خلال <span id="countdown">60</span> ثانية</small>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h6 class="text-primary mb-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        @if (isExistingUnverified)
+                        {
+                            <text>تفعيل الحساب</text>
+                        }
+                        else
+                        {
+                            <text>الخطوة التالية</text>
+                        }
+                    </h6>
+                    <p class="small mb-0">
+                        @if (isExistingUnverified)
+                        {
+                            <text>بعد تأكيد رقم الهاتف، ستتمكن من الدخول إلى حسابك مباشرة.</text>
+                        }
+                        else
+                        {
+                            <text>بعد تأكيد رقم الهاتف، ستنتقل لإكمال بيانات حسابك الجديد.</text>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let countdownInterval;
+        let countdownTime = 60;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('VerificationCode');
+            const form = document.getElementById('verifyForm');
+
+            // تركيز تلقائي على حقل الإدخال
+            input.focus();
+
+            // تصفية الإدخال للأرقام فقط
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                e.target.value = value;
+
+                // إرسال تلقائي عند إدخال 4 أرقام
+                if (value.length === 4) {
+                    setTimeout(() => {
+                        if (e.target.value.length === 4) {
+                            form.submit();
+                        }
+                    }, 500);
+                }
+            });
+
+            // بدء العد التنازلي
+            startCountdown();
+        });
+
+        function resendCode() {
+            const resendBtn = document.getElementById('resendBtn');
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> جاري الإرسال...';
+
+            fetch('/Account/ResendCode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message || 'تم إعادة إرسال الرمز بنجاح', 'success');
+
+                    // إعادة بدء العد التنازلي
+                    countdownTime = 60;
+                    startCountdown();
+
+                    // مسح الحقل
+                    document.getElementById('VerificationCode').value = '';
+                    document.getElementById('VerificationCode').focus();
+                } else {
+                    showMessage(data.message || 'حدث خطأ في إعادة الإرسال', 'error');
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i> إعادة الإرسال';
+                }
+            })
+            .catch(error => {
+                showMessage('حدث خطأ في الشبكة', 'error');
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i> إعادة الإرسال';
+            });
+        }
+
+        function startCountdown() {
+            const resendBtn = document.getElementById('resendBtn');
+            const timerDiv = document.getElementById('resendTimer');
+            const countdownSpan = document.getElementById('countdown');
+
+            resendBtn.style.display = 'none';
+            timerDiv.style.display = 'block';
+
+            countdownInterval = setInterval(() => {
+                countdownTime--;
+                countdownSpan.textContent = countdownTime;
+
+                if (countdownTime <= 0) {
+                    clearInterval(countdownInterval);
+                    timerDiv.style.display = 'none';
+                    resendBtn.style.display = 'inline-block';
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i> إعادة الإرسال';
+                }
+            }, 1000);
+        }
+
+        function showMessage(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            const container = document.querySelector('.container-custom');
+            container.insertBefore(alertDiv, container.firstChild);
+
+            // إزالة الرسالة تلقائياً بعد 3 ثوان
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
+    </script>
+} *@

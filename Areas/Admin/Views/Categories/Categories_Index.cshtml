@@ -1,0 +1,320 @@
+@model List<Category>
+@{
+    ViewData["Title"] = "إدارة الفئات";
+}
+
+<!-- Actions -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>إدارة الفئات</h3>
+    <a asp-area="Admin" asp-controller="Categories" asp-action="Create" class="btn btn-admin">
+        <i class="fas fa-plus me-2"></i>
+        إضافة فئة جديدة
+    </a>
+</div>
+
+<!-- Categories List -->
+<div class="card-admin">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="accordion" id="categoriesAccordion">
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var category = Model[i];
+                    <div class="accordion-item mb-3">
+                        <h2 class="accordion-header" id="heading@(category.Id)">
+                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#collapse@(category.Id)">
+                                <div class="d-flex align-items-center w-100">
+                                    <i class="fas fa-folder me-2 text-primary"></i>
+                                    <strong>@category.Name</strong>
+                                    <span class="badge bg-primary ms-2">@category.SubCategories1.Count فرعية</span>
+                                    @if (!category.IsActive)
+                                    {
+                                        <span class="badge bg-danger ms-2">غير مفعل</span>
+                                    }
+                                    <div class="ms-auto me-3">
+                                        <small class="text-muted">@category.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                    </div>
+                                </div>
+                            </button>
+                        </h2>
+                        <div id="collapse@(category.Id)" class="accordion-collapse collapse"
+                             data-bs-parent="#categoriesAccordion">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        @if (!string.IsNullOrEmpty(category.Description))
+                                        {
+                                            <div class="mb-3">
+                                                <h6 class="text-muted">الوصف:</h6>
+                                                <p class="text-muted">@category.Description</p>
+                                            </div>
+                                        }
+
+                                        <!-- Sub Categories Level 1 -->
+                                        @if (category.SubCategories1.Any())
+                                        {
+                                            <h6 class="mt-3 mb-2 text-primary">
+                                                <i class="fas fa-folder-open me-1"></i>
+                                                الفئات الفرعية الأولى:
+                                            </h6>
+                                            <div class="ms-3">
+                                                @foreach (var sub1 in category.SubCategories1)
+                                                {
+                                                    <div class="card mb-2 border-start border-primary border-3">
+                                                        <div class="card-body py-2">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <div class="d-flex align-items-center">
+                                                                    <i class="fas fa-folder-open me-2 text-secondary"></i>
+                                                                    <strong>@sub1.Name</strong>
+                                                                    @if (sub1.SubCategories2.Any())
+                                                                    {
+                                                                        <span class="badge bg-secondary ms-2">@sub1.SubCategories2.Count فرعية ثانية</span>
+                                                                    }
+                                                                    @if (!sub1.IsActive)
+                                                                    {
+                                                                        <span class="badge bg-warning ms-2">غير مفعل</span>
+                                                                    }
+                                                                </div>
+                                                                <div class="btn-group" role="group">
+                                                                    <a asp-area="Admin" asp-controller="Categories" asp-action="EditSubCategory1" asp-route-id="@sub1.Id"
+                                                                       class="btn btn-outline-primary btn-sm" title="تعديل">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </a>
+                                                                    <a asp-area="Admin" asp-controller="Categories" asp-action="CreateSubCategory2" asp-route-subCategory1Id="@sub1.Id"
+                                                                       class="btn btn-outline-success btn-sm" title="إضافة فئة فرعية ثانية">
+                                                                        <i class="fas fa-plus"></i>
+                                                                    </a>
+                                                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                                                            onclick="deleteSub1(@sub1.Id)" title="حذف">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Sub Categories Level 2 -->
+                                                            @if (sub1.SubCategories2.Any())
+                                                            {
+                                                                <div class="mt-2 ms-3">
+                                                                    <h6 class="small text-info mb-1">
+                                                                        <i class="fas fa-file me-1"></i>
+                                                                        الفئات الفرعية الثانية:
+                                                                    </h6>
+                                                                    @foreach (var sub2 in sub1.SubCategories2)
+                                                                    {
+                                                                        <div class="d-flex justify-content-between align-items-center mb-1 p-2 bg-light rounded">
+                                                                            <div class="d-flex align-items-center">
+                                                                                <i class="fas fa-file me-2 text-info"></i>
+                                                                                <span class="small">@sub2.Name</span>
+                                                                                @if (!sub2.IsActive)
+                                                                                {
+                                                                                    <span class="badge bg-warning ms-2 small">غير مفعل</span>
+                                                                                }
+                                                                            </div>
+                                                                            <div class="btn-group" role="group">
+                                                                                <a asp-area="Admin" asp-controller="Categories" asp-action="EditSubCategory2" asp-route-id="@sub2.Id"
+                                                                                   class="btn btn-outline-primary btn-sm btn-xs" title="تعديل">
+                                                                                    <i class="fas fa-edit"></i>
+                                                                                </a>
+                                                                                <button type="button" class="btn btn-outline-danger btn-sm btn-xs"
+                                                                                        onclick="deleteSub2(@sub2.Id)" title="حذف">
+                                                                                    <i class="fas fa-trash"></i>
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center py-3">
+                                                <p class="text-muted">لا توجد فئات فرعية</p>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-grid gap-2">
+                                            <a asp-area="Admin" asp-controller="Categories" asp-action="Edit" asp-route-id="@category.Id" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-edit me-1"></i>
+                                                تعديل الفئة
+                                            </a>
+                                            <a asp-area="Admin" asp-controller="Categories" asp-action="CreateSubCategory1" asp-route-categoryId="@category.Id" 
+                                               class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-plus me-1"></i>
+                                                إضافة فئة فرعية أولى
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    onclick="deleteCategory(@category.Id)">
+                                                <i class="fas fa-trash me-1"></i>
+                                                حذف الفئة
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- معلومات إضافية -->
+                                        <div class="mt-3 p-2 bg-light rounded">
+                                            <small class="text-muted d-block">
+                                                <strong>المعرف:</strong> @category.Id
+                                            </small>
+                                            <small class="text-muted d-block">
+                                                <strong>تاريخ الإنشاء:</strong> @category.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                            </small>
+                                            <small class="text-muted d-block">
+                                                <strong>الحالة:</strong> 
+                                                @if (category.IsActive)
+                                                {
+                                                    <span class="text-success">مفعل</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-danger">غير مفعل</span>
+                                                }
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-tags fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">لا توجد فئات</h5>
+                <p class="text-muted">ابدأ بإضافة الفئات الرئيسية لموقعك</p>
+                <a asp-area="Admin" asp-controller="Categories" asp-action="Create" class="btn btn-admin">
+                    <i class="fas fa-plus me-2"></i>
+                    إضافة أول فئة
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .btn-xs {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .border-start {
+        border-left: 4px solid !important;
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function deleteCategory(id) {
+            if (confirm('هل أنت متأكد من حذف هذه الفئة؟ سيتم حذف جميع الفئات الفرعية التابعة لها أيضاً.')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/Admin/Categories/Delete`;
+
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = id;
+                form.appendChild(idInput);
+
+                // Add anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = token.value;
+                    form.appendChild(tokenInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function deleteSub1(id) {
+            if (confirm('هل أنت متأكد من حذف هذه الفئة الفرعية الأولى؟ سيتم حذف جميع الفئات الفرعية الثانية التابعة لها.')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/Admin/Categories/DeleteSubCategory1`;
+
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = id;
+                form.appendChild(idInput);
+
+                // Add anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = token.value;
+                    form.appendChild(tokenInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function deleteSub2(id) {
+            if (confirm('هل أنت متأكد من حذف هذه الفئة الفرعية الثانية؟')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/Admin/Categories/DeleteSubCategory2`;
+
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = id;
+                form.appendChild(idInput);
+
+                // Add anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = token.value;
+                    form.appendChild(tokenInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // تحسين تجربة المستخدم مع الأكورديون
+        document.addEventListener('DOMContentLoaded', function() {
+            // إضافة أيقونات ديناميكية للأكورديون
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    if (this.classList.contains('collapsed')) {
+                        icon.classList.remove('fa-folder');
+                        icon.classList.add('fa-folder-open');
+                    } else {
+                        icon.classList.remove('fa-folder-open');
+                        icon.classList.add('fa-folder');
+                    }
+                });
+            });
+        });
+    </script>
+}

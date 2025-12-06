@@ -1,0 +1,97 @@
+﻿@using ReverseMarket.Controllers
+@model UploadTestResult
+@{
+    ViewData["Title"] = "اختبار رفع الملفات";
+}
+
+<div class="container-custom">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="display-6 text-primary mb-4">
+                <i class="fas fa-upload me-3"></i>
+                اختبار رفع الملفات
+            </h1>
+
+            @if (Model != null)
+            {
+                @if (Model.Success)
+                {
+                    <div class="alert alert-success">
+                        <h5><i class="fas fa-check-circle me-2"></i>نجح الرفع!</h5>
+                        <ul class="mb-0">
+                            <li><strong>اسم الملف:</strong> @Model.FileName</li>
+                            <li><strong>حجم الملف:</strong> @(string.Format("{0:F2}", Model.FileSize / 1024.0 / 1024.0)) ميجابايت</li>
+                            <li><strong>مسار الملف:</strong> @Model.FilePath</li>
+                            <li>
+                                <strong>الملف موجود فعلياً:</strong>
+                                @if (Model.FileExists)
+                                {
+                                    <span class="badge bg-success">نعم</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">لا</span>
+                                }
+                            </li>
+                            <li>
+                                <strong>يمكن الوصول إليه عبر الويب:</strong>
+                                @if (Model.WebAccessible)
+                                {
+                                    <span class="badge bg-success">نعم</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">لا</span>
+                                }
+                            </li>
+                        </ul>
+
+                        @if (Model.FileExists && !string.IsNullOrEmpty(Model.FilePath))
+                        {
+                            <div class="mt-3">
+                                <h6>معاينة الصورة:</h6>
+                                <img src="@Model.FilePath" alt="الصورة المرفوعة"
+                                     class="img-fluid rounded" style="max-height: 300px;">
+                            </div>
+                        }
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(Model.Error))
+                {
+                    <div class="alert alert-danger">
+                        <h5><i class="fas fa-exclamation-circle me-2"></i>فشل الرفع</h5>
+                        <p>@Model.Error</p>
+                    </div>
+                }
+            }
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>اختبار رفع صورة</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="testImage" class="form-label">اختر صورة للاختبار</label>
+                            <input type="file" name="testImage" id="testImage"
+                                   class="form-control" accept="image/*" required>
+                            <div class="form-text">
+                                اختر أي صورة لاختبار عملية الرفع والحفظ
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload me-1"></i>
+                            رفع واختبار
+                        </button>
+
+                        <a href="/Diagnostic/Images" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            العودة للتشخيص
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

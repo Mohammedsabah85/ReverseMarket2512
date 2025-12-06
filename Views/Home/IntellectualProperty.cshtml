@@ -1,0 +1,166 @@
+@using Microsoft.Extensions.Localization
+@using ReverseMarket.Resources
+@inject IStringLocalizer<SharedResource> Localizer
+@inject ReverseMarket.Services.ILanguageService LanguageService
+@{
+    ViewData["Title"] = Localizer["IntellectualProperty"];
+    var siteSettings = ViewBag.SiteSettings as ReverseMarket.Models.SiteSettings;
+    var currentLang = LanguageService.GetCurrentLanguage();
+    var intellectualPropertyContent = siteSettings?.GetIntellectualProperty(currentLang);
+}
+
+<div class="container-custom">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card-custom">
+                <div class="text-center mb-4">
+                    <h1 class="display-5 text-primary">
+                        <i class="fas fa-balance-scale me-3"></i>
+                        @Localizer["IntellectualProperty"]
+                    </h1>
+                    <p class="text-muted">@Localizer["LastUpdated"]: @(siteSettings?.UpdatedAt.ToString("dd/MM/yyyy") ?? DateTime.Now.ToString("dd/MM/yyyy"))</p>
+                </div>
+
+                <div class="intellectual-property-content">
+                    @if (!string.IsNullOrEmpty(intellectualPropertyContent))
+                    {
+                        <!-- محتوى من قاعدة البيانات -->
+                        <div class="custom-content">
+                            @Html.Raw(intellectualPropertyContent.Replace("\n", "<br>"))
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- محتوى افتراضي -->
+                        <section class="mb-4">
+                            <h3 class="text-primary mb-3">1. حقوق الملكية الفكرية</h3>
+                            <p>@Localizer["IntellectualPropertyText"]</p>
+                        </section>
+
+                        <section class="mb-4">
+                            <h3 class="text-primary mb-3">2. حقوق النشر والطبع</h3>
+                            <p>جميع المحتويات المنشورة على هذا الموقع، بما في ذلك النصوص، الصور، الرسومات، الشعارات، الأيقونات، الصور، مقاطع الفيديو، التسجيلات الصوتية، التحميلات الرقمية، وتجميعات البيانات، هي ملك حصري لـ @Localizer["SiteName"] أو مرخصيها، ومحمية بموجب قوانين حقوق النشر الدولية.</p>
+                        </section>
+
+                        <section class="mb-4">
+                            <h3 class="text-primary mb-3">3. العلامات التجارية</h3>
+                            <p>جميع العلامات التجارية، علامات الخدمة، الأسماء التجارية، الشعارات، وأي علامات مميزة أخرى معروضة على هذا الموقع هي علامات تجارية مسجلة أو غير مسجلة لـ @Localizer["SiteName"] أو مرخصيها. لا يجوز استخدام هذه العلامات دون إذن كتابي مسبق.</p>
+                        </section>
+
+                        <section class="mb-4">
+                            <h3 class="text-primary mb-3">4. قيود الاستخدام</h3>
+                            <ul>
+                                <li>يحظر نسخ أو إعادة إنتاج أو توزيع أو نشر أو عرض أي محتوى من الموقع دون إذن كتابي مسبق</li>
+                                <li>يحظر استخدام أي محتوى لأغراض تجارية دون ترخيص</li>
+                                <li>يحظر تعديل أو تحرير المحتوى بأي شكل من الأشكال</li>
+                                <li>يحظر إنشاء أعمال مشتقة من المحتوى</li>
+                                <li>يحظر استخدام تقنيات الاستخراج الآلي (web scraping) لجمع البيانات</li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-4">
+                            <h3 class="text-primary mb-3">5. الاستخدام المسموح</h3>
+                            <p>يُسمح بالاستخدام الشخصي غير التجاري للمحتوى فقط. يمكنك:</p>
+                            <ul>
+                                <li>عرض المحتوى على جهازك الشخصي</li>
+                                <li>طباعة نسخة واحدة من الصفحات للاستخدام الشخصي</li>
+                                <li>مشاركة روابط الصفحات عبر وسائل التواصل الاجتماعي</li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-4">
+                            <h3 class="text-primary mb-3">6. محتوى المستخدمين</h3>
+                            <p>بنشرك أي محتوى على الموقع (مثل التعليقات، الصور، أو الطلبات)، فإنك تمنح @Localizer["SiteName"] ترخيصًا غير حصري، عالمي، خالي من حقوق الملكية، قابل للتحويل لاستخدام، إعادة إنتاج، تعديل، نشر، وعرض هذا المحتوى.</p>
+                        </section>
+
+                        <section class="mb-4">
+                            <h3 class="text-primary mb-3">7. الإبلاغ عن انتهاكات حقوق النشر</h3>
+                            <p>إذا كنت تعتقد أن عملك المحمي بحقوق النشر قد تم نسخه بطريقة تشكل انتهاكًا لحقوق النشر، يرجى الاتصال بنا على:</p>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>البريد الإلكتروني:</strong> @(siteSettings?.ContactEmail ?? "copyright@reversemarket.iq")<br>
+                                <strong>الهاتف:</strong> @(siteSettings?.ContactPhone ?? "+964 770 123 4567")
+                            </div>
+                        </section>
+
+                        <section class="mb-4">
+                            <h3 class="text-primary mb-3">8. التعويضات</h3>
+                            <p>أي انتهاك لحقوق الملكية الفكرية قد يؤدي إلى إجراءات قانونية، بما في ذلك المطالبة بالتعويضات المدنية والجنائية وفقًا للقوانين المعمول بها.</p>
+                        </section>
+
+                        <section class="mb-4">
+                            <h3 class="text-primary mb-3">9. الروابط الخارجية</h3>
+                            <p>قد يحتوي الموقع على روابط لمواقع خارجية. نحن لا نتحمل مسؤولية محتوى أو سياسات الخصوصية لهذه المواقع. استخدام هذه المواقع يخضع لشروطها وأحكامها الخاصة.</p>
+                        </section>
+
+                        <section class="mb-4">
+                            <h3 class="text-primary mb-3">10. @Localizer["ContactUs"]</h3>
+                            <p>للأسئلة حول الملكية الفكرية أو للحصول على إذن باستخدام المحتوى، يرجى الاتصال بنا:</p>
+                            <div class="alert alert-info">
+                                <i class="fas fa-envelope me-2"></i>
+                                <strong>@Localizer["Email"]:</strong> @(siteSettings?.ContactEmail ?? "info@reversemarket.iq")<br>
+                                <i class="fas fa-phone me-2"></i>
+                                <strong>@Localizer["Phone"]:</strong> @(siteSettings?.ContactPhone ?? "+964 770 123 4567")
+                            </div>
+                        </section>
+                    }
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/" class="btn btn-outline-primary">
+                        <i class="fas fa-home me-2"></i>
+                        @Localizer["BackToHome"]
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .intellectual-property-content h3 {
+        color: #b3962d;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .intellectual-property-content ul {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .intellectual-property-content ul li {
+        padding: 0.5rem 0;
+        padding-left: 2rem;
+        position: relative;
+    }
+
+    .intellectual-property-content ul li::before {
+        content: "\f00c";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        left: 0;
+        color: #b3962d;
+    }
+
+    .intellectual-property-content p {
+        line-height: 1.8;
+        color: var(--text-color);
+    }
+
+    .intellectual-property-content section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        border-left: 4px solid #b3962d;
+    }
+
+    .custom-content {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 10px;
+        border-left: 4px solid #b3962d;
+        line-height: 1.8;
+    }
+</style>

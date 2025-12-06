@@ -1,0 +1,225 @@
+﻿@using ReverseMarket.Models.Identity
+@model ApplicationUser
+@{
+    ViewData["Title"] = "ملفي الشخصي";
+    var totalRequests = ViewBag.TotalRequests ?? 0;
+    var approvedRequests = ViewBag.ApprovedRequests ?? 0;
+    var pendingRequests = ViewBag.PendingRequests ?? 0;
+    var rejectedRequests = ViewBag.RejectedRequests ?? 0;
+    var requests = ViewBag.Requests as List<Request> ?? new List<Request>();
+}
+
+<div class="container-custom">
+    <div class="row">
+        <!-- معلومات المستخدم -->
+        <div class="col-lg-4">
+            <div class="card-custom mb-4">
+                <div class="text-center">
+                    @if (!string.IsNullOrEmpty(Model.ProfileImage))
+                    {
+                        <img src="@Model.ProfileImage" class="rounded-circle mb-3"
+                             style="width: 150px; height: 150px; object-fit: cover;" alt="@Model.FirstName">
+                    }
+                    else
+                    {
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width: 150px; height: 150px;">
+                            <i class="fas fa-user fa-4x"></i>
+                        </div>
+                    }
+
+                    <h4>@Model.FirstName @Model.LastName</h4>
+                    <p class="text-muted">
+                        @if (Model.UserType == UserType.Buyer)
+                        {
+                            <span class="badge bg-primary">مشتري</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">بائع</span>
+                        }
+                    </p>
+                    <p class="text-muted small">عضو منذ @Model.CreatedAt.ToString("MMMM yyyy")</p>
+                </div>
+
+                <hr>
+
+                <div class="profile-info">
+                    <div class="info-item">
+                        <i class="fas fa-phone text-primary"></i>
+                        <span>@Model.PhoneNumber</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Email))
+                    {
+                        <div class="info-item">
+                            <i class="fas fa-envelope text-primary"></i>
+                            <span>@Model.Email</span>
+                        </div>
+                    }
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt text-primary"></i>
+                        <span>@Model.City - @Model.District</span>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="d-grid gap-2">
+                    <a href="/Profile/Edit" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>
+                        تعديل الملف الشخصي
+                    </a>
+                    <a href="/Profile/MyRequests" class="btn btn-outline-secondary">
+                        <i class="fas fa-list me-2"></i>
+                        طلباتي
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- إحصائيات وطلبات -->
+        <div class="col-lg-8">
+            <!-- إحصائيات -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card bg-primary text-white">
+                        <h3>@totalRequests</h3>
+                        <p>إجمالي الطلبات</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card bg-success text-white">
+                        <h3>@approvedRequests</h3>
+                        <p>معتمد</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card bg-warning text-white">
+                        <h3>@pendingRequests</h3>
+                        <p>قيد المراجعة</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card bg-danger text-white">
+                        <h3>@rejectedRequests</h3>
+                        <p>مرفوض</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- طلباتي الأخيرة -->
+            <div class="card-custom">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list-alt me-2"></i>
+                        طلباتي الأخيرة
+                    </h5>
+                    <a href="/Profile/MyRequests" class="btn btn-sm btn-outline-primary">
+                        عرض الكل
+                    </a>
+                </div>
+
+                @if (requests.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>العنوان</th>
+                                    <th>الفئة</th>
+                                    <th>الحالة</th>
+                                    <th>التاريخ</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var request in requests.Take(5))
+                                {
+                                    <tr>
+                                        <td>@request.Title</td>
+                                        <td>
+                                            <span class="badge bg-primary">@request.Category.Name</span>
+                                        </td>
+                                        <td>
+                                            @switch (request.Status)
+                                            {
+                                                case RequestStatus.Pending:
+                                                    <span class="badge bg-warning">في الانتظار</span>
+                                                    break;
+                                                case RequestStatus.Approved:
+                                                    <span class="badge bg-success">معتمد</span>
+                                                    break;
+                                                case RequestStatus.Rejected:
+                                                    <span class="badge bg-danger">مرفوض</span>
+                                                    break;
+                                                case RequestStatus.Postponed:
+                                                    <span class="badge bg-secondary">مؤجل</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>@request.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                        <td>
+                                            @if (request.Status == RequestStatus.Approved)
+                                            {
+                                                <a href="/Requests/Details/@request.Id" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">لا توجد طلبات حتى الآن</h5>
+                        <a href="/Requests/Create" class="btn btn-custom mt-3">
+                            <i class="fas fa-plus me-2"></i>
+                            أضف طلبك الأول
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-info .info-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+        .profile-info .info-item:last-child {
+            border-bottom: none;
+        }
+
+    .stat-card {
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .stat-card p {
+            margin: 5px 0 0 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+</style>

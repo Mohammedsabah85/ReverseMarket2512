@@ -1,0 +1,102 @@
+﻿@model ReverseMarket.Models.Identity.ApplicationUser
+@{
+    var isLoggedIn = User.Identity?.IsAuthenticated ?? false;
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var canViewContact = isLoggedIn && (User.IsInRole("Admin") || !string.IsNullOrEmpty(currentUserId));
+}
+
+<h5 class="text-primary mb-3">
+    <i class="fas fa-phone me-2"></i>
+    التواصل
+</h5>
+
+@if (canViewContact)
+{
+    <div class="d-grid gap-2">
+        <!-- زر المحادثة عبر الموقع -->
+        <a href="@Url.Action("Index", "Chat", new { withUser = Model.PhoneNumber })"
+           class="btn btn-primary">
+            <i class="fas fa-comments me-2"></i>
+            محادثة عبر الموقع
+        </a>
+
+        <!-- زر واتساب -->
+        <a href="https://wa.me/@Model.PhoneNumber.Replace("+", "")"
+           target="_blank"
+           class="btn btn-success">
+            <i class="fab fa-whatsapp me-2"></i>
+            واتساب
+        </a>
+
+        <!-- زر اتصال مباشر -->
+        <a href="tel:@Model.PhoneNumber"
+           class="btn btn-outline-primary">
+            <i class="fas fa-phone me-2"></i>
+            اتصال مباشر
+        </a>
+
+        <!-- زر البريد الإلكتروني (إذا متوفر) -->
+        @if (!string.IsNullOrEmpty(Model.Email))
+        {
+            <a href="mailto:@Model.Email"
+               class="btn btn-outline-info">
+                <i class="fas fa-envelope me-2"></i>
+                بريد إلكتروني
+            </a>
+        }
+    </div>
+
+    <div class="alert alert-info mt-3" role="alert">
+        <i class="fas fa-info-circle me-2"></i>
+        <small>
+            <strong>نصيحة:</strong> استخدم المحادثة عبر الموقع للتواصل الآمن وحفظ محادثاتك،
+            أو تواصل مباشرة عبر واتساب أو الهاتف.
+        </small>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning" role="alert">
+        <i class="fas fa-lock me-2"></i>
+        <strong>سجل دخولك لرؤية معلومات التواصل</strong>
+        <p class="mb-0 mt-2">
+            يجب تسجيل الدخول أولاً لتتمكن من التواصل مع صاحب الطلب.
+        </p>
+    </div>
+
+    <div class="d-grid gap-2">
+        <a href="@Url.Action("Login", "Account", new { returnUrl = Context.Request.Path })"
+           class="btn btn-primary">
+            <i class="fas fa-sign-in-alt me-2"></i>
+            تسجيل الدخول
+        </a>
+        <a href="@Url.Action("Login", "Account", new { returnUrl = Context.Request.Path })"
+           class="btn btn-outline-secondary">
+            <i class="fas fa-user-plus me-2"></i>
+            إنشاء حساب جديد
+        </a>
+    </div>
+}
+
+<style>
+    .btn {
+        transition: all 0.3s ease;
+    }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+    .alert-info {
+        background-color: #e7f3ff;
+        border-color: #b3d9ff;
+        color: #004085;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+    }
+</style>

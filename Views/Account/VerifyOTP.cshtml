@@ -1,0 +1,735 @@
+﻿@model VerifyOTPViewModel
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["VerifyCode"];
+    var loginType = ViewBag.LoginType as string;
+    var isExistingUser = loginType == "ExistingVerifiedUser";
+    var isUnverifiedUser = loginType == "ExistingUnverifiedUser";
+}
+
+<div class="container-custom">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card-custom">
+                <div class="text-center mb-4">
+                    @if (isExistingUser)
+                    {
+                        <i class="fas fa-sign-in-alt fa-3x text-success mb-3"></i>
+                        <h1 class="h3 text-success">@Localizer["Login"]</h1>
+                        <p class="text-muted">@Localizer["EnterLoginCode"]</p>
+                    }
+                    else if (isUnverifiedUser)
+                    {
+                        <i class="fas fa-shield-alt fa-3x text-warning mb-3"></i>
+                        <h1 class="h3 text-warning">@Localizer["VerifyAccount"]</h1>
+                        <p class="text-muted">@Localizer["EnterVerificationCodeToActivate"]</p>
+                    }
+                    else
+                    {
+                        <i class="fas fa-mobile-alt fa-3x text-primary mb-3"></i>
+                        <h1 class="h3 text-primary">@Localizer["VerifyCode"]</h1>
+                        <p class="text-muted">@Localizer["EnterVerificationCodeSent"]</p>
+                    }
+
+                    <p class="fw-bold text-primary">@ViewBag.PhoneNumber</p>
+                    <p class="text-muted small">@Localizer["CheckWhatsApp"]</p>
+                </div>
+
+                @if (isExistingUser)
+                {
+                    <div class="alert alert-success">
+                        <i class="fas fa-user-check me-2"></i>
+                        @Localizer["WelcomeBackLoginCodeSent"]
+                    </div>
+                }
+                else if (isUnverifiedUser)
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        @Localizer["AccountExistsNeedsVerification"]
+                    </div>
+                }
+
+                <form asp-action="VerifyOTP" method="post" id="otpForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="OTP" class="form-label">
+                            @if (isExistingUser)
+                            {
+                                <text>@Localizer["LoginCode"] *</text>
+                            }
+                            else
+                            {
+                                <text>@Localizer["VerificationCode"] *</text>
+                            }
+                        </label>
+                        <div class="otp-input-container">
+                            <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                            <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                            <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                            <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                        </div>
+                        <input asp-for="OTP" type="hidden" id="otpHidden">
+                        <span asp-validation-for="OTP" class="text-danger"></span>
+                        <div class="form-text text-center mt-2">@Localizer["Enter4DigitCode"]</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-custom w-100" id="verifyBtn" disabled>
+                        <i class="fas fa-check me-2"></i>
+                        @if (isExistingUser)
+                        {
+                            <text>@Localizer["Login"]</text>
+                        }
+                        else
+                        {
+                            <text>@Localizer["VerifyCode"]</text>
+                        }
+                    </button>
+                </form>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <p class="text-muted small mb-2">@Localizer["DidNotReceiveCode"]</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="resendOTP()" id="resendBtn">
+                            <i class="fas fa-redo me-1"></i>
+                            @Localizer["Resend"]
+                        </button>
+                        <a href="/Account/Login" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>
+                            @Localizer["ChangeNumber"]
+                        </a>
+                    </div>
+
+                    <div id="resendTimer" class="mt-2" style="display: none;">
+                        <small class="text-muted">@Localizer["CanResendIn"] <span id="countdown">60</span> @Localizer["Seconds"]</small>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h6 class="text-primary mb-2">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        @Localizer["AdditionalSecurity"]
+                    </h6>
+                    <p class="small mb-0">
+                        @if (isExistingUser)
+                        {
+                            <text>@Localizer["LoginCodeValid10Minutes"]</text>
+                        }
+                        else
+                        {
+                            <text>@Localizer["VerificationCodeValid10Minutes"]</text>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .otp-input-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .otp-input {
+        width: 60px;
+        height: 60px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        background: white;
+        transition: all 0.3s ease;
+    }
+
+        .otp-input:focus {
+            border-color: #b3962d;
+            box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+            outline: none;
+        }
+
+        .otp-input.filled {
+            border-color: var(--secondary-color);
+            background-color: rgba(52, 199, 89, 0.1);
+        }
+
+        .otp-input.error {
+            border-color: #dc3545;
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+    @@media (max-width: 480px) {
+        .otp-input
+
+    {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .otp-input-container {
+        gap: 10px;
+    }
+
+    }
+</style>
+
+@section Scripts {
+    <script>
+        let countdownInterval;
+        let countdownTime = 60;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const otpInputs = document.querySelectorAll('.otp-input');
+            const otpHidden = document.getElementById('otpHidden');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const form = document.getElementById('otpForm');
+
+            otpInputs[0].focus();
+
+            otpInputs.forEach((input, index) => {
+                input.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    e.target.value = value;
+
+                    if (value) {
+                        e.target.classList.add('filled');
+                        if (index < otpInputs.length - 1) {
+                            otpInputs[index + 1].focus();
+                        }
+                    } else {
+                        e.target.classList.remove('filled');
+                    }
+
+                    updateOTPValue();
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                        otpInputs[index - 1].focus();
+                        otpInputs[index - 1].value = '';
+                        otpInputs[index - 1].classList.remove('filled');
+                        updateOTPValue();
+                    }
+                });
+
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '');
+
+                    if (pastedData.length === 4) {
+                        otpInputs.forEach((inp, idx) => {
+                            if (pastedData[idx]) {
+                                inp.value = pastedData[idx];
+                                inp.classList.add('filled');
+                            }
+                        });
+                        updateOTPValue();
+                        otpInputs[3].focus();
+                    }
+                });
+            });
+
+            function updateOTPValue() {
+                const otp = Array.from(otpInputs).map(input => input.value).join('');
+                otpHidden.value = otp;
+
+                if (otp.length === 4) {
+                    verifyBtn.disabled = false;
+                    verifyBtn.classList.add('btn-success');
+                    verifyBtn.classList.remove('btn-custom');
+
+                    setTimeout(() => {
+                        if (otpHidden.value.length === 4) {
+                            form.submit();
+                        }
+                    }, 500);
+                } else {
+                    verifyBtn.disabled = true;
+                    verifyBtn.classList.remove('btn-success');
+                    verifyBtn.classList.add('btn-custom');
+                }
+            }
+
+            startCountdown();
+        });
+
+        function resendOTP() {
+            const resendBtn = document.getElementById('resendBtn');
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> @Localizer["Sending"]';
+
+            fetch('/Account/ResendCode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message || '@Localizer["CodeResentSuccessfully"]', 'success');
+                    countdownTime = 60;
+                    startCountdown();
+
+                    document.querySelectorAll('.otp-input').forEach(input => {
+                        input.value = '';
+                        input.classList.remove('filled', 'error');
+                    });
+                    document.getElementById('otpHidden').value = '';
+                    document.getElementById('verifyBtn').disabled = true;
+                    document.querySelectorAll('.otp-input')[0].focus();
+                } else {
+                    showMessage(data.message || '@Localizer["ResendError"]', 'error');
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i> @Localizer["Resend"]';
+                }
+            })
+            .catch(error => {
+                showMessage('@Localizer["NetworkError"]', 'error');
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i> @Localizer["Resend"]';
+            });
+        }
+
+        function startCountdown() {
+            const resendBtn = document.getElementById('resendBtn');
+            const timerDiv = document.getElementById('resendTimer');
+            const countdownSpan = document.getElementById('countdown');
+
+            resendBtn.style.display = 'none';
+            timerDiv.style.display = 'block';
+
+            countdownInterval = setInterval(() => {
+                countdownTime--;
+                countdownSpan.textContent = countdownTime;
+
+                if (countdownTime <= 0) {
+                    clearInterval(countdownInterval);
+                    timerDiv.style.display = 'none';
+                    resendBtn.style.display = 'inline-block';
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i> @Localizer["Resend"]';
+                }
+            }, 1000);
+        }
+
+        function showMessage(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            const container = document.querySelector('.container-custom');
+            container.insertBefore(alertDiv, container.firstChild);
+
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+                <text>
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.querySelectorAll('.otp-input').forEach(input => {
+                        input.classList.add('error');
+                    });
+
+                    setTimeout(() => {
+                        document.querySelectorAll('.otp-input').forEach(input => {
+                            input.classList.remove('error');
+                            input.value = '';
+                        });
+                        document.querySelectorAll('.otp-input')[0].focus();
+                    }, 2000);
+                });
+                </text>
+        }
+    </script>
+}
+
+
+
+
+@* @model VerifyOTPViewModel
+@{
+    ViewData["Title"] = "تأكيد رمز التحقق";
+    var loginType = ViewBag.LoginType as string;
+    var isExistingUser = loginType == "ExistingVerifiedUser";
+    var isUnverifiedUser = loginType == "ExistingUnverifiedUser";
+}
+
+<div class="container-custom">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card-custom">
+                <div class="text-center mb-4">
+                    @if (isExistingUser)
+                    {
+                        <i class="fas fa-sign-in-alt fa-3x text-success mb-3"></i>
+                        <h1 class="h3 text-success">تسجيل الدخول</h1>
+                        <p class="text-muted">أدخل رمز الدخول المرسل إليك</p>
+                    }
+                    else if (isUnverifiedUser)
+                    {
+                        <i class="fas fa-shield-alt fa-3x text-warning mb-3"></i>
+                        <h1 class="h3 text-warning">تأكيد الحساب</h1>
+                        <p class="text-muted">أدخل رمز التأكيد لتفعيل حسابك</p>
+                    }
+                    else
+                    {
+                        <i class="fas fa-mobile-alt fa-3x text-primary mb-3"></i>
+                        <h1 class="h3 text-primary">تأكيد رمز التحقق</h1>
+                        <p class="text-muted">أدخل رمز التحقق المرسل إليك</p>
+                    }
+
+                    <p class="fw-bold text-primary">@ViewBag.PhoneNumber</p>
+                    <p class="text-muted small">تحقق من رسائل واتساب الخاصة بك</p>
+                </div>
+
+                @if (isExistingUser)
+                {
+                    <div class="alert alert-success">
+                        <i class="fas fa-user-check me-2"></i>
+                        مرحباً بعودتك! تم إرسال رمز الدخول إلى واتساب.
+                    </div>
+                }
+                else if (isUnverifiedUser)
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        حسابك موجود لكن يحتاج تأكيد رقم الهاتف.
+                    </div>
+                }
+
+                <form asp-action="VerifyOTP" method="post" id="otpForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="OTP" class="form-label">
+                            @if (isExistingUser)
+                            {
+                                <text>رمز الدخول *</text>
+                            }
+                            else
+                            {
+                                <text>رمز التحقق *</text>
+                            }
+                        </label>
+                        <div class="otp-input-container">
+                            <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                            <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                            <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                            <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                        </div>
+                        <input asp-for="OTP" type="hidden" id="otpHidden">
+                        <span asp-validation-for="OTP" class="text-danger"></span>
+                        <div class="form-text text-center mt-2">أدخل الرمز المكون من 4 أرقام</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-custom w-100" id="verifyBtn" disabled>
+                        <i class="fas fa-check me-2"></i>
+                        @if (isExistingUser)
+                        {
+                            <text>تسجيل الدخول</text>
+                        }
+                        else
+                        {
+                            <text>تأكيد الرمز</text>
+                        }
+                    </button>
+                </form>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <p class="text-muted small mb-2">لم تتلق الرمز؟</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="resendOTP()" id="resendBtn">
+                            <i class="fas fa-redo me-1"></i>
+                            إعادة الإرسال
+                        </button>
+                        <a href="/Account/Login" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>
+                            تغيير الرقم
+                        </a>
+                    </div>
+
+                    <div id="resendTimer" class="mt-2" style="display: none;">
+                        <small class="text-muted">يمكنك إعادة الإرسال خلال <span id="countdown">60</span> ثانية</small>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h6 class="text-primary mb-2">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        أمان إضافي
+                    </h6>
+                    <p class="small mb-0">
+                        @if (isExistingUser)
+                        {
+                            <text>رمز الدخول صالح لمدة 10 دقائق فقط لضمان أمان حسابك</text>
+                        }
+                        else
+                        {
+                            <text>رمز التحقق صالح لمدة 10 دقائق فقط لضمان أمان العملية</text>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .otp-input-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .otp-input {
+        width: 60px;
+        height: 60px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        background: white;
+        transition: all 0.3s ease;
+    }
+
+        .otp-input:focus {
+            border-color: #b3962d;
+            box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+            outline: none;
+        }
+
+        .otp-input.filled {
+            border-color: var(--secondary-color);
+            background-color: rgba(52, 199, 89, 0.1);
+        }
+
+        .otp-input.error {
+            border-color: #dc3545;
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+    @@media (max-width: 480px) {
+        .otp-input {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+        }
+
+        .otp-input-container {
+            gap: 10px;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        let countdownInterval;
+        let countdownTime = 60;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const otpInputs = document.querySelectorAll('.otp-input');
+            const otpHidden = document.getElementById('otpHidden');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const form = document.getElementById('otpForm');
+
+            // تركيز على أول حقل
+            otpInputs[0].focus();
+
+            // معالجة إدخال الأرقام
+            otpInputs.forEach((input, index) => {
+                input.addEventListener('input', function(e) {
+                    // قبول الأرقام فقط
+                    let value = e.target.value.replace(/\D/g, '');
+                    e.target.value = value;
+
+                    if (value) {
+                        e.target.classList.add('filled');
+                        // الانتقال للحقل التالي
+                        if (index < otpInputs.length - 1) {
+                            otpInputs[index + 1].focus();
+                        }
+                    } else {
+                        e.target.classList.remove('filled');
+                    }
+
+                    updateOTPValue();
+                });
+
+                // معالجة مفتاح Backspace
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                        otpInputs[index - 1].focus();
+                        otpInputs[index - 1].value = '';
+                        otpInputs[index - 1].classList.remove('filled');
+                        updateOTPValue();
+                    }
+                });
+
+                // معالجة اللصق
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '');
+
+                    if (pastedData.length === 4) {
+                        otpInputs.forEach((inp, idx) => {
+                            if (pastedData[idx]) {
+                                inp.value = pastedData[idx];
+                                inp.classList.add('filled');
+                            }
+                        });
+                        updateOTPValue();
+                        otpInputs[3].focus();
+                    }
+                });
+            });
+
+            function updateOTPValue() {
+                const otp = Array.from(otpInputs).map(input => input.value).join('');
+                otpHidden.value = otp;
+
+                // تفعيل/تعطيل زر التحقق
+                if (otp.length === 4) {
+                    verifyBtn.disabled = false;
+                    verifyBtn.classList.add('btn-success');
+                    verifyBtn.classList.remove('btn-custom');
+
+                    // إرسال تلقائي بعد تأخير قصير
+                    setTimeout(() => {
+                        if (otpHidden.value.length === 4) {
+                            form.submit();
+                        }
+                    }, 500);
+                } else {
+                    verifyBtn.disabled = true;
+                    verifyBtn.classList.remove('btn-success');
+                    verifyBtn.classList.add('btn-custom');
+                }
+            }
+
+            // بدء العد التنازلي
+            startCountdown();
+        });
+
+        function resendOTP() {
+            const resendBtn = document.getElementById('resendBtn');
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> جاري الإرسال...';
+
+            fetch('/Account/ResendCode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message || 'تم إعادة إرسال الرمز بنجاح', 'success');
+                    countdownTime = 60;
+                    startCountdown();
+
+                    // مسح الحقول
+                    document.querySelectorAll('.otp-input').forEach(input => {
+                        input.value = '';
+                        input.classList.remove('filled', 'error');
+                    });
+                    document.getElementById('otpHidden').value = '';
+                    document.getElementById('verifyBtn').disabled = true;
+                    document.querySelectorAll('.otp-input')[0].focus();
+                } else {
+                    showMessage(data.message || 'حدث خطأ في إعادة الإرسال', 'error');
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i> إعادة الإرسال';
+                }
+            })
+            .catch(error => {
+                showMessage('حدث خطأ في الشبكة', 'error');
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i> إعادة الإرسال';
+            });
+        }
+
+        function startCountdown() {
+            const resendBtn = document.getElementById('resendBtn');
+            const timerDiv = document.getElementById('resendTimer');
+            const countdownSpan = document.getElementById('countdown');
+
+            resendBtn.style.display = 'none';
+            timerDiv.style.display = 'block';
+
+            countdownInterval = setInterval(() => {
+                countdownTime--;
+                countdownSpan.textContent = countdownTime;
+
+                if (countdownTime <= 0) {
+                    clearInterval(countdownInterval);
+                    timerDiv.style.display = 'none';
+                    resendBtn.style.display = 'inline-block';
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = '<i class="fas fa-redo me-1"></i> إعادة الإرسال';
+                }
+            }, 1000);
+        }
+
+        function showMessage(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            const container = document.querySelector('.container-custom');
+            container.insertBefore(alertDiv, container.firstChild);
+
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
+
+        // معالجة خطأ التحقق
+        @if (!ViewData.ModelState.IsValid)
+        {
+                    <text>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.querySelectorAll('.otp-input').forEach(input => {
+                            input.classList.add('error');
+                        });
+
+                        setTimeout(() => {
+                            document.querySelectorAll('.otp-input').forEach(input => {
+                                input.classList.remove('error');
+                                input.value = '';
+                            });
+                            document.querySelectorAll('.otp-input')[0].focus();
+                        }, 2000);
+                    });
+                    </text>
+        }
+    </script>
+} *@

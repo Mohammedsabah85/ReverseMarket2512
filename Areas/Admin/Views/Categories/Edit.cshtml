@@ -1,0 +1,194 @@
+﻿@model EditCategoryViewModel
+@{
+    ViewData["Title"] = "تعديل الفئة";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>تعديل الفئة: @Model.Name</h3>
+    <a href="/Admin/Categories" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-right me-2"></i>
+        العودة للقائمة
+    </a>
+</div>
+
+<div class="card-admin">
+    <div class="card-body">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <input asp-for="Id" type="hidden">
+            <input asp-for="CreatedAt" type="hidden">
+            <input asp-for="CurrentImagePath" type="hidden">
+
+            <!-- Basic Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="text-primary mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        المعلومات الأساسية
+                    </h5>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">اسم الفئة *</label>
+                        <input asp-for="Name" class="form-control" required>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">حالة الفئة</label>
+                        <div class="form-check">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox">
+                            <label asp-for="IsActive" class="form-check-label">
+                                نشطة
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">وصف الفئة</label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Image Management -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="text-primary mb-3">
+                        <i class="fas fa-image me-2"></i>
+                        إدارة صورة الفئة
+                    </h5>
+                </div>
+
+                <div class="col-12">
+                    <!-- Current Image -->
+                    @if (!string.IsNullOrEmpty(Model.CurrentImagePath))
+                    {
+                        <div class="mb-3" id="currentImageSection">
+                            <label class="form-label">الصورة الحالية</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="@Model.CurrentImagePath" class="img-thumbnail"
+                                     style="max-height: 100px;" alt="صورة الفئة الحالية">
+                                <div>
+                                    <div class="form-check">
+                                        <input asp-for="RemoveImage" class="form-check-input" type="checkbox"
+                                               onchange="toggleImageUpload(this)">
+                                        <label asp-for="RemoveImage" class="form-check-label text-danger">
+                                            حذف الصورة الحالية
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- New Image Upload -->
+                    <div class="mb-3" id="newImageSection">
+                        <label asp-for="NewImage" class="form-label">
+                            @if (string.IsNullOrEmpty(Model.CurrentImagePath))
+                            {
+                                <text>صورة الفئة</text>
+                            }
+                            else
+                            {
+                                <text>صورة جديدة (اختياري)</text>
+                            }
+                        </label>
+                        <input asp-for="NewImage" type="file" class="form-control" accept="image/*"
+                               onchange="previewNewCategoryImage(this)">
+                        <div class="form-text">
+                            @if (string.IsNullOrEmpty(Model.CurrentImagePath))
+                            {
+                                <text>اختر صورة تمثل الفئة (PNG, JPG, GIF - الحد الأقصى 2 ميجابايت)</text>
+                            }
+                            else
+                            {
+                                <text>اختياري - اختر صورة جديدة لاستبدال الصورة الحالية</text>
+                            }
+                        </div>
+                        <span asp-validation-for="NewImage" class="text-danger"></span>
+                    </div>
+
+                    <div id="newCategoryImagePreview" class="mt-3" style="display: none;">
+                        <img id="newCategoryPreview" class="img-thumbnail" style="max-height: 200px;" alt="معاينة الصورة الجديدة">
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="/Admin/Categories" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>
+                    إلغاء
+                </a>
+                <button type="submit" class="btn btn-admin">
+                    <i class="fas fa-save me-2"></i>
+                    حفظ التغييرات
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleImageUpload(checkbox) {
+            const newImageSection = document.getElementById('newImageSection');
+            const newImageInput = document.querySelector('input[name="NewImage"]');
+            const preview = document.getElementById('newCategoryImagePreview');
+
+            if (checkbox.checked) {
+                // Hide new image upload when removing current image
+                newImageSection.style.display = 'none';
+                newImageInput.value = '';
+                preview.style.display = 'none';
+            } else {
+                // Show new image upload
+                newImageSection.style.display = 'block';
+            }
+        }
+
+        function previewNewCategoryImage(input) {
+            const preview = document.getElementById('newCategoryPreview');
+            const previewContainer = document.getElementById('newCategoryImagePreview');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Check file size (2MB limit)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('حجم الصورة كبير جداً. يجب أن يكون أقل من 2 ميجابايت');
+                    input.value = '';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+
+                // Check file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('نوع الملف غير مدعوم. يرجى اختيار صورة (JPG, PNG, GIF)');
+                    input.value = '';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        }
+    </script>
+}

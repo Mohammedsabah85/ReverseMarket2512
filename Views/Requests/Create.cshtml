@@ -1,0 +1,580 @@
+﻿@model CreateRequestViewModel
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["AddRequest"];
+}
+
+<div class="container-custom">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-custom">
+                <div class="text-center mb-4">
+                    <h1 class="display-6 text-primary">
+                        <i class="fas fa-plus-circle me-3"></i>
+                        @Localizer["AddRequest"]
+                    </h1>
+                    <p class="text-muted">@Localizer["AddRequestDescription"]</p>
+                </div>
+
+                <form asp-action="Create" method="post" enctype="multipart/form-data" id="requestForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-info-circle me-2"></i>
+                            @Localizer["BasicInfo"]
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label asp-for="Title" class="form-label">@Localizer["Title"] *</label>
+                                <input asp-for="Title" class="form-control" placeholder="@Localizer["RequestTitleExample"]" required>
+                                <span asp-validation-for="Title" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Description" class="form-label">@Localizer["Description"] *</label>
+                                <textarea asp-for="Description" class="form-control" rows="5"
+                                          placeholder="@Localizer["RequestDescriptionPlaceholder"]" required></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                                <div class="form-text">@Localizer["BetterDetailsNote"]</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Selection -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-tags me-2"></i>
+                            @Localizer["Category"]
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="CategoryId" class="form-label">@Localizer["MainCategory"] *</label>
+                                <select asp-for="CategoryId" class="form-control" id="categorySelect" required>
+                                    <option value="">@Localizer["SelectCategory"]</option>
+                                    @foreach (var category in ViewBag.Categories as List<Category>)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="SubCategory1Id" class="form-label">@Localizer["SubCategory1"]</label>
+                                <select asp-for="SubCategory1Id" class="form-control" id="subCategory1Select">
+                                    <option value="">@Localizer["SelectSubCategory1"]</option>
+                                </select>
+                                <span asp-validation-for="SubCategory1Id" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="SubCategory2Id" class="form-label">@Localizer["SubCategory2"]</label>
+                                <select asp-for="SubCategory2Id" class="form-control" id="subCategory2Select">
+                                    <option value="">@Localizer["SelectSubCategory2"]</option>
+                                </select>
+                                <span asp-validation-for="SubCategory2Id" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            @Localizer["LocationInfo"]
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="City" class="form-label">@Localizer["City"] *</label>
+                                <select asp-for="City" class="form-control" required>
+                                    <option value="">@Localizer["SelectCity"]</option>
+                                    <option value="Baghdad">@Localizer["Baghdad"]</option>
+                                    <option value="Basra">@Localizer["Basra"]</option>
+                                    <option value="Erbil">@Localizer["Erbil"]</option>
+                                    <option value="Najaf">@Localizer["Najaf"]</option>
+                                    <option value="Karbala">@Localizer["Karbala"]</option>
+                                    <option value="Mosul">@Localizer["Mosul"]</option>
+                                    <option value="Sulaymaniyah">@Localizer["Sulaymaniyah"]</option>
+                                    <option value="Babylon">@Localizer["Babylon"]</option>
+                                    <option value="Dohuk">@Localizer["Dohuk"]</option>
+                                    <option value="Kirkuk">@Localizer["Kirkuk"]</option>
+                                    <option value="Anbar">@Localizer["Anbar"]</option>
+                                    <option value="Diyala">@Localizer["Diyala"]</option>
+                                    <option value="Saladin">@Localizer["Saladin"]</option>
+                                    <option value="Wasit">@Localizer["Wasit"]</option>
+                                    <option value="ThiQar">@Localizer["ThiQar"]</option>
+                                    <option value="Muthanna">@Localizer["Muthanna"]</option>
+                                    <option value="Qadisiyyah">@Localizer["Qadisiyyah"]</option>
+                                    <option value="Maysan">@Localizer["Maysan"]</option>
+                                </select>
+                                <span asp-validation-for="City" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="District" class="form-label">@Localizer["District"] *</label>
+                                <input asp-for="District" class="form-control" placeholder="@Localizer["DistrictExample"]" required>
+                                <span asp-validation-for="District" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Location" class="form-label">@Localizer["DetailedAddress"]</label>
+                                <input asp-for="Location" class="form-control" placeholder="@Localizer["AddressOptional"]">
+                                <span asp-validation-for="Location" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-camera me-2"></i>
+                            @Localizer["Images"] (@Localizer["Optional"])
+                        </h5>
+
+                        <div class="upload-area">
+                            <label for="images" class="form-label">@Localizer["UploadImages"]</label>
+                            <input type="file" name="Images" id="images" class="form-control"
+                                   multiple accept="image/*" style="display: none;">
+
+                            <div class="upload-zone" onclick="document.getElementById('images').click()">
+                                <div class="upload-content">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">@Localizer["ClickToUpload"]</h5>
+                                    <p class="text-muted small mb-0">@Localizer["OrDragImages"]</p>
+                                    <small class="text-muted d-block mt-2">
+                                        @Localizer["UploadImagesNote"]
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Image Preview Container -->
+                            <div id="imagePreview" class="row g-3 mt-3"></div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-custom btn-lg px-5" id="submitBtn">
+                            <i class="fas fa-paper-plane me-2"></i>
+                            @Localizer["Submit"]
+                        </button>
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                @Localizer["RequestReviewNote"]
+                            </small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-section {
+        margin-bottom: 2.5rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+    .section-title {
+        color: #b3962d;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .upload-area {
+        margin-top: 1rem;
+    }
+
+    .upload-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 15px;
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #fafafa;
+    }
+
+        .upload-zone:hover {
+            border-color: #b3962d;
+            background: rgba(44, 90, 160, 0.05);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--secondary-color);
+            background: rgba(52, 199, 89, 0.1);
+            transform: scale(1.02);
+        }
+
+    .upload-content {
+        pointer-events: none;
+    }
+
+    .image-preview-item {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+
+        .image-preview-item:hover {
+            transform: translateY(-2px);
+        }
+
+    .remove-image-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .image-info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        color: white;
+        padding: 1rem 0.5rem 0.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .upload-zone
+
+    {
+        padding: 2rem 1rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    }
+</style>
+
+@section Scripts {
+    <script>
+        let uploadedFiles = [];
+        const maxFiles = 3;
+        const maxFileSize = 5 * 1024 * 1024;
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeImageUpload();
+            initializeCategoryDropdowns();
+            initializeDragAndDrop();
+            initializeFormValidation();
+        });
+
+        function initializeImageUpload() {
+            const imageInput = document.getElementById('images');
+            const previewContainer = document.getElementById('imagePreview');
+
+            if (imageInput) {
+                imageInput.addEventListener('change', function(e) {
+                    handleImageSelection(e.target.files, previewContainer);
+                });
+            }
+        }
+
+        function initializeDragAndDrop() {
+            const uploadZone = document.querySelector('.upload-zone');
+            if (!uploadZone) return;
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, unhighlight, false);
+            });
+
+            uploadZone.addEventListener('drop', handleDrop, false);
+        }
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function highlight(e) {
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            const previewContainer = document.getElementById('imagePreview');
+            handleImageSelection(files, previewContainer);
+        }
+
+        function handleImageSelection(files, previewContainer) {
+            previewContainer.innerHTML = '';
+            uploadedFiles = [];
+
+            Array.from(files).forEach((file, index) => {
+                if (index >= maxFiles) {
+                    showAlert(`@Localizer["MaxImagesAllowed"]: ${maxFiles}`, 'warning');
+                    return;
+                }
+
+                if (!validateFile(file)) {
+                    return;
+                }
+
+                uploadedFiles.push(file);
+                createImagePreview(file, index, previewContainer);
+            });
+
+            updateFileInput();
+        }
+
+        function validateFile(file) {
+            if (!allowedTypes.includes(file.type)) {
+                showAlert(`@Localizer["UnsupportedFileType"]: ${file.name}`, 'error');
+                return false;
+            }
+
+            if (file.size > maxFileSize) {
+                showAlert(`@Localizer["FileTooLarge"]: ${file.name}`, 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        function createImagePreview(file, index, container) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const imageDiv = document.createElement('div');
+                imageDiv.className = 'col-md-4 mb-3';
+                imageDiv.dataset.index = index;
+
+                imageDiv.innerHTML = `
+                    <div class="image-preview-item">
+                        <img src="${e.target.result}"
+                             class="img-fluid w-100"
+                             style="height: 200px; object-fit: cover;"
+                             alt="@Localizer["ImagePreview"] ${index + 1}">
+                        <button type="button"
+                                class="btn btn-danger btn-sm remove-image-btn"
+                                onclick="removeImage(${index})"
+                                title="@Localizer["Delete"]">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="image-info">
+                            <small class="d-block text-truncate fw-bold">${file.name}</small>
+                            <small class="text-light">${formatFileSize(file.size)}</small>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(imageDiv);
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage(index) {
+            uploadedFiles.splice(index, 1);
+            const previewContainer = document.getElementById('imagePreview');
+            previewContainer.innerHTML = '';
+
+            uploadedFiles.forEach((file, newIndex) => {
+                createImagePreview(file, newIndex, previewContainer);
+            });
+
+            updateFileInput();
+            showAlert('@Localizer["ImageDeleted"]', 'success');
+        }
+
+        function updateFileInput() {
+            const dt = new DataTransfer();
+            uploadedFiles.forEach(file => dt.items.add(file));
+            const imageInput = document.getElementById('images');
+            if (imageInput) {
+                imageInput.files = dt.files;
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 @Localizer["Bytes"]';
+            const k = 1024;
+            const sizes = ['@Localizer["Bytes"]', '@Localizer["KB"]', '@Localizer["MB"]'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function initializeCategoryDropdowns() {
+            const categorySelect = document.getElementById('categorySelect');
+            const subCategory1Select = document.getElementById('subCategory1Select');
+            const subCategory2Select = document.getElementById('subCategory2Select');
+
+            if (categorySelect) {
+                categorySelect.addEventListener('change', function() {
+                    const categoryId = this.value;
+                    loadSubCategories1(categoryId, subCategory1Select);
+                    if (subCategory2Select) {
+                        subCategory2Select.innerHTML = '<option value="">@Localizer["SelectSubCategory2"]</option>';
+                    }
+                });
+            }
+
+            if (subCategory1Select) {
+                subCategory1Select.addEventListener('change', function() {
+                    const subCategory1Id = this.value;
+                    loadSubCategories2(subCategory1Id, subCategory2Select);
+                });
+            }
+        }
+
+        function loadSubCategories1(categoryId, targetSelect) {
+            if (!categoryId || !targetSelect) {
+                if (targetSelect) {
+                    targetSelect.innerHTML = '<option value="">@Localizer["SelectSubCategory1"]</option>';
+                }
+                return;
+            }
+
+            targetSelect.innerHTML = '<option value="">@Localizer["Loading"]...</option>';
+
+            fetch(`/Requests/GetSubCategories1?categoryId=${categoryId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('@Localizer["NetworkError"]');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    targetSelect.innerHTML = '<option value="">@Localizer["SelectSubCategory1"]</option>';
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.id;
+                        option.textContent = item.name;
+                        targetSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('@Localizer["LoadingError"]:', error);
+                    targetSelect.innerHTML = '<option value="">@Localizer["LoadingError"]</option>';
+                    showAlert('@Localizer["SubCategoryLoadError"]', 'error');
+                });
+        }
+
+        function loadSubCategories2(subCategory1Id, targetSelect) {
+            if (!subCategory1Id || !targetSelect) {
+                if (targetSelect) {
+                    targetSelect.innerHTML = '<option value="">@Localizer["SelectSubCategory2"]</option>';
+                }
+                return;
+            }
+
+            targetSelect.innerHTML = '<option value="">@Localizer["Loading"]...</option>';
+
+            fetch(`/Requests/GetSubCategories2?subCategory1Id=${subCategory1Id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('@Localizer["NetworkError"]');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    targetSelect.innerHTML = '<option value="">@Localizer["SelectSubCategory2"]</option>';
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.id;
+                        option.textContent = item.name;
+                        targetSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('@Localizer["LoadingError"]:', error);
+                    targetSelect.innerHTML = '<option value="">@Localizer["LoadingError"]</option>';
+                    showAlert('@Localizer["SubCategoryLoadError"]', 'error');
+                });
+        }
+
+        function initializeFormValidation() {
+            const form = document.getElementById('requestForm');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>@Localizer["Sending"]...';
+
+                    setTimeout(() => {
+                        if (submitBtn.disabled) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>@Localizer["Submit"]';
+                        }
+                    }, 10000);
+                });
+            }
+        }
+
+        function showAlert(message, type = 'info') {
+            const existingAlerts = document.querySelectorAll('.alert.auto-dismiss');
+            existingAlerts.forEach(alert => alert.remove());
+
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show auto-dismiss`;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.maxWidth = '400px';
+
+            const iconClass = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-circle',
+                'warning': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle'
+            };
+
+            alertDiv.innerHTML = `
+                <i class="fas ${iconClass[type] || iconClass.info} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(alertDiv);
+
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+    </script>
+}

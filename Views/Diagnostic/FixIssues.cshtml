@@ -1,0 +1,62 @@
+﻿<!-- Views/Diagnostic/FixIssues.cshtml -->
+
+@{
+    ViewData["Title"] = "إصلاح المشاكل";
+}
+
+<div class="container-custom">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="display-6 text-primary mb-4">
+                <i class="fas fa-wrench me-3"></i>
+                إصلاح المشاكل الأساسية
+            </h1>
+
+            @if (ViewBag.Results != null)
+            {
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-info-circle me-2"></i>نتائج الإصلاح</h5>
+                    <ul class="mb-0">
+                        @foreach (string result in ViewBag.Results)
+                        {
+                            <li>@result</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(ViewBag.Error as string))
+            {
+                <div class="alert alert-danger">
+                    <h5><i class="fas fa-exclamation-circle me-2"></i>خطأ</h5>
+                    <p>@ViewBag.Error</p>
+                </div>
+            }
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>الإصلاحات المتاحة</h5>
+                </div>
+                <div class="card-body">
+                    <p>سيتم تنفيذ الإصلاحات التالية:</p>
+                    <ul>
+                        <li>إنشاء جميع المجلدات المطلوبة لرفع الملفات</li>
+                        <li>فحص الصور المفقودة في قاعدة البيانات</li>
+                        <li>التحقق من أذونات الكتابة</li>
+                    </ul>
+
+                    <div class="d-flex gap-2">
+                        <a href="/Diagnostic/Images" class="btn btn-primary">
+                            <i class="fas fa-stethoscope me-1"></i>
+                            إعادة التشخيص
+                        </a>
+                        <a href="/" class="btn btn-secondary">
+                            <i class="fas fa-home me-1"></i>
+                            العودة للرئيسية
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

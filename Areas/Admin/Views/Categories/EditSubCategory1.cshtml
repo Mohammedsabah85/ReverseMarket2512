@@ -1,0 +1,80 @@
+@model SubCategory1
+@{
+    ViewData["Title"] = "تعديل الفئة الفرعية الأولى";
+    var category = ViewBag.Category as Category;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>تعديل الفئة الفرعية الأولى</h3>
+    <a href="/Admin/Categories" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-right me-2"></i>
+        العودة للقائمة
+    </a>
+</div>
+
+<div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i>
+    تعديل الفئة الفرعية تحت: <strong>@category?.Name</strong>
+</div>
+
+<div class="card-admin">
+    <div class="card-body">
+        <form asp-action="EditSubCategory1" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <input asp-for="Id" type="hidden">
+            <input asp-for="CategoryId" type="hidden">
+            <input asp-for="CreatedAt" type="hidden">
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">اسم الفئة الفرعية *</label>
+                        <input asp-for="Name" class="form-control" placeholder="أدخل اسم الفئة الفرعية" required>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">حالة الفئة</label>
+                        <div class="form-check">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox">
+                            <label asp-for="IsActive" class="form-check-label">
+                                نشطة
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- معلومات إضافية -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="bg-light p-3 rounded">
+                        <small class="text-muted d-block">
+                            <strong>المعرف:</strong> @Model.Id
+                        </small>
+                        <small class="text-muted d-block">
+                            <strong>الفئة الرئيسية:</strong> @category?.Name
+                        </small>
+                        <small class="text-muted d-block">
+                            <strong>تاريخ الإنشاء:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="/Admin/Categories" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>
+                    إلغاء
+                </a>
+                <button type="submit" class="btn btn-admin">
+                    <i class="fas fa-save me-2"></i>
+                    حفظ التغييرات
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

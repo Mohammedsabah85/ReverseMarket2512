@@ -1,0 +1,347 @@
+@model Request
+@{
+    ViewData["Title"] = "تفاصيل الطلب";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>تفاصيل الطلب</h3>
+    <a href="/Admin/Requests" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-right me-2"></i>
+        العودة للقائمة
+    </a>
+</div>
+
+<!-- Request Status Actions -->
+<div class="card-admin mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="mb-0">
+                    حالة الطلب:
+                    @switch (Model.Status)
+                    {
+                        case RequestStatus.Pending:
+                            <span class="badge bg-warning fs-6">في الانتظار</span>
+                            break;
+                        case RequestStatus.Approved:
+                            <span class="badge bg-success fs-6">معتمد</span>
+                            break;
+                        case RequestStatus.Rejected:
+                            <span class="badge bg-danger fs-6">مرفوض</span>
+                            break;
+                        case RequestStatus.Postponed:
+                            <span class="badge bg-secondary fs-6">مؤجل</span>
+                            break;
+                    }
+                </h5>
+            </div>
+            <div class="col-md-6 text-end">
+                <div class="d-flex gap-2 justify-content-end">
+                    @if (Model.Status == RequestStatus.Pending)
+                    {
+                        <form method="post" asp-action="UpdateStatus" style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <input type="hidden" name="status" value="2" />
+                            <input type="hidden" name="adminNotes" value="تم اعتماد الطلب" />
+                            <button type="submit" class="btn btn-success" onclick="return confirm('هل أنت متأكد من اعتماد هذا الطلب؟')">
+                                <i class="fas fa-check me-1"></i>
+                                موافقة
+                            </button>
+                        </form>
+
+                        <form method="post" asp-action="UpdateStatus" style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <input type="hidden" name="status" value="4" />
+                            <input type="hidden" name="adminNotes" value="تم تأجيل الطلب" />
+                            <button type="submit" class="btn btn-warning" onclick="return confirm('هل أنت متأكد من تأجيل هذا الطلب؟')">
+                                <i class="fas fa-pause me-1"></i>
+                                تأجيل
+                            </button>
+                        </form>
+
+                        <form method="post" asp-action="UpdateStatus" style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <input type="hidden" name="status" value="3" />
+                            <input type="hidden" name="adminNotes" value="تم رفض الطلب" />
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('هل أنت متأكد من رفض هذا الطلب؟')">
+                                <i class="fas fa-times me-1"></i>
+                                رفض
+                            </button>
+                        </form>
+                    }
+                    else if (Model.Status == RequestStatus.Postponed)
+                    {
+                        <!-- إضافة خيار تحويل من مؤجل إلى معتمد -->
+                        <form method="post" asp-action="UpdateStatus" style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <input type="hidden" name="status" value="2" />
+                            <input type="hidden" name="adminNotes" value="تم اعتماد الطلب بعد التأجيل" />
+                            <button type="submit" class="btn btn-success" onclick="return confirm('هل أنت متأكد من اعتماد هذا الطلب المؤجل؟')">
+                                <i class="fas fa-check me-1"></i>
+                                اعتماد الطلب
+                            </button>
+                        </form>
+
+                        <form method="post" asp-action="UpdateStatus" style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <input type="hidden" name="status" value="3" />
+                            <input type="hidden" name="adminNotes" value="تم رفض الطلب بعد التأجيل" />
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('هل أنت متأكد من رفض هذا الطلب المؤجل؟')">
+                                <i class="fas fa-times me-1"></i>
+                                رفض
+                            </button>
+                        </form>
+                    }
+                    else if (Model.Status == RequestStatus.Approved)
+                    {
+                        <!-- إضافة خيارات للطلبات المعتمدة -->
+                        <form method="post" asp-action="ToggleRequestStatus" style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-warning" onclick="return confirm('هل أنت متأكد من إيقاف هذا الطلب؟')">
+                                <i class="fas fa-pause me-1"></i>
+                                إيقاف الطلب
+                            </button>
+                        </form>
+                    }
+
+                    <!-- أزرار التعديل والحذف متاحة لجميع الحالات -->
+                    <a href="/Admin/Requests/Edit/@Model.Id" class="btn btn-primary">
+                        <i class="fas fa-edit me-1"></i>
+                        تعديل
+                    </a>
+
+                    <form method="post" asp-action="Delete" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟ لا يمكن التراجع عن هذا الإجراء!')">
+                            <i class="fas fa-trash me-1"></i>
+                            حذف
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.AdminNotes))
+        {
+            <hr>
+            <div class="alert alert-info">
+                <strong>ملاحظات الإدارة:</strong><br>
+                @Model.AdminNotes
+            </div>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Request Details -->
+        <div class="card-admin mb-4">
+            <div class="card-body">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    تفاصيل الطلب
+                </h5>
+
+                <h4 class="mb-3">@Model.Title</h4>
+
+                <div class="mb-3">
+                    <div class="d-flex gap-2 mb-2">
+                        <span class="badge bg-primary">@Model.Category.Name</span>
+                        @if (Model.SubCategory1 != null)
+                        {
+                            <span class="badge bg-secondary">@Model.SubCategory1.Name</span>
+                        }
+                        @if (Model.SubCategory2 != null)
+                        {
+                            <span class="badge bg-info">@Model.SubCategory2.Name</span>
+                        }
+                    </div>
+                </div>
+
+                <p class="lead">@Model.Description</p>
+
+                <div class="bg-light p-3 rounded">
+                    <h6><i class="fas fa-map-marker-alt me-2 text-primary"></i>الموقع</h6>
+                    <p class="mb-1"><strong>المحافظة:</strong> @Model.City</p>
+                    <p class="mb-1"><strong>المنطقة:</strong> @Model.District</p>
+                    @if (!string.IsNullOrEmpty(Model.Location))
+                    {
+                        <p class="mb-0"><strong>العنوان التفصيلي:</strong> @Model.Location</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Images -->
+        @if (Model.Images.Any())
+        {
+            <div class="card-admin mb-4">
+                <div class="card-body">
+                    <h5 class="text-primary mb-3">
+                        <i class="fas fa-images me-2"></i>
+                        صور الطلب
+                    </h5>
+
+                    <div class="row g-3">
+                        @foreach (var image in Model.Images)
+                        {
+                            <div class="col-md-4">
+                                <img src="@image.ImagePath" class="img-fluid rounded"
+                                     style="height: 200px; object-fit: cover; width: 100%;"
+                                     alt="صورة الطلب" data-bs-toggle="modal" data-bs-target="#imageModal"
+                                     onclick="showImage('@image.ImagePath')">
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Customer Info -->
+        <div class="card-admin mb-4">
+            <div class="card-body">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-user me-2"></i>
+                    معلومات العميل
+                </h5>
+
+                <div class="text-center mb-3">
+                    @if (!string.IsNullOrEmpty(Model.User.ProfileImage))
+                    {
+                        <img src="@Model.User.ProfileImage" class="rounded-circle mb-2"
+                             style="width: 80px; height: 80px; object-fit: cover;" alt="صورة العميل">
+                    }
+                    else
+                    {
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                             style="width: 80px; height: 80px;">
+                            <i class="fas fa-user fa-2x"></i>
+                        </div>
+                    }
+                    <h6>@Model.User.FirstName @Model.User.LastName</h6>
+                    <p class="text-muted small">عضو منذ @Model.User.CreatedAt.ToString("MM/yyyy")</p>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="tel:@Model.User.PhoneNumber" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-phone me-1"></i>
+                        @Model.User.PhoneNumber
+                    </a>
+                    <a href="https://wa.me/@Model.User.PhoneNumber.Replace("+", "")" target="_blank"
+                       class="btn btn-success btn-sm">
+                        <i class="fab fa-whatsapp me-1"></i>
+                        واتساب
+                    </a>
+                    @if (!string.IsNullOrEmpty(Model.User.Email))
+                    {
+                        <a href="mailto:@Model.User.Email" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-envelope me-1"></i>
+                            بريد إلكتروني
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="card-admin">
+            <div class="card-body">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-history me-2"></i>
+                    التسلسل الزمني
+                </h5>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6>تم إنشاء الطلب</h6>
+                            <small class="text-muted">@Model.CreatedAt.ToString("dd/MM/yyyy - hh:mm tt")</small>
+                        </div>
+                    </div>
+
+                    @if (Model.Status == RequestStatus.Approved && Model.ApprovedAt.HasValue)
+                    {
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6>تم اعتماد الطلب</h6>
+                                <small class="text-muted">@Model.ApprovedAt.Value.ToString("dd/MM/yyyy - hh:mm tt")</small>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">عرض الصورة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" class="img-fluid" alt="صورة الطلب">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showImage(imageSrc) {
+            document.getElementById('modalImage').src = imageSrc;
+        }
+    </script>
+}
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e9ecef;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -23px;
+        top: 5px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 2px #e9ecef;
+    }
+
+    .timeline-content h6 {
+        margin-bottom: 2px;
+        font-size: 14px;
+    }
+</style>

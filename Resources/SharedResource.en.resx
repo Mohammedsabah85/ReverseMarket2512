@@ -1,0 +1,1007 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Site Information -->
+  <data name="SiteName" xml:space="preserve">
+    <value>Reverse Market</value>
+  </data>
+  <data name="SiteDescription" xml:space="preserve">
+    <value>Platform connecting customers with stores in Iraq</value>
+  </data>
+  
+  <!-- Navigation -->
+  <data name="Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Requests" xml:space="preserve">
+    <value>Requests</value>
+  </data>
+  <data name="Stores" xml:space="preserve">
+    <value>Stores</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>About Us</value>
+  </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Contact Us</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="AddRequest" xml:space="preserve">
+    <value>Add Request</value>
+  </data>
+  <data name="MyRequests" xml:space="preserve">
+    <value>My Requests</value>
+  </data>
+  <data name="AdminPanel" xml:space="preserve">
+    <value>Admin Panel</value>
+  </data>
+  
+  <!-- Welcome Section -->
+  <data name="Welcome" xml:space="preserve">
+    <value>Welcome to Reverse Market</value>
+  </data>
+  <data name="WelcomeMessage" xml:space="preserve">
+    <value>Add your request and let stores compete to serve you</value>
+  </data>
+  <data name="AddRequestNow" xml:space="preserve">
+    <value>Add Your Request Now</value>
+  </data>
+  <data name="BrowseRequests" xml:space="preserve">
+    <value>Browse Requests</value>
+  </data>
+  
+  <!-- Search -->
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Search for a specific request...</value>
+  </data>
+  <data name="AllCategories" xml:space="preserve">
+    <value>All Categories</value>
+  </data>
+  <data name="BestCategories" xml:space="preserve">
+    <value>Best Categories</value>
+  </data>
+  <data name="BestCategoriesSubtitle" xml:space="preserve">
+    <value>Choose from a wide range of categories</value>
+  </data>
+  <data name="DiscoverProducts" xml:space="preserve">
+    <value>Discover products and services</value>
+  </data>
+  
+  <!-- Requests Section -->
+  <data name="RecentRequests" xml:space="preserve">
+    <value>Recently Added Requests</value>
+  </data>
+  <data name="RecentRequestsSubtitle" xml:space="preserve">
+    <value>Latest available requests from customers</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>View Details</value>
+  </data>
+  <data name="NoRecentRequests" xml:space="preserve">
+    <value>No recent requests</value>
+  </data>
+  <data name="BeFirstToAddRequest" xml:space="preserve">
+    <value>Be the first to add a request</value>
+  </data>
+  <data name="AddFirstRequest" xml:space="preserve">
+    <value>Add First Request</value>
+  </data>
+  <data name="ViewAllRequests" xml:space="preserve">
+    <value>View All Requests</value>
+  </data>
+  <data name="AllRequests" xml:space="preserve">
+    <value>All Requests</value>
+  </data>
+  <data name="SearchInTitleOrDescription" xml:space="preserve">
+    <value>Search by title or description</value>
+  </data>
+  <data name="BrowseAvailableRequests" xml:space="preserve">
+    <value>Browse Available Requests</value>
+  </data>
+  
+  <!-- How It Works -->
+  <data name="HowItWorks" xml:space="preserve">
+    <value>How Does Reverse Market Work?</value>
+  </data>
+  <data name="HowItWorksSubtitle" xml:space="preserve">
+    <value>Simple steps to get what you want</value>
+  </data>
+  <data name="Step1Title" xml:space="preserve">
+    <value>Add Your Request</value>
+  </data>
+  <data name="Step1Description" xml:space="preserve">
+    <value>Write clearly what you need in detail</value>
+  </data>
+  <data name="Step2Title" xml:space="preserve">
+    <value>Wait for Approval</value>
+  </data>
+  <data name="Step2Description" xml:space="preserve">
+    <value>Your request will be reviewed and approved</value>
+  </data>
+  <data name="Step3Title" xml:space="preserve">
+    <value>Stores Contact You</value>
+  </data>
+  <data name="Step3Description" xml:space="preserve">
+    <value>You'll receive offers from specialized stores</value>
+  </data>
+  <data name="Step4Title" xml:space="preserve">
+    <value>Choose the Best</value>
+  </data>
+  <data name="Step4Description" xml:space="preserve">
+    <value>Compare offers and choose what suits you</value>
+  </data>
+  
+  <!-- Statistics -->
+  <data name="CompletedRequests" xml:space="preserve">
+    <value>Completed Requests</value>
+  </data>
+  <data name="RegisteredStores" xml:space="preserve">
+    <value>Registered Stores</value>
+  </data>
+  <data name="SatisfiedCustomers" xml:space="preserve">
+    <value>Satisfied Customers</value>
+  </data>
+  <data name="AvailableCategories" xml:space="preserve">
+    <value>Available Categories</value>
+  </data>
+  
+  <!-- Pagination -->
+  <data name="Previous" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  
+  <!-- Common Fields -->
+  <data name="Advertisement" xml:space="preserve">
+    <value>Advertisement</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="City" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="District" xml:space="preserve">
+    <value>District</value>
+  </data>
+  <data name="Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="Phone" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="WhatsApp" xml:space="preserve">
+    <value>WhatsApp</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="FullName" xml:space="preserve">
+    <value>Full Name</value>
+  </data>
+  
+  <!-- Contact Page -->
+  <data name="ContactInfo" xml:space="preserve">
+    <value>Contact Information</value>
+  </data>
+  <data name="ContactDescription" xml:space="preserve">
+    <value>We're here to help you. Contact us anytime</value>
+  </data>
+  <data name="LocationAddress" xml:space="preserve">
+    <value>Baghdad, Iraq</value>
+  </data>
+  <data name="SendMessage" xml:space="preserve">
+    <value>Send Message</value>
+  </data>
+  <data name="Subject" xml:space="preserve">
+    <value>Subject</value>
+  </data>
+  <data name="SelectSubject" xml:space="preserve">
+    <value>Select Subject</value>
+  </data>
+  <data name="GeneralInquiry" xml:space="preserve">
+    <value>General Inquiry</value>
+  </data>
+  <data name="TechnicalIssue" xml:space="preserve">
+    <value>Technical Issue</value>
+  </data>
+  <data name="Suggestion" xml:space="preserve">
+    <value>Suggestion</value>
+  </data>
+  <data name="Complaint" xml:space="preserve">
+    <value>Complaint</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="MessageSentSuccess" xml:space="preserve">
+    <value>Your message has been sent successfully</value>
+  </data>
+  <data name="ContactUs" xml:space="preserve">
+    <value>Contact Us</value>
+  </data>
+  
+  <!-- FAQ -->
+  <data name="FAQ" xml:space="preserve">
+    <value>Frequently Asked Questions</value>
+  </data>
+  <data name="FAQ1Question" xml:space="preserve">
+    <value>What is Reverse Market?</value>
+  </data>
+  <data name="FAQ1Answer" xml:space="preserve">
+    <value>Reverse Market is a platform that connects buyers and sellers in a reverse way, where the customer adds their request and stores compete to serve them</value>
+  </data>
+  <data name="FAQ2Question" xml:space="preserve">
+    <value>Is the service free?</value>
+  </data>
+  <data name="FAQ2Answer" xml:space="preserve">
+    <value>Yes, adding requests and browsing offers is completely free for customers</value>
+  </data>
+  
+  <!-- Privacy Policy -->
+  <data name="PrivacyPolicy" xml:space="preserve">
+    <value>Privacy Policy</value>
+  </data>
+  <data name="LastUpdated" xml:space="preserve">
+    <value>Last Updated</value>
+  </data>
+  <data name="InformationWeCollect" xml:space="preserve">
+    <value>Information We Collect</value>
+  </data>
+  <data name="PersonalInformation" xml:space="preserve">
+    <value>Personal Information</value>
+  </data>
+  <data name="PersonalInfo1" xml:space="preserve">
+    <value>Full name</value>
+  </data>
+  <data name="PersonalInfo2" xml:space="preserve">
+    <value>Phone number</value>
+  </data>
+  <data name="PersonalInfo3" xml:space="preserve">
+    <value>Email address</value>
+  </data>
+  <data name="PersonalInfo4" xml:space="preserve">
+    <value>Address and location</value>
+  </data>
+  <data name="HowWeUseInformation" xml:space="preserve">
+    <value>How We Use Your Information</value>
+  </data>
+  <data name="UseInfo1" xml:space="preserve">
+    <value>Provide and improve our services</value>
+  </data>
+  <data name="UseInfo2" xml:space="preserve">
+    <value>Communicate with you about your requests</value>
+  </data>
+  <data name="UseInfo3" xml:space="preserve">
+    <value>Send notifications and updates</value>
+  </data>
+  <data name="UseInfo4" xml:space="preserve">
+    <value>Analyze and improve user experience</value>
+  </data>
+  <data name="UseInfo5" xml:space="preserve">
+    <value>Protect our legal rights</value>
+  </data>
+  <data name="DataProtection" xml:space="preserve">
+    <value>Data Protection</value>
+  </data>
+  <data name="DataProtectionText" xml:space="preserve">
+    <value>We take appropriate security measures to protect your personal information</value>
+  </data>
+  <data name="Protection1" xml:space="preserve">
+    <value>Encryption of sensitive data</value>
+  </data>
+  <data name="Protection2" xml:space="preserve">
+    <value>Limited access to authorized staff</value>
+  </data>
+  <data name="Protection3" xml:space="preserve">
+    <value>Continuous system monitoring</value>
+  </data>
+  <data name="InformationSharing" xml:space="preserve">
+    <value>Information Sharing</value>
+  </data>
+  <data name="SharingText" xml:space="preserve">
+    <value>We do not sell or rent your personal information to third parties</value>
+  </data>
+  <data name="Sharing1" xml:space="preserve">
+    <value>With approved stores only to respond to your requests</value>
+  </data>
+  <data name="Sharing2" xml:space="preserve">
+    <value>When legally required by authorities</value>
+  </data>
+  <data name="Sharing3" xml:space="preserve">
+    <value>With trusted service providers</value>
+  </data>
+  <data name="Cookies" xml:space="preserve">
+    <value>Cookies</value>
+  </data>
+  <data name="CookiesText" xml:space="preserve">
+    <value>We use cookies to improve your experience on our site</value>
+  </data>
+  <data name="YourRights" xml:space="preserve">
+    <value>Your Rights</value>
+  </data>
+  <data name="Right1" xml:space="preserve">
+    <value>Access your personal data</value>
+  </data>
+  <data name="Right2" xml:space="preserve">
+    <value>Correct inaccurate information</value>
+  </data>
+  <data name="Right3" xml:space="preserve">
+    <value>Delete your account and information</value>
+  </data>
+  <data name="Right4" xml:space="preserve">
+    <value>Object to processing your data</value>
+  </data>
+  <data name="DataRetention" xml:space="preserve">
+    <value>Data Retention</value>
+  </data>
+  <data name="RetentionText" xml:space="preserve">
+    <value>We retain your information as long as your account is active or as needed to provide our services</value>
+  </data>
+  <data name="ChildrenPrivacy" xml:space="preserve">
+    <value>Children's Privacy</value>
+  </data>
+  <data name="ChildrenText" xml:space="preserve">
+    <value>Our services are not directed to children under 18 years of age</value>
+  </data>
+  <data name="PolicyChanges" xml:space="preserve">
+    <value>Policy Changes</value>
+  </data>
+  <data name="PolicyChangesText" xml:space="preserve">
+    <value>We may update this policy from time to time. We will notify you of any material changes</value>
+  </data>
+  <data name="ContactPrivacyText" xml:space="preserve">
+    <value>If you have questions about our privacy policy, please contact us</value>
+  </data>
+  <data name="BackToHome" xml:space="preserve">
+    <value>Back to Home</value>
+  </data>
+  
+  <!-- Terms of Use -->
+  <data name="TermsOfUse" xml:space="preserve">
+    <value>Terms of Use</value>
+  </data>
+  <data name="Introduction" xml:space="preserve">
+    <value>Introduction</value>
+  </data>
+  <data name="TermsIntroText" xml:space="preserve">
+    <value>Welcome to Reverse Market. By using this website, you agree to comply with the following terms of use</value>
+  </data>
+  <data name="AcceptanceOfTerms" xml:space="preserve">
+    <value>Acceptance of Terms</value>
+  </data>
+  <data name="AcceptanceText" xml:space="preserve">
+    <value>By using our services, you agree to all the terms and conditions stated here</value>
+  </data>
+  <data name="UserRegistration" xml:space="preserve">
+    <value>User Registration</value>
+  </data>
+  <data name="RegistrationRule1" xml:space="preserve">
+    <value>You must be over 18 years old to register</value>
+  </data>
+  <data name="RegistrationRule2" xml:space="preserve">
+    <value>Provide accurate and truthful information</value>
+  </data>
+  <data name="RegistrationRule3" xml:space="preserve">
+    <value>Keep your password confidential</value>
+  </data>
+  <data name="RegistrationRule4" xml:space="preserve">
+    <value>Do not share your account with others</value>
+  </data>
+  <data name="UserResponsibilities" xml:space="preserve">
+    <value>User Responsibilities</value>
+  </data>
+  <data name="Responsibility1" xml:space="preserve">
+    <value>Use the site legally and responsibly</value>
+  </data>
+  <data name="Responsibility2" xml:space="preserve">
+    <value>Do not post offensive or illegal content</value>
+  </data>
+  <data name="Responsibility3" xml:space="preserve">
+    <value>Respect the rights of other users</value>
+  </data>
+  <data name="Responsibility4" xml:space="preserve">
+    <value>Update account information regularly</value>
+  </data>
+  <data name="ProhibitedActivities" xml:space="preserve">
+    <value>Prohibited Activities</value>
+  </data>
+  <data name="Prohibited1" xml:space="preserve">
+    <value>Fraud or deception</value>
+  </data>
+  <data name="Prohibited2" xml:space="preserve">
+    <value>Violation of intellectual property rights</value>
+  </data>
+  <data name="Prohibited3" xml:space="preserve">
+    <value>Posting viruses or malware</value>
+  </data>
+  <data name="Prohibited4" xml:space="preserve">
+    <value>Disrupting the service or abusing it</value>
+  </data>
+  <data name="IntellectualProperty" xml:space="preserve">
+    <value>Intellectual Property</value>
+  </data>
+  <data name="IntellectualPropertyText" xml:space="preserve">
+    <value>All content on the site is protected by copyright and trademark laws</value>
+  </data>
+  <data name="LimitationOfLiability" xml:space="preserve">
+    <value>Limitation of Liability</value>
+  </data>
+  <data name="LiabilityText" xml:space="preserve">
+    <value>We provide the platform "as is" and are not liable for any losses resulting from use</value>
+  </data>
+  <data name="TerminationOfService" xml:space="preserve">
+    <value>Service Termination</value>
+  </data>
+  <data name="TerminationText" xml:space="preserve">
+    <value>We reserve the right to terminate or suspend your account in case of violation</value>
+  </data>
+  <data name="ChangesToTerms" xml:space="preserve">
+    <value>Changes to Terms</value>
+  </data>
+  <data name="ChangesText" xml:space="preserve">
+    <value>We may update these terms from time to time. Continued use means you agree to the changes</value>
+  </data>
+  <data name="ContactTermsText" xml:space="preserve">
+    <value>If you have questions about the terms of use, please contact us</value>
+  </data>
+  
+  <!-- Common Actions -->
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Submit" xml:space="preserve">
+    <value>Submit</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="ViewAll" xml:space="preserve">
+    <value>View All</value>
+  </data>
+  
+  <!-- Status Messages -->
+  <data name="Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Required" xml:space="preserve">
+    <value>Required</value>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>Optional</value>
+  </data>
+  <data name="ConfirmDelete" xml:space="preserve">
+    <value>Are you sure you want to delete?</value>
+  </data>
+  <data name="NoDataAvailable" xml:space="preserve">
+    <value>No data available</value>
+  </data>
+  
+  <!-- Status Labels -->
+  <data name="Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Approved" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="Rejected" xml:space="preserve">
+    <value>Rejected</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  
+  <!-- Date/Time -->
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="CreatedAt" xml:space="preserve">
+    <value>Created At</value>
+  </data>
+  <data name="UpdatedAt" xml:space="preserve">
+    <value>Updated At</value>
+  </data>
+  
+  <!-- Footer -->
+  <data name="ImportantLinks" xml:space="preserve">
+    <value>Important Links</value>
+  </data>
+  <data name="Copyright" xml:space="preserve">
+    <value>© 2025 Reverse Market. All Rights Reserved</value>
+  </data>
+  <data name="AllRightsReserved" xml:space="preserve">
+    <value>All Rights Reserved</value>
+  </data>
+  <data name="MadeWithLoveInIraq" xml:space="preserve">
+    <value>Made with love in Iraq</value>
+  </data>
+  
+  <!-- Language -->
+  <data name="LanguageChanged" xml:space="preserve">
+    <value>Language changed successfully</value>
+  </data>
+  <data name="LoadingLanguage" xml:space="preserve">
+    <value>Loading language...</value>
+  </data>
+  <data name="LanguageError" xml:space="preserve">
+    <value>Error changing language</value>
+  </data>
+  
+  <!-- About Page -->
+  <data name="AboutSubtitle" xml:space="preserve">
+    <value>An innovative platform connecting buyers with sellers</value>
+  </data>
+  <data name="OurVision" xml:space="preserve">
+    <value>Our Vision</value>
+  </data>
+  <data name="VisionText" xml:space="preserve">
+    <value>To be the leading platform in Iraq for connecting buyers with sellers through the innovative reverse market model</value>
+  </data>
+  <data name="OurMission" xml:space="preserve">
+    <value>Our Mission</value>
+  </data>
+  <data name="MissionText" xml:space="preserve">
+    <value>Facilitate shopping and save time and effort for customers by making stores compete to serve them</value>
+  </data>
+  <data name="OurAdvantages" xml:space="preserve">
+    <value>Our Advantages</value>
+  </data>
+  <data name="TimeSaving" xml:space="preserve">
+    <value>Time Saving</value>
+  </data>
+  <data name="TimeSavingText" xml:space="preserve">
+    <value>Instead of searching dozens of stores, stores come to you</value>
+  </data>
+  <data name="BestOffers" xml:space="preserve">
+    <value>Best Offers</value>
+  </data>
+  <data name="BestOffersText" xml:space="preserve">
+    <value>Stores compete to offer the best prices and services</value>
+  </data>
+  <data name="SafetyTrust" xml:space="preserve">
+    <value>Safety and Trust</value>
+  </data>
+  <data name="SafetyTrustText" xml:space="preserve">
+    <value>All stores are reviewed and approved by us</value>
+  </data>
+  <data name="StartNow" xml:space="preserve">
+    <value>Start Now</value>
+  </data>
+  
+  <!-- Social Media -->
+  <data name="SocialMedia" xml:space="preserve">
+    <value>Social Media</value>
+  </data>
+  <data name="Facebook" xml:space="preserve">
+    <value>Facebook</value>
+  </data>
+  <data name="Instagram" xml:space="preserve">
+    <value>Instagram</value>
+  </data>
+  <data name="Twitter" xml:space="preserve">
+    <value>Twitter</value>
+  </data>
+  <data name="YouTube" xml:space="preserve">
+    <value>YouTube</value>
+  </data>
+  
+  <!-- Database References -->
+  <data name="TermsFromDatabase" xml:space="preserve">
+    <value>Terms of use from database</value>
+  </data>
+  <data name="IntellectualPropertyFromDatabase" xml:space="preserve">
+    <value>Intellectual property rights from database</value>
+  </data>
+  
+  <!-- Stores -->
+  <data name="StoresDirectory" xml:space="preserve">
+    <value>Stores Directory</value>
+  </data>
+  <data name="BrowseRegisteredStores" xml:space="preserve">
+    <value>Browse Registered Stores</value>
+  </data>
+  <data name="SearchInStoreNameOrDescription" xml:space="preserve">
+    <value>Search in store name or description</value>
+  </data>
+  <data name="RegisterYourStore" xml:space="preserve">
+    <value>Register Your Store</value>
+  </data>
+  
+  <!-- Login Page -->
+  <data name="EnterPhoneToLogin" xml:space="preserve">
+    <value>Enter phone to login</value>
+  </data>
+  <data name="EnterPhoneWithoutCode" xml:space="preserve">
+    <value>Enter phone without country code</value>
+  </data>
+  <data name="IAgreeToThe" xml:space="preserve">
+    <value>I agree to the</value>
+  </data>
+  <data name="And" xml:space="preserve">
+    <value>and</value>
+  </data>
+  <data name="VerificationCodeViaWhatsApp" xml:space="preserve">
+    <value>Verification code via WhatsApp</value>
+  </data>
+  <data name="SecureAndProtected" xml:space="preserve">
+    <value>Secure and Protected</value>
+  </data>
+  <data name="InstantVerification" xml:space="preserve">
+    <value>Instant Verification</value>
+  </data>
+  <data name="ForEveryone" xml:space="preserve">
+    <value>For Everyone</value>
+  </data>
+  
+  <!-- NEW COMPLETED TRANSLATIONS -->
+  
+  <!-- Phone Status -->
+  <data name="RegisteredVerifiedNumber" xml:space="preserve">
+    <value>Registered and verified number</value>
+  </data>
+  <data name="RegisteredUnverifiedNumber" xml:space="preserve">
+    <value>Registered but unverified number</value>
+  </data>
+  <data name="NewNumber" xml:space="preserve">
+    <value>New number</value>
+  </data>
+  <data name="InstantLoginCode" xml:space="preserve">
+    <value>Instant login code</value>
+  </data>
+  <data name="VerificationRequired" xml:space="preserve">
+    <value>Verification required</value>
+  </data>
+  <data name="CreateNewAccount" xml:space="preserve">
+    <value>Create new account</value>
+  </data>
+  
+  <!-- Phone Verification -->
+  <data name="PhoneVerification" xml:space="preserve">
+    <value>Phone Verification</value>
+  </data>
+  <data name="CreateAccount" xml:space="preserve">
+    <value>Create Account</value>
+  </data>
+  <data name="CompleteYourData" xml:space="preserve">
+    <value>Complete your data</value>
+  </data>
+  <data name="VerifiedPhoneNumber" xml:space="preserve">
+    <value>Verified phone number</value>
+  </data>
+  
+  <!-- Personal Information -->
+  <data name="FirstName" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="DateOfBirth" xml:space="preserve">
+    <value>Date of Birth</value>
+  </data>
+  <data name="Gender" xml:space="preserve">
+    <value>Gender</value>
+  </data>
+  <data name="SelectGender" xml:space="preserve">
+    <value>Select Gender</value>
+  </data>
+  <data name="Male" xml:space="preserve">
+    <value>Male</value>
+  </data>
+  <data name="Female" xml:space="preserve">
+    <value>Female</value>
+  </data>
+  
+  <!-- Location Information -->
+  <data name="LocationInfo" xml:space="preserve">
+    <value>Location Information</value>
+  </data>
+  <data name="Baghdad" xml:space="preserve">
+    <value>Baghdad</value>
+  </data>
+  <data name="Basra" xml:space="preserve">
+    <value>Basra</value>
+  </data>
+  <data name="Erbil" xml:space="preserve">
+    <value>Erbil</value>
+  </data>
+  <data name="Najaf" xml:space="preserve">
+    <value>Najaf</value>
+  </data>
+  <data name="Karbala" xml:space="preserve">
+    <value>Karbala</value>
+  </data>
+  <data name="Mosul" xml:space="preserve">
+    <value>Mosul</value>
+  </data>
+  <data name="Sulaymaniyah" xml:space="preserve">
+    <value>Sulaymaniyah</value>
+  </data>
+  <data name="Babylon" xml:space="preserve">
+    <value>Babylon</value>
+  </data>
+  <data name="Dohuk" xml:space="preserve">
+    <value>Dohuk</value>
+  </data>
+  <data name="Kirkuk" xml:space="preserve">
+    <value>Kirkuk</value>
+  </data>
+  <data name="Anbar" xml:space="preserve">
+    <value>Anbar</value>
+  </data>
+  <data name="Diyala" xml:space="preserve">
+    <value>Diyala</value>
+  </data>
+  <data name="Saladin" xml:space="preserve">
+    <value>Saladin</value>
+  </data>
+  <data name="Wasit" xml:space="preserve">
+    <value>Wasit</value>
+  </data>
+  <data name="ThiQar" xml:space="preserve">
+    <value>Thi Qar</value>
+  </data>
+  <data name="Muthanna" xml:space="preserve">
+    <value>Muthanna</value>
+  </data>
+  <data name="Qadisiyyah" xml:space="preserve">
+    <value>Qadisiyyah</value>
+  </data>
+  <data name="Maysan" xml:space="preserve">
+    <value>Maysan</value>
+  </data>
+  <data name="DistrictExample" xml:space="preserve">
+    <value>Example: Karrada, Mansour</value>
+  </data>
+  <data name="DetailedAddress" xml:space="preserve">
+    <value>Detailed Address</value>
+  </data>
+  <data name="AddressOptional" xml:space="preserve">
+    <value>Address (Optional)</value>
+  </data>
+  
+  <!-- Account Type -->
+  <data name="AccountType" xml:space="preserve">
+    <value>Account Type</value>
+  </data>
+  <data name="Buyer" xml:space="preserve">
+    <value>Buyer</value>
+  </data>
+  <data name="BuyerDescription" xml:space="preserve">
+    <value>I want to add requests and receive offers from stores</value>
+  </data>
+  <data name="Seller" xml:space="preserve">
+    <value>Seller</value>
+  </data>
+  <data name="SellerDescription" xml:space="preserve">
+    <value>I want to display my products and connect with customers</value>
+  </data>
+  
+  <!-- Store Information -->
+  <data name="StoreInfo" xml:space="preserve">
+    <value>Store Information</value>
+  </data>
+  <data name="YourStoreName" xml:space="preserve">
+    <value>Your Store Name</value>
+  </data>
+  <data name="StoreDescription" xml:space="preserve">
+    <value>Store Description</value>
+  </data>
+  <data name="StoreDescriptionPlaceholder" xml:space="preserve">
+    <value>Write a brief description about your store and the services you offer...</value>
+  </data>
+  <data name="WebsiteUrl1" xml:space="preserve">
+    <value>Website URL</value>
+  </data>
+  <data name="WebsiteUrl2" xml:space="preserve">
+    <value>Additional Link (Optional)</value>
+  </data>
+  <data name="WebsiteUrl3" xml:space="preserve">
+    <value>Another Additional Link (Optional)</value>
+  </data>
+  
+  <!-- Profile Image -->
+  <data name="ProfileImage" xml:space="preserve">
+    <value>Profile Image</value>
+  </data>
+  <data name="ProfileImageNote" xml:space="preserve">
+    <value>Square image preferred, at least 200×200 pixels</value>
+  </data>
+  <data name="ImagePreview" xml:space="preserve">
+    <value>Image Preview</value>
+  </data>
+  
+  <!-- User Status -->
+  <data name="ExistingVerifiedUser" xml:space="preserve">
+    <value>Registered and verified user</value>
+  </data>
+  <data name="ExistingUnverifiedUser" xml:space="preserve">
+    <value>Registered but unverified user</value>
+  </data>
+  
+  <!-- Verification -->
+  <data name="EnterLoginCode" xml:space="preserve">
+    <value>Enter login code</value>
+  </data>
+  <data name="VerifyAccount" xml:space="preserve">
+    <value>Verify Account</value>
+  </data>
+  <data name="EnterVerificationCodeToActivate" xml:space="preserve">
+    <value>Enter verification code to activate your account</value>
+  </data>
+  <data name="VerifyCode" xml:space="preserve">
+    <value>Verify Code</value>
+  </data>
+  <data name="EnterVerificationCodeSent" xml:space="preserve">
+    <value>Enter the verification code sent to you</value>
+  </data>
+  <data name="CheckWhatsApp" xml:space="preserve">
+    <value>Check WhatsApp messages</value>
+  </data>
+  <data name="WelcomeBackLoginCodeSent" xml:space="preserve">
+    <value>Welcome back! Login code has been sent</value>
+  </data>
+  <data name="AccountExistsNeedsVerification" xml:space="preserve">
+    <value>Account exists and needs verification</value>
+  </data>
+  <data name="LoginCode" xml:space="preserve">
+    <value>Login Code</value>
+  </data>
+  <data name="VerificationCode" xml:space="preserve">
+    <value>Verification Code</value>
+  </data>
+  <data name="Enter4DigitCode" xml:space="preserve">
+    <value>Enter 4-digit code</value>
+  </data>
+  <data name="DidNotReceiveCode" xml:space="preserve">
+    <value>Didn't receive the code?</value>
+  </data>
+  <data name="Resend" xml:space="preserve">
+    <value>Resend</value>
+  </data>
+  <data name="ChangeNumber" xml:space="preserve">
+    <value>Change Number</value>
+  </data>
+  <data name="CanResendIn" xml:space="preserve">
+    <value>Can resend in</value>
+  </data>
+  <data name="Seconds" xml:space="preserve">
+    <value>seconds</value>
+  </data>
+  
+  <!-- Security -->
+  <data name="AdditionalSecurity" xml:space="preserve">
+    <value>Additional Security</value>
+  </data>
+  <data name="LoginCodeValid10Minutes" xml:space="preserve">
+    <value>Login code is valid for 10 minutes</value>
+  </data>
+  <data name="VerificationCodeValid10Minutes" xml:space="preserve">
+    <value>Verification code is valid for 10 minutes</value>
+  </data>
+  
+  <!-- Admin Verification -->
+  <data name="AdminVerification" xml:space="preserve">
+    <value>Admin Verification</value>
+  </data>
+  <data name="EnterAdminVerificationCode" xml:space="preserve">
+    <value>Enter admin verification code</value>
+  </data>
+  <data name="RestrictedAreaAdminOnly" xml:space="preserve">
+    <value>Restricted Area - Admins Only</value>
+  </data>
+  <data name="AdminVerificationCode" xml:space="preserve">
+    <value>Admin Verification Code</value>
+  </data>
+  <data name="EnterDashboard" xml:space="preserve">
+    <value>Enter Dashboard</value>
+  </data>
+  <data name="BackToLogin" xml:space="preserve">
+    <value>Back to Login</value>
+  </data>
+  <data name="AdditionalAdminSecurity" xml:space="preserve">
+    <value>Additional security layer for administrators</value>
+  </data>
+  
+</root>

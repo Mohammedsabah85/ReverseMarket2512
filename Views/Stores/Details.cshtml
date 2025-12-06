@@ -1,0 +1,201 @@
+@using ReverseMarket.Models.Identity
+@model ApplicationUser
+
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Model.StoreName;
+    var isLoggedIn = Context.Session.GetString("IsLoggedIn") == "true";
+    var currentUserId = Context.Session.GetInt32("UserId");
+    var userType = Context.Session.GetString("UserType");
+    bool canViewContact = isLoggedIn && (userType == "Admin" || currentUserId.HasValue);
+}
+
+<div class="container-custom">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card-custom">
+                <!-- Store Header -->
+                <div class="d-flex align-items-center mb-4">
+                    @if (!string.IsNullOrEmpty(Model.ProfileImage))
+                    {
+                        <img src="@Model.ProfileImage" class="rounded-circle me-4"
+                             style="width: 100px; height: 100px; object-fit: cover;" alt="@Model.StoreName">
+                    }
+                    else
+                    {
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-4"
+                             style="width: 100px; height: 100px;">
+                            <i class="fas fa-store fa-2x"></i>
+                        </div>
+                    }
+                    <div>
+                        <h1 class="display-6 text-primary mb-2">@Model.StoreName</h1>
+                        @if (canViewContact)
+                        {
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-user me-1"></i>
+                                @Model.FirstName @Model.LastName
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-user me-1"></i>
+                                <span class="blurred-text">*** ***</span>
+                            </p>
+                        }
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-calendar me-1"></i>
+                            @Localizer["MemberSince"] @Model.CreatedAt.ToString("MMMM yyyy")
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Store Description -->
+                @if (!string.IsNullOrEmpty(Model.StoreDescription))
+                {
+                    <div class="mb-4">
+                        <h4 class="text-primary mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            @Localizer["AboutStore"]
+                        </h4>
+                        <p class="lead">@Model.StoreDescription</p>
+                    </div>
+                }
+
+                <!-- Categories -->
+                <div class="mb-4">
+                    <h4 class="text-primary mb-3">
+                        <i class="fas fa-tags me-2"></i>
+                        @Localizer["Specializations"]
+                    </h4>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var storeCategory in Model.StoreCategories)
+                        {
+                            <span class="badge bg-primary fs-6 p-2">@storeCategory.Category.Name</span>
+                            @if (storeCategory.SubCategory1 != null)
+                            {
+                                <span class="badge bg-secondary fs-6 p-2">@storeCategory.SubCategory1.Name</span>
+                            }
+                            @if (storeCategory.SubCategory2 != null)
+                            {
+                                <span class="badge bg-info fs-6 p-2">@storeCategory.SubCategory2.Name</span>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="mb-4">
+                    <h4 class="text-primary mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        @Localizer["Location"]
+                    </h4>
+                    <div class="bg-light p-3 rounded">
+                        <p class="mb-1"><strong>@Localizer["City"]:</strong> @Model.City</p>
+                        <p class="mb-1"><strong>@Localizer["District"]:</strong> @Model.District</p>
+                        @if (!string.IsNullOrEmpty(Model.Location))
+                        {
+                            <p class="mb-0"><strong>@Localizer["Address"]:</strong> @Model.Location</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Websites -->
+                @if (!string.IsNullOrEmpty(Model.WebsiteUrl1) || !string.IsNullOrEmpty(Model.WebsiteUrl2) || !string.IsNullOrEmpty(Model.WebsiteUrl3))
+                {
+                    <div class="mb-4">
+                        <h4 class="text-primary mb-3">
+                            <i class="fas fa-link me-2"></i>
+                            @Localizer["Links"]
+                        </h4>
+                        <div class="d-flex flex-wrap gap-2">
+                            @if (!string.IsNullOrEmpty(Model.WebsiteUrl1))
+                            {
+                                <a href="@Model.WebsiteUrl1" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    @Localizer["Website1"]
+                                </a>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.WebsiteUrl2))
+                            {
+                                <a href="@Model.WebsiteUrl2" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    @Localizer["Website2"]
+                                </a>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.WebsiteUrl3))
+                            {
+                                <a href="@Model.WebsiteUrl3" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    @Localizer["Website3"]
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Contact Card -->
+            <div class="card-custom mb-4">
+                @Html.Partial("_ContactVerificationPartial", Model)
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card-custom mb-4">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-lightning-bolt me-2"></i>
+                    @Localizer["QuickActions"]
+                </h5>
+                <div class="d-grid gap-2">
+                    <a href="/Requests/Create" class="btn btn-custom">
+                        <i class="fas fa-plus me-2"></i>
+                        @Localizer["AddRequest"]
+                    </a>
+                    <a href="/Requests?categoryId=@Model.StoreCategories.FirstOrDefault()?.CategoryId" class="btn btn-outline-secondary">
+                        <i class="fas fa-list me-2"></i>
+                        @Localizer["RequestsInSameSpecialization"]
+                    </a>
+                </div>
+            </div>
+
+            <!-- Similar Stores -->
+            <div class="card-custom">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-store me-2"></i>
+                    @Localizer["SimilarStores"]
+                </h5>
+                <div class="d-grid gap-2">
+                    @if (Model.StoreCategories.Any())
+                    {
+                        <a href="/Stores?categoryId=@Model.StoreCategories.First().CategoryId" class="btn btn-outline-secondary btn-sm">
+                            @Localizer["Stores"] @Model.StoreCategories.First().Category.Name
+                        </a>
+                    }
+                    <a href="/Stores?search=@Model.City" class="btn btn-outline-secondary btn-sm">
+                        @Localizer["StoresIn"] @Model.City
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mt-4">
+        <a href="/Stores" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-right me-2"></i>
+            @Localizer["BackToStores"]
+        </a>
+    </div>
+</div>
+
+<style>
+    .blurred-text {
+        filter: blur(4px);
+        -webkit-filter: blur(4px);
+        user-select: none;
+        pointer-events: none;
+    }
+</style>

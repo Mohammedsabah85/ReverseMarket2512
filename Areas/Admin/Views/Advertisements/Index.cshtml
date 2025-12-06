@@ -1,0 +1,173 @@
+﻿@model List<Advertisement>
+@{
+    ViewData["Title"] = "إدارة الإعلانات";
+}
+
+<!-- Actions -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>إدارة الإعلانات</h3>
+    <a href="/Admin/Advertisements/Create" class="btn btn-admin">
+        <i class="fas fa-plus me-2"></i>
+        إضافة إعلان جديد
+    </a>
+</div>
+
+<!-- Advertisements List -->
+<div class="card-admin">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-admin">
+                    <thead>
+                        <tr>
+                            <th>الصورة</th>
+                            <th>العنوان</th>
+                            <th>النوع</th>
+                            <th>الحالة</th>
+                            <th>ترتيب العرض</th>
+                            <th>تاريخ البداية</th>
+                            <th>تاريخ النهاية</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ad in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <img src="@ad.ImagePath" alt="@ad.Title"
+                                         style="width: 80px; height: 60px; object-fit: cover;"
+                                         class="rounded">
+                                </td>
+                                <td>
+                                    <strong>@ad.Title</strong>
+                                    @if (!string.IsNullOrEmpty(ad.Description))
+                                    {
+                                        <br>
+                                        <small class="text-muted">
+                                            @(ad.Description.Length > 50 ?
+                                                                            ad.Description.Substring(0, 50) + "..." :
+                                                                            ad.Description)
+                            </small>
+                                                        }
+                                </td>
+                                <td>
+                                    @switch (ad.Type)
+                                    {
+                                        case AdvertisementType.Banner:
+                                            <span class="badge bg-primary">بانر</span>
+                                            break;
+                                        case AdvertisementType.Slide:
+                                            <span class="badge bg-success">شريحة</span>
+                                            break;
+                                        case AdvertisementType.Logo:
+                                            <span class="badge bg-info">شعار</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @if (ad.IsActive)
+                                    {
+                                        @if (ad.EndDate.HasValue && ad.EndDate < DateTime.Now)
+                                        {
+                                            <span class="badge bg-warning">منتهي الصلاحية</span>
+                                        }
+                                        else if (ad.StartDate > DateTime.Now)
+                                        {
+                                            <span class="badge bg-secondary">مجدول</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">نشط</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">غير نشط</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">@ad.DisplayOrder</span>
+                                </td>
+                                <td>
+                                    @ad.StartDate.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>
+                                    @if (ad.EndDate.HasValue)
+                                    {
+                                        @ad.EndDate.Value.ToString("dd/MM/yyyy")
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">بدون تاريخ انتهاء</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        @if (!string.IsNullOrEmpty(ad.LinkUrl))
+                                        {
+                                            <a href="@ad.LinkUrl" target="_blank"
+                                               class="btn btn-outline-info btn-sm"
+                                               title="زيارة الرابط">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        }
+                                        <a href="/Admin/Advertisements/Edit/@ad.Id"
+                                           class="btn btn-outline-primary btn-sm"
+                                           title="تعديل">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-outline-danger btn-sm"
+                                                onclick="deleteAdvertisement(@ad.Id)"
+                                                title="حذف">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-ad fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">لا توجد إعلانات</h5>
+                <p class="text-muted">ابدأ بإضافة الإعلانات لموقعك</p>
+                <a href="/Admin/Advertisements/Create" class="btn btn-admin">
+                    <i class="fas fa-plus me-2"></i>
+                    إضافة أول إعلان
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteAdvertisement(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الإعلان؟')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/Admin/Advertisements/Delete/${id}`;
+
+                // Add anti-forgery token if needed
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = token.value;
+                    form.appendChild(tokenInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+}

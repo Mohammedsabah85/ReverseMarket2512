@@ -1,0 +1,456 @@
+﻿@model User
+@{
+    ViewData["Title"] = "تفاصيل المستخدم";
+    var userStats = ViewBag.UserStats as UserStatistics;
+}
+
+<!-- Add Anti-forgery Token to the page -->
+@Html.AntiForgeryToken()
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>تفاصيل المستخدم: @Model.FirstName @Model.LastName</h3>
+    <div class="btn-group">
+        <a href="/Admin/Users" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-right me-2"></i>
+            العودة للقائمة
+        </a>
+        <a href="/Admin/Users/Edit/@Model.Id" class="btn btn-outline-primary">
+            <i class="fas fa-edit me-2"></i>
+            تعديل
+        </a>
+    </div>
+</div>
+
+<!-- User Status Alert -->
+@if (!Model.IsActive)
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>تنبيه:</strong> هذا المستخدم موقوف حالياً
+    </div>
+}
+
+@if (!Model.IsPhoneVerified)
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>ملاحظة:</strong> رقم الهاتف غير مؤكد
+    </div>
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Basic Information -->
+        <div class="card-admin mb-4">
+            <div class="card-body">
+                <h5 class="text-primary mb-4">
+                    <i class="fas fa-user me-2"></i>
+                    المعلومات الشخصية
+                </h5>
+
+                <div class="row">
+                    <div class="col-md-3 text-center mb-4">
+                        @if (!string.IsNullOrEmpty(Model.ProfileImage))
+                        {
+                            <img src="@Model.ProfileImage" class="rounded-circle mb-3"
+                                 style="width: 120px; height: 120px; object-fit: cover;" alt="@Model.FirstName">
+                        }
+                        else
+                        {
+                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                 style="width: 120px; height: 120px;">
+                                <i class="fas fa-user fa-3x"></i>
+                            </div>
+                        }
+                        <h6>@Model.FirstName @Model.LastName</h6>
+                        <small class="text-muted">ID: @Model.Id</small>
+                    </div>
+
+                    <div class="col-md-9">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <strong>رقم الهاتف:</strong>
+                                <span class="d-block">@Model.PhoneNumber</span>
+                                @if (Model.IsPhoneVerified)
+                                {
+                                    <small class="text-success"><i class="fas fa-check-circle"></i> مؤكد</small>
+                                }
+                                else
+                                {
+                                    <small class="text-warning"><i class="fas fa-exclamation-circle"></i> غير مؤكد</small>
+                                }
+                            </div>
+
+                            <div class="col-md-6">
+                                <strong>البريد الإلكتروني:</strong>
+                                <span class="d-block">@(string.IsNullOrEmpty(Model.Email) ? "غير محدد" : Model.Email)</span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <strong>تاريخ الميلاد:</strong>
+                                <span class="d-block">@Model.DateOfBirth.ToString("dd/MM/yyyy")</span>
+                                <small class="text-muted">@((DateTime.Now.Year - Model.DateOfBirth.Year)) سنة</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <strong>الجنس:</strong>
+                                <span class="d-block">@Model.Gender</span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <strong>نوع الحساب:</strong>
+                                @if (Model.UserType == UserType.Buyer)
+                                {
+                                    <span class="badge bg-primary">مشتري</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">بائع</span>
+                                }
+                            </div>
+
+                            <div class="col-md-6">
+                                <strong>حالة الحساب:</strong>
+                                @if (Model.IsActive)
+                                {
+                                    <span class="badge bg-success">نشط</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">موقوف</span>
+                                }
+                            </div>
+
+                            <div class="col-12">
+                                <strong>الموقع:</strong>
+                                <span class="d-block">@Model.City - @Model.District</span>
+                                @if (!string.IsNullOrEmpty(Model.Location))
+                                {
+                                    <small class="text-muted">@Model.Location</small>
+                                }
+                            </div>
+
+                            <div class="col-md-6">
+                                <strong>تاريخ التسجيل:</strong>
+                                <span class="d-block">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Store Information (for Sellers) -->
+        @if (Model.UserType == UserType.Seller)
+        {
+            <div class="card-admin mb-4">
+                <div class="card-body">
+                    <h5 class="text-primary mb-4">
+                        <i class="fas fa-store me-2"></i>
+                        معلومات المتجر
+                    </h5>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <strong>اسم المتجر:</strong>
+                            <span class="d-block">@(string.IsNullOrEmpty(Model.StoreName) ? "غير محدد" : Model.StoreName)</span>
+                        </div>
+
+                        <div class="col-12">
+                            <strong>وصف المتجر:</strong>
+                            <p class="mb-2">@(string.IsNullOrEmpty(Model.StoreDescription) ? "غير محدد" : Model.StoreDescription)</p>
+                        </div>
+
+                        @if (Model.StoreCategories != null && Model.StoreCategories.Any())
+                        {
+                            <div class="col-12">
+                                <strong>فئات المتجر:</strong>
+                                <div class="mt-2">
+                                    @foreach (var storeCategory in Model.StoreCategories)
+                                    {
+                                        if (storeCategory.Category != null)
+                                        {
+                                            <span class="badge bg-primary me-2 mb-2">@storeCategory.Category.Name</span>
+                                        }
+                                        if (storeCategory.SubCategory1 != null)
+                                        {
+                                            <span class="badge bg-secondary me-2 mb-2">@storeCategory.SubCategory1.Name</span>
+                                        }
+                                        if (storeCategory.SubCategory2 != null)
+                                        {
+                                            <span class="badge bg-info me-2 mb-2">@storeCategory.SubCategory2.Name</span>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <div class="col-12">
+                            <strong>روابط المتجر:</strong>
+                            <div class="mt-2">
+                                @if (!string.IsNullOrEmpty(Model.WebsiteUrl1))
+                                {
+                                    <div>
+                                        <a href="@Model.WebsiteUrl1" target="_blank" class="text-decoration-none">
+                                            <i class="fas fa-external-link-alt me-1"></i> @Model.WebsiteUrl1
+                                        </a>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.WebsiteUrl2))
+                                {
+                                    <div>
+                                        <a href="@Model.WebsiteUrl2" target="_blank" class="text-decoration-none">
+                                            <i class="fas fa-external-link-alt me-1"></i> @Model.WebsiteUrl2
+                                        </a>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.WebsiteUrl3))
+                                {
+                                    <div>
+                                        <a href="@Model.WebsiteUrl3" target="_blank" class="text-decoration-none">
+                                            <i class="fas fa-external-link-alt me-1"></i> @Model.WebsiteUrl3
+                                        </a>
+                                    </div>
+                                }
+                                @if (string.IsNullOrEmpty(Model.WebsiteUrl1) && string.IsNullOrEmpty(Model.WebsiteUrl2) && string.IsNullOrEmpty(Model.WebsiteUrl3))
+                                {
+                                    <span class="text-muted">لا توجد روابط</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- User Statistics -->
+        @if (userStats != null)
+        {
+            <div class="card-admin">
+                <div class="card-body">
+                    <h5 class="text-primary mb-4">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        إحصائيات النشاط
+                    </h5>
+
+                    <div class="row g-4">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-primary">@userStats.TotalRequests</h4>
+                                <small class="text-muted">إجمالي الطلبات</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-success">@userStats.ApprovedRequests</h4>
+                                <small class="text-muted">طلبات معتمدة</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-warning">@userStats.PendingRequests</h4>
+                                <small class="text-muted">طلبات معلقة</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-danger">@userStats.RejectedRequests</h4>
+                                <small class="text-muted">طلبات مرفوضة</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card-admin mb-4">
+            <div class="card-body">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-tools me-2"></i>
+                    إجراءات سريعة
+                </h5>
+
+                <div class="d-grid gap-2">
+                    <a href="/Admin/Users/Edit/@Model.Id" class="btn btn-outline-primary">
+                        <i class="fas fa-edit me-2"></i>
+                        تعديل البيانات
+                    </a>
+
+                    @if (Model.PhoneNumber != "+9647805006974")
+                    {
+                        <!-- Forms for Toggle Status and Delete -->
+                        <form asp-action="ToggleStatus" method="post" id="toggleForm-@Model.Id" style="display: none;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                        </form>
+
+                        <form asp-action="Delete" method="post" id="deleteForm-@Model.Id" style="display: none;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                        </form>
+
+                        <button type="button" class="btn btn-outline-warning"
+                                onclick="confirmToggleStatus('@Model.Id', @Model.IsActive.ToString().ToLower(), '@Model.FirstName @Model.LastName')">
+                            <i class="fas fa-@(Model.IsActive ? "user-slash" : "user-check") me-2"></i>
+                            @(Model.IsActive ? "إيقاف المستخدم" : "تفعيل المستخدم")
+                        </button>
+
+                        <button type="button" class="btn btn-outline-danger"
+                                onclick="confirmDelete('@Model.Id', '@Model.FirstName @Model.LastName')">
+                            <i class="fas fa-trash me-2"></i>
+                            حذف المستخدم
+                        </button>
+                    }
+
+                    <a href="tel:@Model.PhoneNumber" class="btn btn-outline-success">
+                        <i class="fas fa-phone me-2"></i>
+                        اتصال مباشر
+                    </a>
+
+                    <a href="https://wa.me/@Model.PhoneNumber.Replace("+", "")" target="_blank" class="btn btn-success">
+                        <i class="fab fa-whatsapp me-2"></i>
+                        واتساب
+                    </a>
+
+                    @if (!string.IsNullOrEmpty(Model.Email))
+                    {
+                        <a href="mailto:@Model.Email" class="btn btn-outline-info">
+                            <i class="fas fa-envelope me-2"></i>
+                            إرسال بريد
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="card-admin">
+            <div class="card-body">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    معلومات إضافية
+                </h5>
+
+                <div class="small">
+                    <div class="mb-2">
+                        <strong>معرف المستخدم:</strong>
+                        <code>@Model.Id</code>
+                    </div>
+                    <div class="mb-2">
+                        <strong>أيام العضوية:</strong> @((DateTime.Now - Model.CreatedAt).Days) يوم
+                    </div>
+                    <div class="mb-2">
+                        <strong>آخر تحديث:</strong>
+                        @if (Model.UpdatedAt.HasValue)
+                        {
+                            @Model.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                        }
+                        else
+                        {
+                            <span class="text-muted">لا يوجد</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmToggleStatus(userId, isCurrentlyActive, userName) {
+            const action = isCurrentlyActive ? 'إيقاف' : 'تفعيل';
+            const confirmMessage = `هل أنت متأكد من ${action} المستخدم "${userName}"؟`;
+
+            if (confirm(confirmMessage)) {
+                const form = document.getElementById('toggleForm-' + userId);
+                if (form) {
+                    form.submit();
+                } else {
+                    // Fallback method
+                    toggleUserStatus(userId, isCurrentlyActive);
+                }
+            }
+        }
+
+        function confirmDelete(userId, userName) {
+            const confirmMessage = `هل أنت متأكد من حذف المستخدم "${userName}"؟\n\nتحذير: هذا الإجراء لا يمكن التراجع عنه!`;
+
+            if (confirm(confirmMessage)) {
+                const form = document.getElementById('deleteForm-' + userId);
+                if (form) {
+                    form.submit();
+                } else {
+                    // Fallback method
+                    deleteUser(userId, userName);
+                }
+            }
+        }
+
+        // Fallback methods from user-management.js
+        function toggleUserStatus(userId, isCurrentlyActive) {
+             const action = isCurrentlyActive ? 'إيقاف' : 'تفعيل';
+             const confirmMessage = `هل أنت متأكد من ${action} هذا المستخدم؟`;
+
+             if (confirm(confirmMessage)) {
+                 const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                 fetch('/Admin/Users/ToggleStatus', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/x-www-form-urlencoded',
+                     },
+                     body: `id=${userId}&__RequestVerificationToken=${encodeURIComponent(token)}`
+                 })
+                 .then(response => response.json())
+                 .then(data => {
+                     if (data.success) {
+                         location.reload(); // إعادة تحميل الصفحة
+                     } else {
+                         alert('خطأ: ' + data.message);
+                     }
+                 })
+                 .catch(error => {
+                     alert('حدث خطأ أثناء تغيير الحالة');
+                     console.error('Error:', error);
+                 });
+             }
+         }
+
+         function deleteUser(userId, userName) {
+             const confirmMessage = `هل أنت متأكد من حذف المستخدم "${userName}"؟\n\nتحذير: هذا الإجراء لا يمكن التراجع عنه!`;
+
+             if (confirm(confirmMessage)) {
+                 const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                 fetch('/Admin/Users/Delete', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/x-www-form-urlencoded',
+                     },
+                     body: `id=${userId}&__RequestVerificationToken=${encodeURIComponent(token)}`
+                 })
+                 .then(response => response.json())
+                 .then(data => {
+                     if (data.success) {
+                         alert(data.message); // "تم حذف المستخدم بنجاح"
+                         location.reload(); // إعادة تحميل الصفحة
+                     } else {
+                         alert('خطأ: ' + data.message);
+                     }
+                 })
+                 .catch(error => {
+                     alert('حدث خطأ أثناء الحذف');
+                     console.error('Error:', error);
+                 });
+             }
+         }
+
+
+        // Debug: Log the User ID when page loads
+        console.log('Current User ID:', '@Model.Id');
+    </script>
+}

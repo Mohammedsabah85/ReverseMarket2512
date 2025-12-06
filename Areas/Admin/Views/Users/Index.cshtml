@@ -1,0 +1,381 @@
+﻿@model AdminUsersViewModel
+
+@{
+    ViewData["Title"] = "إدارة المستخدمين";
+}
+
+@* Anti-forgery Token *@
+@Html.AntiForgeryToken()
+
+@* رسالة النجاح *@
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <i class="fas fa-users fa-2x mb-3"></i>
+            <h3>@Model.TotalUsers</h3>
+            <p>إجمالي المستخدمين</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-success">
+            <i class="fas fa-user-check fa-2x mb-3"></i>
+            <h3>@Model.ActiveUsers</h3>
+            <p>مستخدمين نشطين</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-warning">
+            <i class="fas fa-user-times fa-2x mb-3"></i>
+            <h3>@Model.InactiveUsers</h3>
+            <p>مستخدمين موقوفين</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-info">
+            <i class="fas fa-store fa-2x mb-3"></i>
+            <h3>@Model.SellersCount</h3>
+            <p>المتاجر المسجلة</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<!-- Filters -->
+<div class="card-admin mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="search" class="form-label">البحث</label>
+                <input type="text" name="search" id="search" class="form-control"
+                       value="@Model.Search" placeholder="الاسم، الهاتف، البريد...">
+            </div>
+
+            <div class="col-md-3">
+                <label for="userType" class="form-label">نوع المستخدم</label>
+                <select name="userType" id="userType" class="form-control">
+                    <option value="">جميع الأنواع</option>
+                    @if (Model.UserTypeFilter == UserType.Buyer)
+                    {
+                        <option value="1" selected>مشتري</option>
+                        <option value="2">بائع</option>
+                    }
+                    else if (Model.UserTypeFilter == UserType.Seller)
+                    {
+                        <option value="1">مشتري</option>
+                        <option value="2" selected>بائع</option>
+                    }
+                    else
+                    {
+                        <option value="1">مشتري</option>
+                        <option value="2">بائع</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="isActive" class="form-label">الحالة</label>
+                <select name="isActive" id="isActive" class="form-control">
+                    <option value="">جميع الحالات</option>
+                    @if (Model.IsActiveFilter == true)
+                    {
+                        <option value="true" selected>نشط</option>
+                        <option value="false">موقوف</option>
+                    }
+                    else if (Model.IsActiveFilter == false)
+                    {
+                        <option value="true">نشط</option>
+                        <option value="false" selected>موقوف</option>
+                    }
+                    else
+                    {
+                        <option value="true">نشط</option>
+                        <option value="false">موقوف</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-admin me-2">
+                    <i class="fas fa-filter me-1"></i>
+                    تصفية
+                </button>
+                <a href="/Admin/Users" class="btn btn-outline-secondary">
+                    <i class="fas fa-redo me-1"></i>
+                    إعادة تعيين
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card-admin">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-users me-2"></i>
+            قائمة المستخدمين (@Model.Users.Count)
+        </h5>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportUsers()">
+                <i class="fas fa-download me-1"></i>
+                تصدير
+            </button>
+            <button type="button" class="btn btn-outline-info btn-sm" onclick="location.reload()">
+                <i class="fas fa-sync me-1"></i>
+                تحديث
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        @if (Model.Users != null && Model.Users.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-admin">
+                    <thead>
+                        <tr>
+                            <th>المستخدم</th>
+                            <th>معلومات التواصل</th>
+                            <th>النوع</th>
+                            <th>الموقع</th>
+                            <th>الحالة</th>
+                            <th>تاريخ التسجيل</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.Users)
+                        {
+                            <tr class="@(!user.IsActive ? "table-warning" : "")">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @if (!string.IsNullOrEmpty(user.ProfileImage))
+                                        {
+                                            <img src="@user.ProfileImage" class="rounded-circle me-2"
+                                                 style="width: 40px; height: 40px; object-fit: cover;" alt="@user.FirstName">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                                 style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                        }
+                                        <div>
+                                            <strong>@user.FirstName @user.LastName</strong>
+                                            @if (user.UserType == UserType.Seller && !string.IsNullOrEmpty(user.StoreName))
+                                            {
+                                                <br>
+                                                <small class="text-muted">@user.StoreName</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="small">
+                                        <div><i class="fas fa-phone me-1"></i> @(user.PhoneNumber ?? "غير محدد")</div>
+                                        @if (!string.IsNullOrEmpty(user.Email))
+                                        {
+                                            <div><i class="fas fa-envelope me-1"></i> @user.Email</div>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (user.UserType == UserType.Buyer)
+                                    {
+                                        <span class="badge bg-primary">مشتري</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">بائع</span>
+                                    }
+                                    <br>
+                                    @if (!user.IsPhoneVerified)
+                                    {
+                                        <span class="badge bg-warning mt-1">غير مؤكد</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info mt-1">مؤكد</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small>
+                                        @(user.City ?? "غير محدد")<br>
+                                        @(user.District ?? "غير محدد")
+                                    </small>
+                                </td>
+                                <td>
+                                    @if (user.IsActive)
+                                    {
+                                        <span class="badge bg-success">نشط</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">موقوف</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small>
+                                        @user.CreatedAt.ToString("dd/MM/yyyy")<br>
+                                        <span class="text-muted">@user.CreatedAt.ToString("HH:mm")</span>
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="/Admin/Users/Details/@user.Id" class="btn btn-outline-info btn-sm" title="التفاصيل">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="/Admin/Users/Edit/@user.Id" class="btn btn-outline-primary btn-sm" title="تعديل">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @if (user.PhoneNumber != "+9647805006974")
+                                        {
+                                            <button type="button" class="btn btn-outline-warning btn-sm"
+                                                    onclick="toggleUserStatus('@user.Id', @user.IsActive.ToString().ToLower())"
+                                                    title="@(user.IsActive ? "إيقاف" : "تفعيل")">
+                                                <i class="fas fa-@(user.IsActive ? "user-slash" : "user-check")"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    onclick="deleteUser('@user.Id', '@user.FirstName @user.LastName')"
+                                                    title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info">مدير</span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav aria-label="pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        @if (Model.CurrentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?page=@(Model.CurrentPage - 1)&search=@Model.Search&userType=@((int?)Model.UserTypeFilter)&isActive=@Model.IsActiveFilter">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+
+                        @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="?page=@i&search=@Model.Search&userType=@((int?)Model.UserTypeFilter)&isActive=@Model.IsActiveFilter">@i</a>
+                            </li>
+                        }
+
+                        @if (Model.CurrentPage < Model.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?page=@(Model.CurrentPage + 1)&search=@Model.Search&userType=@((int?)Model.UserTypeFilter)&isActive=@Model.IsActiveFilter">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">لا توجد مستخدمين</h5>
+                <p class="text-muted">لم يتم العثور على مستخدمين يطابقون المعايير المحددة</p>
+                @if (!string.IsNullOrEmpty(Model.Search) || Model.UserTypeFilter.HasValue || Model.IsActiveFilter.HasValue)
+                {
+                    <a href="/Admin/Users" class="btn btn-outline-primary">
+                        <i class="fas fa-redo me-2"></i>
+                        إعادة تعيين البحث
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleUserStatus(userId, isCurrentlyActive) {
+            const action = isCurrentlyActive ? 'إيقاف' : 'تفعيل';
+            const confirmMessage = `هل أنت متأكد من ${action} هذا المستخدم؟`;
+
+            if (confirm(confirmMessage)) {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                fetch('/Admin/Users/ToggleStatus', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${userId}&__RequestVerificationToken=${encodeURIComponent(token)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('خطأ: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('حدث خطأ أثناء تغيير الحالة');
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        function deleteUser(userId, userName) {
+            const confirmMessage = `هل أنت متأكد من حذف المستخدم "${userName}"؟\n\nتحذير: هذا الإجراء لا يمكن التراجع عنه!`;
+
+            if (confirm(confirmMessage)) {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                fetch('/Admin/Users/Delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${userId}&__RequestVerificationToken=${encodeURIComponent(token)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert('خطأ: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('حدث خطأ أثناء الحذف');
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        function exportUsers() {
+            alert('وظيفة التصدير قيد التطوير');
+        }
+    </script>
+}

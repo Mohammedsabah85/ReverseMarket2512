@@ -1,0 +1,306 @@
+﻿@using ReverseMarket.SignalR
+@* @model ChatMembersDto *@
+@model ReverseMarket.Controllers.ChatMembersDto
+@{
+    // ✅ استخدام Layout مناسب حسب نوع المستخدم
+    Layout = ViewBag.UseAdminLayout == false ? "~/Views/Shared/_Layout.cshtml" : "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "المحادثة مع " + Model.ReceiverFullName;
+    var messages = ViewBag.Messages as List<ChatMessage> ?? new List<ChatMessage>();
+    var currentUser = Model.SenderId;   // <-- your app’s current user id/name
+    var withUser = Model.ReceiverId;
+    var Receiver = Model.ReceiverFullName;
+}
+
+<h2 style="text-align:center;padding-top:3%;padding-bottom:3%;">المراسلة مع : @Receiver</h2>
+
+<style>
+    /* Messenger-like bubbles */
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 5px;
+        direction: ltr; /* keep LTR flow even if page is RTL */
+    }
+
+    .message {
+        max-width: 70%;
+        padding: 10px 14px;
+        border-radius: 15px;
+        font-size: 14px;
+        word-wrap: break-word;
+    }
+
+    .sender {
+        align-self: flex-end;
+        background: #fff;
+        color: #000;
+        border: 1px solid #ccc;
+        border-bottom-right-radius: 2px;
+    }
+
+    .receiver {
+        align-self: flex-start;
+        background: #4caf50;
+        color: #fff;
+        border-bottom-left-radius: 2px;
+    }
+
+    .message-content img {
+        border-radius: 8px;
+        max-width: 200px;
+    }
+
+    .time {
+        display: block;
+        font-size: 11px;
+        opacity: .6;
+        margin-top: 4px;
+        text-align: right;
+    }
+</style>
+
+<div id="chat-box" style="font-weight:500;font-size:20px;height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+    <div id="load-more" style="text-align:center;">
+        <a href="#" id="loadOlderBtn" style="color:#3C403E">تحميل الرسائل السابقة</a>
+    </div>
+
+    @* Make this the flex parent *@
+    @{
+        ViewBag.CurrentUser = currentUser;
+    }
+    <div id="messagesContainer" class="chat-container" dir="ltr" data-skip="@messages.Count">
+        @Html.Partial("_ChatMessagesPartial", messages)
+    </div>
+</div>
+
+<form id="chat-form" enctype="multipart/form-data" class="mb-2" style="padding-top:2%">
+    <div class="row align-items-center g-2">
+        <input type="hidden" id="withUser" value="@withUser" />
+
+        <div class="col">
+            <input type="text" id="messageInput" class="form-control" placeholder="اكتب رسالة..." />
+        </div>
+
+        <div class="col-auto">
+            <!-- Hidden file input -->
+            <input type="file" id="fileInput" class="d-none" />
+
+            <!-- Custom button for file upload -->
+            <label for="fileInput" class="btn btn-light mb-0" style="background-color:#212120;color:white">📎 رفع ملف</label>
+        </div>
+
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">ارسال</button>
+        </div>
+    </div>
+</form>
+
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const withUser = "@withUser";
+        const currentUser = "@currentUser"; // string from Razor
+
+        const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+        // helper: build bubble HTML (same structure/classes as partial)
+                            function buildBubbleHtml(sender, message, time, filePath, fileType, currentUser){
+            const isSender = sender === currentUser;
+            let inner = "";
+
+            if (message === "[File]" && filePath){
+                const ext = (fileType || "").toLowerCase();
+                if (ext === ".png" || ext === ".jpg" || ext === ".jpeg"){
+                    inner = `<img src="${filePath}" />`;
+                } else {
+                    inner = `<a href="${filePath}" target="_blank" download>Download file</a>`;
+                }
+            } else {
+                inner = message;
+            }
+
+            return `
+            <div class="message ${isSender ? "sender":"receiver"}">
+                <div class="message-content">${inner}</div>
+                <small class="time">${time}</small>
+            </div>`;
+        }
+
+        // Receive new message
+                 connection.on("ReceiveMessage", function (sender, message, time, filePath, fileType) {
+            const cleanSender = sender.trim().toLowerCase();
+            const cleanCurrentUser = currentUser.trim().toLowerCase();
+
+            // Only append if the message is from someone else (not current user)
+            if (cleanSender !== cleanCurrentUser) {
+                const html = buildBubbleHtml(cleanSender, message, time, filePath, fileType, cleanCurrentUser);
+                $("#messagesContainer").append(html);
+
+                markMessagesAsRead();
+
+                showBrowserNotification(`New message from ${sender}`, message);
+
+                const chatBox = $("#chat-box")[0];
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        });
+
+        // Read receipts (optional)
+        connection.on("MessagesRead", function (readerUsername) {
+            $("#messagesContainer .message:last").append(" <span style='color: #0047AB;'>✓✓ Read</span>");
+        });
+
+        connection.start().catch(err => console.error(err.toString()));
+
+                $("#chat-form").submit(function(e) {
+            e.preventDefault();
+
+            const message = $("#messageInput").val().trim();
+            const file = $("#fileInput")[0].files[0];
+            const now = new Date().toLocaleTimeString();
+
+            if (!message && !file) return;
+
+            if (file) {
+                // create local preview for sender
+                let fileHtml = "";
+                const ext = (file.name.split(".").pop() || "").toLowerCase();
+
+                if (["png","jpg","jpeg"].includes(ext)) {
+                    fileHtml = `<img src="${URL.createObjectURL(file)}" />`;
+                } else if (["pdf","doc","docx"].includes(ext)) {
+                    fileHtml = `<a href="#" download="${file.name}">${file.name}</a>`;
+                }
+
+                const html = `
+                    <div class="message sender">
+                        <div class="message-content">${fileHtml}</div>
+                        <small class="time">${now}</small>
+                    </div>`;
+                $("#messagesContainer").append(html);
+                $("#chat-box")[0].scrollTop = $("#chat-box")[0].scrollHeight;
+
+                // upload file to server
+                const formData = new FormData();
+                formData.append("receiver", withUser);
+                if (message) formData.append("message", message);
+                formData.append("file", file);
+
+                $.ajax({
+                    url: "/Chat/UploadFile",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function () {
+                        $("#messageInput").val("");
+                        $("#fileInput").val("");
+                        location.reload(); // reload to get server-generated message (with URL, timestamp, etc)
+                    }
+                });
+
+                return; // stop further processing
+            }
+
+            // text message
+            if (message) {
+                const html = buildBubbleHtml(currentUser, message, now, null, null, currentUser);
+                $("#messagesContainer").append(html);
+                $("#chat-box")[0].scrollTop = $("#chat-box")[0].scrollHeight;
+
+                connection.invoke("SendMessage", withUser, message)
+                    .then(() => { $("#messageInput").val(""); })
+                    .catch(err => console.error(err));
+            }
+        });
+
+        function showBrowserNotification(title, message) {
+            if (Notification.permission === "granted") {
+                new Notification(title, { body: message });
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") new Notification(title, { body: message });
+                });
+            }
+        }
+
+        function markMessagesAsRead() {
+            connection.invoke("MarkAsRead", withUser).catch(err => console.error("MarkAsRead error:", err.toString()));
+        }
+
+        // Load older messages and scroll to down
+        function pageLoad(){
+
+            const skip = $("#messagesContainer").data("skip") || 0;
+
+            $.get("/Chat/LoadMessages", { withUser, skip, take: 10 })
+             .done(function (data) {
+                const $rows = $(data).filter(".message").length
+                    ? $(data).filter(".message")
+                    : $(data).find(".message");
+
+                if ($rows.length){
+                    $("#messagesContainer").prepend($rows);
+                    $("#messagesContainer").data("skip", skip + 10);
+                } else if (data.trim() !== "") {
+                    // If your endpoint still returns a wrapper, prepend its children
+                    $("#messagesContainer").prepend($(data).children());
+                    $("#messagesContainer").data("skip", skip + 10);
+                } else {
+                    $("#loadOlderBtn").text("لا توجد رسائل اخرى").css("pointer-events", "none");
+                }
+
+                // Scroll to bottom after messages loaded
+                 scrollChatToBottom();
+             });
+        }
+
+        // load only previous messages :
+          $("#loadOlderBtn").click(function (e) {
+            e.preventDefault();
+
+            const skip = $("#messagesContainer").data("skip") || 0;
+
+            $.get("/Chat/LoadMessages", { withUser, skip, take: 10 })
+             .done(function (data) {
+                const $rows = $(data).filter(".message").length
+                    ? $(data).filter(".message")
+                    : $(data).find(".message");
+
+                if ($rows.length){
+                    $("#messagesContainer").prepend($rows);
+                    $("#messagesContainer").data("skip", skip + 10);
+                } else if (data.trim() !== "") {
+                    // If your endpoint still returns a wrapper, prepend its children
+                    $("#messagesContainer").prepend($(data).children());
+                    $("#messagesContainer").data("skip", skip + 10);
+                } else {
+                    $("#loadOlderBtn").text("لا توجد رسائل اخرى").css("pointer-events", "none");
+                }
+             });
+        });
+
+
+                         function scrollChatToBottom() {
+            const chatBox = document.getElementById("chat-box");
+            if (!chatBox) return;
+
+            // Wait a little for images/files to render
+            setTimeout(() => {
+                chatBox.scrollTop = chatBox.scrollHeight; // scroll chat container
+                window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: 'smooth' // scroll whole page smoothly
+                });
+            }, 50);
+        }
+
+        $(document).ready(function () {
+        pageLoad();
+        });
+
+    </script>
+}

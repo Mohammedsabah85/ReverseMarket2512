@@ -1,0 +1,145 @@
+﻿@model EditUserViewModel
+
+@{
+    ViewData["Title"] = "تعديل المستخدم";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>تعديل المستخدم</h2>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                @* Hidden fields للحقول التي ليست في الفورم *@
+                <input type="hidden" asp-for="City" />
+                <input type="hidden" asp-for="District" />
+                <input type="hidden" asp-for="Location" />
+                <input type="hidden" asp-for="DateOfBirth" />
+                <input type="hidden" asp-for="Gender" />
+                <input type="hidden" asp-for="StoreName" />
+                <input type="hidden" asp-for="StoreDescription" />
+                <input type="hidden" asp-for="WebsiteUrl1" />
+                <input type="hidden" asp-for="WebsiteUrl2" />
+                <input type="hidden" asp-for="WebsiteUrl3" />
+                <input type="hidden" asp-for="IsPhoneVerified" />
+                <input type="hidden" asp-for="IsEmailVerified" />
+                <input type="hidden" asp-for="IsStoreApproved" />
+                <input type="hidden" asp-for="UserType" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="FirstName" class="form-label"></label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="LastName" class="form-label"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="UserName" class="form-label"></label>
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" type="email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="PhoneNumber" class="form-label"></label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-check mt-4">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label class="form-label">الأدوار</label>
+                            @if (Model.AvailableRoles != null && Model.AvailableRoles.Any())
+                            {
+                                <div class="row">
+                                    @for (int i = 0; i < Model.AvailableRoles.Count; i++)
+                                    {
+                                        var role = Model.AvailableRoles[i];
+                                        var isChecked = Model.SelectedRoles != null && Model.SelectedRoles.Contains(role);
+
+                                        <div class="col-md-4 mb-2">
+                                            <div class="form-check">
+                                                <input type="checkbox"
+                                                       name="SelectedRoles"
+                                                       value="@role"
+                                                       class="form-check-input"
+                                                       id="role_@i"
+                                                       @(isChecked ? "checked" : "") />
+                                                <label class="form-check-label" for="role_@i">
+                                                    @role
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted">لا توجد أدوار متاحة</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> إلغاء
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> حفظ التغييرات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

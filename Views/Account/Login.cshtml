@@ -1,0 +1,213 @@
+﻿@model LoginViewModel
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["Login"];
+}
+
+<div class="container-custom">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card-custom">
+                <div class="text-center mb-4">
+                    <i class="fas fa-sign-in-alt fa-3x text-primary mb-3"></i>
+                    <h1 class="h3 text-primary">@Localizer["Login"]</h1>
+                    <p class="text-muted">@Localizer["EnterPhoneToLogin"]</p>
+                </div>
+
+                <div class="alert alert-info mb-4">
+                    <a href="~\account\login.cshtml"></a>
+                    <h6 class="fw-bold mb-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        @Localizer["HowItWorks"]
+                    </h6>
+                    <ul class="small mb-0 ps-3">
+                        <li><strong>@Localizer["RegisteredVerifiedNumber"]:</strong> @Localizer["InstantLoginCode"]</li>
+                        <li><strong>@Localizer["RegisteredUnverifiedNumber"]:</strong> @Localizer["VerificationRequired"]</li>
+                        <li><strong>@Localizer["NewNumber"]:</strong> @Localizer["CreateNewAccount"]</li>
+                    </ul>
+                </div>
+
+                <form asp-action="Login" method="post" id="loginForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label">@Localizer["Phone"] *</label>
+                        <div class="input-group">
+                            <span class="input-group-text">@(Model?.CountryCode ?? "+964")</span>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="7xxxxxxxxx" required
+                                   maxlength="10" pattern="[0-9]{10}" id="phoneInput">
+                        </div>
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            @Localizer["EnterPhoneWithoutCode"]
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input asp-for="AcceptTerms" class="form-check-input" type="checkbox" required id="termsCheck">
+                            <label class="form-check-label" asp-for="AcceptTerms">
+                                @Localizer["IAgreeToThe"] <a href="/Home/Terms" target="_blank">@Localizer["TermsOfUse"]</a> @Localizer["And"]
+                                <a href="/Home/Privacy" target="_blank">@Localizer["PrivacyPolicy"]</a>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-custom w-100" id="submitBtn">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        @Localizer["Continue"]
+                    </button>
+                </form>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <p class="text-muted small mb-3">
+                        <i class="fab fa-whatsapp text-success me-1"></i>
+                        @Localizer["VerificationCodeViaWhatsApp"]
+                    </p>
+
+                   @*  <div class="mb-3">
+                        <p class="text-muted small mb-2">@Localizer["ForQuickDemo"]:</p>
+                        <div class="d-flex gap-2 justify-content-center flex-wrap">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fillDemoNumber('7701234567')">
+                                <i class="fas fa-user me-1"></i>
+                                @Localizer["DemoUser1"]
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fillDemoNumber('7509876543')">
+                                <i class="fas fa-store me-1"></i>
+                                @Localizer["DemoStore"]
+                            </button>
+                        </div>
+                    </div> *@
+                </div>
+
+                <div class="row g-3 mt-3">
+                    <div class="col-4">
+                        <div class="text-center">
+                            <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                            <small class="d-block text-muted">@Localizer["SecureAndProtected"]</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-center">
+                            <i class="fas fa-mobile-alt fa-2x text-primary mb-2"></i>
+                            <small class="d-block text-muted">@Localizer["InstantVerification"]</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-center">
+                            <i class="fas fa-users fa-2x text-info mb-2"></i>
+                            <small class="d-block text-muted">@Localizer["ForEveryone"]</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInput = document.getElementById('phoneInput');
+            const form = document.getElementById('loginForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const termsCheck = document.getElementById('termsCheck');
+
+            phoneInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.startsWith('0')) {
+                    value = value.substring(1);
+                }
+                if (value.length > 10) {
+                    value = value.substring(0, 10);
+                }
+                e.target.value = value;
+                updateSubmitButton();
+            });
+
+            termsCheck.addEventListener('change', updateSubmitButton);
+
+            function updateSubmitButton() {
+                const phoneValid = phoneInput.value.length === 10;
+                const termsAccepted = termsCheck.checked;
+
+                if (phoneValid && termsAccepted) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('btn-secondary');
+                    submitBtn.classList.add('btn-custom');
+                } else {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.remove('btn-custom');
+                    submitBtn.classList.add('btn-secondary');
+                }
+            }
+
+            form.addEventListener('submit', function(e) {
+                if (!phoneInput.value || phoneInput.value.length !== 10) {
+                    e.preventDefault();
+                    showMessage('@Localizer["EnterValidPhone"]', 'warning');
+                    return;
+                }
+
+                if (!termsCheck.checked) {
+                    e.preventDefault();
+                    showMessage('@Localizer["AcceptTermsRequired"]', 'warning');
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>@Localizer["Processing"]';
+            });
+
+            updateSubmitButton();
+        });
+
+        function fillDemoNumber(number) {
+            const phoneInput = document.getElementById('phoneInput');
+            const termsCheck = document.getElementById('termsCheck');
+            phoneInput.value = number;
+            termsCheck.checked = true;
+            const event = new Event('input');
+            phoneInput.dispatchEvent(event);
+            const changeEvent = new Event('change');
+            termsCheck.dispatchEvent(changeEvent);
+            phoneInput.focus();
+            showMessage(`@Localizer["DemoNumberFilled"]: +964${number}`, 'info');
+        }
+
+        function showMessage(message, type) {
+            const existingAlerts = document.querySelectorAll('.alert.temp-alert');
+            existingAlerts.forEach(alert => alert.remove());
+
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'warning' ? 'warning' : type === 'info' ? 'info' : 'danger'} alert-dismissible fade show temp-alert`;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.maxWidth = '400px';
+
+            const iconClass = {
+                'warning': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle',
+                'error': 'fa-exclamation-circle'
+            };
+
+            alertDiv.innerHTML = `
+                <i class="fas ${iconClass[type]} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(alertDiv);
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 4000);
+        }
+    </script>
+}

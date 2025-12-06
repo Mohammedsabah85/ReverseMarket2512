@@ -1,0 +1,135 @@
+﻿@model CreateCategoryViewModel
+@{
+    ViewData["Title"] = "إضافة فئة جديدة";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>إضافة فئة جديدة</h3>
+    <a href="/Admin/Categories" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-right me-2"></i>
+        العودة للقائمة
+    </a>
+</div>
+
+<div class="card-admin">
+    <div class="card-body">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <!-- Basic Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="text-primary mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        المعلومات الأساسية
+                    </h5>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">اسم الفئة *</label>
+                        <input asp-for="Name" class="form-control" placeholder="أدخل اسم الفئة" required>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">حالة الفئة</label>
+                        <div class="form-check">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" checked>
+                            <label asp-for="IsActive" class="form-check-label">
+                                نشطة
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">وصف الفئة</label>
+                        <textarea asp-for="Description" class="form-control" rows="3"
+                                  placeholder="وصف اختياري للفئة..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Image Upload -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="text-primary mb-3">
+                        <i class="fas fa-image me-2"></i>
+                        صورة الفئة
+                    </h5>
+                </div>
+
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label asp-for="Image" class="form-label">صورة الفئة</label>
+                        <input asp-for="Image" type="file" class="form-control" accept="image/*"
+                               onchange="previewCategoryImage(this)">
+                        <div class="form-text">اختياري - اختر صورة تمثل الفئة (PNG, JPG, GIF - الحد الأقصى 2 ميجابايت)</div>
+                        <span asp-validation-for="Image" class="text-danger"></span>
+                    </div>
+
+                    <div id="categoryImagePreview" class="mt-3" style="display: none;">
+                        <img id="categoryPreview" class="img-thumbnail" style="max-height: 200px;" alt="معاينة صورة الفئة">
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="/Admin/Categories" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>
+                    إلغاء
+                </a>
+                <button type="submit" class="btn btn-admin">
+                    <i class="fas fa-save me-2"></i>
+                    حفظ الفئة
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewCategoryImage(input) {
+            const preview = document.getElementById('categoryPreview');
+            const previewContainer = document.getElementById('categoryImagePreview');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Check file size (2MB limit)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('حجم الصورة كبير جداً. يجب أن يكون أقل من 2 ميجابايت');
+                    input.value = '';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+
+                // Check file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('نوع الملف غير مدعوم. يرجى اختيار صورة (JPG, PNG, GIF)');
+                    input.value = '';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        }
+    </script>
+}

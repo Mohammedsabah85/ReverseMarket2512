@@ -1,0 +1,41 @@
+﻿@using ReverseMarket.SignalR;
+@model List<ChatMessage>
+
+@{
+    var request = Context.Request;
+    var currentUser = ViewBag.CurrentUser as string ?? User.Identity.Name;
+}
+@foreach (var msg in Model)
+{
+    var isFile = msg.Message == "[File]" && !string.IsNullOrEmpty(msg.FilePath);
+    var time = msg.SentAt.ToShortTimeString();
+    var isSender = string.Equals(msg.SenderId?.Trim(), currentUser?.Trim(), StringComparison.OrdinalIgnoreCase);
+
+    <div class="message @(isSender ? "sender" : "receiver")" data-message-id="@msg.Id">
+        <div class="message-content">
+            @if (isFile)
+            {
+                var ext = (msg.FileType ?? "").ToLower();
+                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
+                {
+                    <img src="@msg.FilePath" />
+                }
+                else if (ext == ".pdf" || ext == ".doc" || ext == ".docx")
+                {
+                    var fileUrl = $"{request.Scheme}://{request.Host}{msg.FilePath}";
+                    var viewerUrl = $"https://docs.google.com/gview?url={fileUrl}&embedded=true";
+                    <iframe src="@viewerUrl" style="width:400px; height:300px;" frameborder="0"></iframe>
+                }
+                else
+                {
+                    <a href="@msg.FilePath" target="_blank" download>Download file</a>
+                }
+            }
+            else
+            {
+                @msg.Message
+            }
+        </div>
+        <small class="time">@time</small>
+    </div>
+}

@@ -1,0 +1,312 @@
+﻿@using Microsoft.Extensions.Localization
+@using ReverseMarket.Resources
+@inject IStringLocalizer<SharedResource> Localizer
+@inject ReverseMarket.Services.ILanguageService LanguageService
+@model HomeViewModel
+@{
+    ViewData["Title"] = Localizer["Home"];
+    var currentLang = LanguageService.GetCurrentLanguage();
+}
+
+<!-- Advertisements Slider Section -->
+@if (Model.Advertisements != null && Model.Advertisements.Any())
+{
+    <section class="advertisements-section">
+        <div class="container">
+            <div id="advertisementsCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+
+                <!-- Indicators -->
+                <div class="carousel-indicators">
+                    @for (int i = 0; i < Model.Advertisements.Count; i++)
+                    {
+                        <button type="button"
+                                data-bs-target="#advertisementsCarousel"
+                                data-bs-slide-to="@i"
+                                class="@(i == 0 ? "active" : "")"
+                                aria-current="@(i == 0 ? "true" : "false")"
+                                aria-label="@Localizer["Advertisement"] @(i + 1)">
+                        </button>
+                    }
+                </div>
+
+                <!-- Slides -->
+                <div class="carousel-inner">
+                    @for (int i = 0; i < Model.Advertisements.Count; i++)
+                    {
+                        var ad = Model.Advertisements[i];
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            @if (!string.IsNullOrEmpty(ad.LinkUrl))
+                            {
+                                <a href="@ad.LinkUrl" target="_blank">
+                                    <img src="@ad.ImagePath"
+                                         class="d-block w-100 advertisement-image"
+                                         alt="@ad.Title"
+                                         onerror="this.onerror=null; this.src='/images/placeholder-ad.png';">
+                                </a>
+                            }
+                            else
+                            {
+                                <img src="@ad.ImagePath"
+                                     class="d-block w-100 advertisement-image"
+                                     alt="@ad.Title"
+                                     onerror="this.onerror=null; this.src='/images/placeholder-ad.png';">
+                            }
+
+                            @if (!string.IsNullOrEmpty(ad.Title) || !string.IsNullOrEmpty(ad.Description))
+                            {
+                                <div class="carousel-caption d-none d-md-block">
+                                    @if (!string.IsNullOrEmpty(ad.Title))
+                                    {
+                                        <h5>@ad.Title</h5>
+                                    }
+                                    @if (!string.IsNullOrEmpty(ad.Description))
+                                    {
+                                        <p>@ad.Description</p>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Controls -->
+                @if (Model.Advertisements.Count > 1)
+                {
+                    <button class="carousel-control-prev" type="button"
+                            data-bs-target="#advertisementsCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">@Localizer["Previous"]</span>
+                    </button>
+                    <button class="carousel-control-next" type="button"
+                            data-bs-target="#advertisementsCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">@Localizer["Next"]</span>
+                    </button>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1>@Localizer["Welcome"]</h1>
+        <p>@Localizer["WelcomeMessage"]</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="/Requests/Create" class="btn-custom">@Localizer["AddRequestNow"]</a>
+            <a href="/Requests" class="btn-outline-custom">@Localizer["BrowseRequests"]</a>
+        </div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="search-section">
+    <div class="container">
+        <form class="search-form" method="get" action="/Requests">
+            <div class="flex-grow-1">
+                <input type="text" name="search" class="form-control" placeholder="@Localizer["SearchPlaceholder"]">
+            </div>
+            <div>
+                <select name="categoryId" class="form-control">
+                    <option value="">@Localizer["AllCategories"]</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-custom">
+                    <i class="fas fa-search me-1"></i>
+                    @Localizer["Search"]
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="section-title">
+            <h2>@Localizer["BestCategories"]</h2>
+            <p>@Localizer["BestCategoriesSubtitle"]</p>
+        </div>
+
+        <div class="cards-grid">
+            @foreach (var category in Model.Categories.Take(8))
+            {
+              @*   <div class="col-lg-3 col-md-4 col-sm-6"> *@
+                    <a href="/Requests?categoryId=@category.Id" class="text-decoration-none">
+                        <div class="category-card">
+                            <div class="category-image-container">
+                                @if (!string.IsNullOrEmpty(category.ImagePath))
+                                {
+                                    <img src="@category.ImagePath" alt="@category.Name" class="category-image">
+                                }
+                                else
+                                {
+                                    <div class="category-placeholder">
+                                        <i class="fas fa-tags"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="category-content">
+                                <h5>@category.Name</h5>
+                                @if (!string.IsNullOrEmpty(category.Description))
+                                {
+                                    <p class="text-muted">@(category.Description.Length > 60 ? category.Description.Substring(0, 60) + "..." : category.Description)</p>
+                                }
+                                else
+                                {
+                                    <p class="text-muted">@Localizer["DiscoverProducts"]</p>
+                                }
+                            </div>
+                        </div>
+                    </a>
+               @*  </div> *@
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Recent Requests Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="section-title">
+            <h2>@Localizer["RecentRequests"]</h2>
+            <p>@Localizer["RecentRequestsSubtitle"]</p>
+        </div>
+
+        @if (Model.RecentRequests.Any())
+        {
+            <div class="cards-grid">
+                @foreach (var request in Model.RecentRequests.Take(6))
+                {
+                    @* <div class="col-lg-4 col-md-6"> *@
+                        <div class="request-card">
+                            @if (request.Images.Any())
+                            {
+                                <img src="@request.Images.First().ImagePath" alt="@request.Title">
+                            }
+                            else
+                            {
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                            }
+                        <div class="request-card-body">
+                            <span class="badge-custom">@request.Category.Name</span>
+                            <h6 class="mt-2">@request.Title</h6>
+                            <p class="text-muted small">@request.City - @request.District</p>
+                            <p class="text-muted">
+                                @(request.Description.Length > 80 ?
+                                                            request.Description.Substring(0, 80) + "..." :
+                                                            request.Description)
+                        </p>
+                        <a href="/Requests/Details/@request.Id" class="btn btn-outline-custom btn-sm">@Localizer["ViewDetails"]</a>
+                    </div>
+                </div>
+           @*  </div> *@
+                        }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">@Localizer["NoRecentRequests"]</h5>
+                <p class="text-muted">@Localizer["BeFirstToAddRequest"]</p>
+                <a href="/Requests/Create" class="btn btn-custom">
+                    <i class="fas fa-plus me-2"></i>
+                    @Localizer["AddFirstRequest"]
+                </a>
+            </div>
+        }
+
+        @if (Model.RecentRequests.Any())
+        {
+            <div class="text-center mt-4">
+                <a href="/Requests" class="btn btn-custom">@Localizer["ViewAllRequests"]</a>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="section-title">
+            <h2>@Localizer["HowItWorks"]</h2>
+            <p>@Localizer["HowItWorksSubtitle"]</p>
+        </div>
+
+        <div class="cards-grid">
+           @*  <div class="col-lg-3 col-md-6"> *@
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h5>@Localizer["Step1Title"]</h5>
+                    <p>@Localizer["Step1Description"]</p>
+               @*  </div> *@
+            </div>
+           @*  <div class="col-lg-3 col-md-6"> *@
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h5>@Localizer["Step2Title"]</h5>
+                    <p>@Localizer["Step2Description"]</p>
+              @*   </div> *@
+            </div>
+          @*   <div class="col-lg-3 col-md-6"> *@
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h5>@Localizer["Step3Title"]</h5>
+                    <p>@Localizer["Step3Description"]</p>
+                </div>
+         @*    </div> *@
+           @*  <div class="col-lg-3 col-md-6"> *@
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h5>@Localizer["Step4Title"]</h5>
+                    <p>@Localizer["Step4Description"]</p>
+                </div>
+           @*  </div> *@
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // فحص الإعلانات بعد تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 فحص الإعلانات...');
+
+            const carousel = document.getElementById('advertisementsCarousel');
+            if (carousel) {
+                console.log('✅ Carousel موجود');
+
+                const items = carousel.querySelectorAll('.carousel-item');
+                console.log(`📊 عدد الشرائح: ${items.length}`);
+
+                items.forEach((item, i) => {
+                    const img = item.querySelector('img');
+                    if (img) {
+                        const isLoaded = img.complete && img.naturalHeight !== 0;
+                        console.log(`${isLoaded ? '✅' : '⏳'} صورة ${i+1}: ${img.src}`);
+
+                        // التحقق من التحميل
+                        img.addEventListener('load', function() {
+                            console.log(`✅ تم تحميل الصورة ${i+1}`);
+                        });
+
+                        img.addEventListener('error', function() {
+                            console.error(`❌ فشل تحميل الصورة ${i+1}: ${this.src}`);
+                        });
+                    }
+                });
+            } else {
+                console.error('❌ Carousel غير موجود!');
+            }
+        });
+    </script>
+}

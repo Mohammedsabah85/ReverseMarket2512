@@ -1,0 +1,382 @@
+/* ===================================
+   إصلاحات شاملة للموبايل
+   =================================== */
+
+/* إصلاح شريط التنقل الرئيسي */
+@media (max-width: 991.98px) {
+    /* تحسين زر القائمة */
+    .navbar-toggler {
+        border: none !important;
+        padding: 0.5rem;
+        font-size: 1.25rem;
+        background: transparent;
+        box-shadow: none !important;
+    }
+    
+    .navbar-toggler:focus {
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+        width: 1.5em;
+        height: 1.5em;
+    }
+    
+    /* تحسين القائمة المنسدلة */
+    .navbar-collapse {
+        background: #fff;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-top: 0.5rem;
+        padding: 1rem;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .navbar-nav {
+        width: 100%;
+    }
+    
+    .navbar-nav .nav-item {
+        margin-bottom: 0.5rem;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        color: #495057 !important;
+        font-weight: 500;
+    }
+    
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link:focus {
+        background-color: #f8f9fa;
+        color: #007bff !important;
+        transform: translateX(5px);
+    }
+    
+    .navbar-nav .nav-link.active {
+        background-color: #007bff;
+        color: #fff !important;
+    }
+    
+    /* تحسين قائمة اللغات */
+    .language-selector {
+        margin-bottom: 1rem;
+    }
+    
+    .language-dropdown {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 0.75rem 1rem !important;
+        width: 100%;
+        text-align: right;
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .language-dropdown:hover {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+    }
+    
+    .language-dropdown::after {
+        margin-left: 0 !important;
+        margin-right: auto;
+    }
+    
+    /* إصلاح قائمة اللغات المنسدلة */
+    .language-selector .dropdown-menu {
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        margin-top: 0.5rem;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        z-index: 1050 !important;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .language-form {
+        width: 100%;
+        margin: 0;
+    }
+    
+    .language-form button {
+        width: 100% !important;
+        text-align: right !important;
+        padding: 0.75rem 1rem !important;
+        border: none !important;
+        background: none !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .language-form button:last-child {
+        border-bottom: none;
+    }
+    
+    .language-form button:hover,
+    .language-form button:focus {
+        background-color: #f8f9fa !important;
+        color: #007bff !important;
+    }
+    
+    .language-form button.active {
+        background-color: #e3f2fd !important;
+        color: #1976d2 !important;
+    }
+    
+    /* تحسين قائمة المستخدم */
+    .user-dropdown {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 0.75rem 1rem !important;
+        width: 100%;
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .user-dropdown:hover {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+    }
+    
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-left: 0.5rem;
+    }
+    
+    /* إصلاح قائمة المستخدم المنسدلة */
+    .user-dropdown + .dropdown-menu {
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        margin-top: 0.5rem;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        z-index: 1050 !important;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .dropdown-item {
+        padding: 0.75rem 1rem !important;
+        border-bottom: 1px solid #f8f9fa;
+        display: flex !important;
+        align-items: center;
+        color: #495057 !important;
+        text-decoration: none !important;
+    }
+    
+    .dropdown-item:last-child {
+        border-bottom: none;
+    }
+    
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+        background-color: #f8f9fa !important;
+        color: #007bff !important;
+    }
+    
+    .dropdown-item i {
+        margin-left: 0.5rem;
+        width: 20px;
+        text-align: center;
+    }
+    
+    /* تحسين جرس الإشعارات */
+    .notification-bell {
+        position: relative;
+        padding: 0.75rem 1rem !important;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        color: #495057 !important;
+        text-decoration: none !important;
+        transition: all 0.3s ease;
+    }
+    
+    .notification-bell:hover,
+    .notification-bell:focus {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+        color: #007bff !important;
+        text-decoration: none !important;
+    }
+    
+    .notification-bell .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        font-size: 0.7em;
+        padding: 0.25em 0.5em;
+    }
+    
+    /* إصلاح مشكلة التمرير */
+    body.modal-open {
+        overflow: hidden;
+    }
+    
+    /* تحسين الأزرار */
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+}
+
+/* تحسينات خاصة للشاشات الصغيرة جداً */
+@media (max-width: 576px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    .navbar-brand img {
+        height: 30px;
+    }
+    
+    /* تحسين عرض النصوص */
+    .nav-link span {
+        font-size: 0.9rem;
+    }
+    
+    /* تحسين المسافات */
+    .navbar-nav .nav-item {
+        margin-bottom: 0.25rem;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* تحسين قوائم الإشعارات */
+    .notification-dropdown {
+        max-width: 100vw !important;
+        left: 0 !important;
+        right: 0 !important;
+        margin: 0 10px;
+        border-radius: 15px;
+    }
+}
+
+/* إصلاح مشكلة z-index */
+.dropdown-menu {
+    z-index: 1050 !important;
+}
+
+.modal {
+    z-index: 1055 !important;
+}
+
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+/* تحسين التفاعل مع اللمس */
+.nav-link,
+.dropdown-item,
+.btn {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* تحسين الأنيميشن */
+.navbar-collapse {
+    transition: all 0.3s ease;
+}
+
+.dropdown-menu {
+    transition: all 0.3s ease;
+}
+
+/* إصلاح مشكلة الخطوط */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    .navbar {
+        font-size: 14px;
+    }
+    
+    .dropdown-item {
+        font-size: 14px;
+    }
+}
+
+/* تحسين الألوان للوضع المظلم */
+@media (prefers-color-scheme: dark) {
+    .navbar-collapse {
+        background: #2d3748;
+        color: #fff;
+    }
+    
+    .nav-link {
+        color: #e2e8f0 !important;
+    }
+    
+    .nav-link:hover {
+        color: #63b3ed !important;
+        background-color: #4a5568;
+    }
+    
+    .dropdown-menu {
+        background-color: #2d3748;
+        border-color: #4a5568;
+    }
+    
+    .dropdown-item {
+        color: #e2e8f0 !important;
+    }
+    
+    .dropdown-item:hover {
+        background-color: #4a5568 !important;
+        color: #63b3ed !important;
+    }
+}

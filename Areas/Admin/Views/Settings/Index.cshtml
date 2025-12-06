@@ -1,0 +1,358 @@
+@model SiteSettings
+@{
+    ViewData["Title"] = "إعدادات الموقع";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>إعدادات الموقع</h3>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card-admin">
+    <div class="card-body">
+        <form asp-action="Index" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs mb-4" id="settingsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button">
+                        <i class="fas fa-cog me-2"></i>إعدادات عامة
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about" type="button">
+                        <i class="fas fa-info-circle me-2"></i>من نحن
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button">
+                        <i class="fas fa-phone me-2"></i>معلومات التواصل
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="legal-tab" data-bs-toggle="tab" data-bs-target="#legal" type="button">
+                        <i class="fas fa-gavel me-2"></i>الصفحات القانونية
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="settingsTabContent">
+                <!-- General Settings -->
+                <div class="tab-pane fade show active" id="general" role="tabpanel">
+                    <h5 class="text-primary mb-3"><i class="fas fa-image me-2"></i>شعار الموقع</h5>
+                    
+                    @if (!string.IsNullOrEmpty(Model.SiteLogo))
+                    {
+                        <div class="mb-3">
+                            <img src="@Model.SiteLogo" alt="شعار الموقع" style="max-height: 100px;" class="img-thumbnail">
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label for="logoFile" class="form-label">تحديث الشعار</label>
+                        <input type="file" name="logoFile" id="logoFile" class="form-control" accept="image/*">
+                        <div class="form-text">اختر ملف صورة للشعار (PNG, JPG, GIF)</div>
+                    </div>
+                </div>
+
+                <!-- About Us -->
+                <div class="tab-pane fade" id="about" role="tabpanel">
+                    <h5 class="text-primary mb-3"><i class="fas fa-info-circle me-2"></i>من نحن</h5>
+                    
+                    <!-- Arabic -->
+                    <div class="mb-3">
+                        <label asp-for="AboutUs" class="form-label">
+                            من نحن (عربي) <span class="flag-icon">🇮🇶</span>
+                        </label>
+                        <textarea asp-for="AboutUs" class="form-control" rows="5"
+                                  placeholder="اكتب نبذة عن الموقع والخدمات التي يقدمها..."></textarea>
+                        <span asp-validation-for="AboutUs" class="text-danger"></span>
+                    </div>
+
+                    <!-- English -->
+                    <div class="mb-3">
+                        <label asp-for="AboutUsEn" class="form-label">
+                            About Us (English) <span class="flag-icon">🇬🇧</span>
+                        </label>
+                        <textarea asp-for="AboutUsEn" class="form-control" rows="5"
+                                  placeholder="Write about the site and services..."></textarea>
+                        <span asp-validation-for="AboutUsEn" class="text-danger"></span>
+                    </div>
+
+                    <!-- Kurdish -->
+                    <div class="mb-3">
+                        <label asp-for="AboutUsKu" class="form-label">
+                            دەربارەی ئێمە (کوردی) <span class="flag-icon">🏴</span>
+                        </label>
+                        <textarea asp-for="AboutUsKu" class="form-control" rows="5"
+                                  placeholder="باسی ماڵپەڕەکە و خزمەتگوزاریەکان بکە..."></textarea>
+                        <span asp-validation-for="AboutUsKu" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="tab-pane fade" id="contact" role="tabpanel">
+                    <h5 class="text-primary mb-3"><i class="fas fa-phone me-2"></i>معلومات التواصل</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label asp-for="ContactPhone" class="form-label">رقم الهاتف</label>
+                                <input asp-for="ContactPhone" class="form-control" placeholder="+964 770 123 4567">
+                                <span asp-validation-for="ContactPhone" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label asp-for="ContactWhatsApp" class="form-label">رقم واتساب</label>
+                                <input asp-for="ContactWhatsApp" class="form-control" placeholder="+964 770 123 4567">
+                                <span asp-validation-for="ContactWhatsApp" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label asp-for="ContactEmail" class="form-label">البريد الإلكتروني</label>
+                                <input asp-for="ContactEmail" type="email" class="form-control" placeholder="info@reversemarket.iq">
+                                <span asp-validation-for="ContactEmail" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h5 class="text-primary mb-3"><i class="fas fa-share-alt me-2"></i>روابط التواصل الاجتماعي</h5>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="FacebookUrl" class="form-label">
+                                    <i class="fab fa-facebook text-primary me-1"></i>فيسبوك
+                                </label>
+                                <input asp-for="FacebookUrl" class="form-control" placeholder="https://facebook.com/yourpage">
+                                <span asp-validation-for="FacebookUrl" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="InstagramUrl" class="form-label">
+                                    <i class="fab fa-instagram text-danger me-1"></i>إنستغرام
+                                </label>
+                                <input asp-for="InstagramUrl" class="form-control" placeholder="https://instagram.com/yourpage">
+                                <span asp-validation-for="InstagramUrl" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="TwitterUrl" class="form-label">
+                                    <i class="fab fa-twitter text-info me-1"></i>تويتر
+                                </label>
+                                <input asp-for="TwitterUrl" class="form-control" placeholder="https://twitter.com/yourpage">
+                                <span asp-validation-for="TwitterUrl" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="YouTubeUrl" class="form-label">
+                                    <i class="fab fa-youtube text-danger me-1"></i>يوتيوب
+                                </label>
+                                <input asp-for="YouTubeUrl" class="form-control" placeholder="https://youtube.com/yourchannel">
+                                <span asp-validation-for="YouTubeUrl" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legal Pages -->
+                <div class="tab-pane fade" id="legal" role="tabpanel">
+                    <!-- Privacy Policy -->
+                    <h5 class="text-primary mb-3"><i class="fas fa-shield-alt me-2"></i>سياسة الخصوصية</h5>
+                    
+                    <div class="mb-3">
+                        <label asp-for="PrivacyPolicy" class="form-label">سياسة الخصوصية (عربي) 🇮🇶</label>
+                        <textarea asp-for="PrivacyPolicy" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="PrivacyPolicy" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PrivacyPolicyEn" class="form-label">Privacy Policy (English) 🇬🇧</label>
+                        <textarea asp-for="PrivacyPolicyEn" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="PrivacyPolicyEn" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PrivacyPolicyKu" class="form-label">سیاسەتی تایبەتێتی (کوردی) 🏴</label>
+                        <textarea asp-for="PrivacyPolicyKu" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="PrivacyPolicyKu" class="text-danger"></span>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Terms of Use -->
+                    <h5 class="text-primary mb-3"><i class="fas fa-file-contract me-2"></i>شروط الاستخدام</h5>
+                    
+                    <div class="mb-3">
+                        <label asp-for="TermsOfUse" class="form-label">شروط الاستخدام (عربي) 🇮🇶</label>
+                        <textarea asp-for="TermsOfUse" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="TermsOfUse" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="TermsOfUseEn" class="form-label">Terms of Use (English) 🇬🇧</label>
+                        <textarea asp-for="TermsOfUseEn" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="TermsOfUseEn" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="TermsOfUseKu" class="form-label">مەرجەکانی بەکارهێنان (کوردی) 🏴</label>
+                        <textarea asp-for="TermsOfUseKu" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="TermsOfUseKu" class="text-danger"></span>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Copyright Info -->
+                    <h5 class="text-primary mb-3"><i class="fas fa-copyright me-2"></i>معلومات حقوق الطبع</h5>
+                    
+                    <div class="mb-3">
+                        <label asp-for="CopyrightInfo" class="form-label">حقوق الطبع (عربي) 🇮🇶</label>
+                        <input asp-for="CopyrightInfo" class="form-control" placeholder="© 2024 السوق العكسي. جميع الحقوق محفوظة.">
+                        <span asp-validation-for="CopyrightInfo" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CopyrightInfoEn" class="form-label">Copyright Info (English) 🇬🇧</label>
+                        <input asp-for="CopyrightInfoEn" class="form-control" placeholder="© 2024 Reverse Market. All rights reserved.">
+                        <span asp-validation-for="CopyrightInfoEn" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CopyrightInfoKu" class="form-label">زانیاری مافی چاپ (کوردی) 🏴</label>
+                        <input asp-for="CopyrightInfoKu" class="form-control" placeholder="© 2024 بازاڕی پێچەوانە. هەموو مافەکان پارێزراون.">
+                        <span asp-validation-for="CopyrightInfoKu" class="text-danger"></span>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Intellectual Property -->
+                    <h5 class="text-primary mb-3"><i class="fas fa-balance-scale me-2"></i>الملكية الفكرية</h5>
+                    
+                    <div class="mb-3">
+                        <label asp-for="IntellectualProperty" class="form-label">الملكية الفكرية (عربي) 🇮🇶</label>
+                        <textarea asp-for="IntellectualProperty" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="IntellectualProperty" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="IntellectualPropertyEn" class="form-label">Intellectual Property (English) 🇬🇧</label>
+                        <textarea asp-for="IntellectualPropertyEn" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="IntellectualPropertyEn" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="IntellectualPropertyKu" class="form-label">موڵکی زیهنی (کوردی) 🏴</label>
+                        <textarea asp-for="IntellectualPropertyKu" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="IntellectualPropertyKu" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-admin btn-lg">
+                    <i class="fas fa-save me-2"></i>
+                    حفظ جميع الإعدادات
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Image preview for logo
+        document.getElementById('logoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let preview = document.getElementById('logoPreview');
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.id = 'logoPreview';
+                        preview.className = 'img-thumbnail mt-2';
+                        preview.style.maxHeight = '100px';
+                        document.getElementById('logoFile').parentNode.appendChild(preview);
+                    }
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Save scroll position on tab change
+        document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(button => {
+            button.addEventListener('shown.bs.tab', function (event) {
+                localStorage.setItem('activeTab', event.target.id);
+            });
+        });
+
+        // Restore active tab on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const activeTab = localStorage.getItem('activeTab');
+            if (activeTab) {
+                const tabButton = document.getElementById(activeTab);
+                if (tabButton) {
+                    const tab = new bootstrap.Tab(tabButton);
+                    tab.show();
+                }
+            }
+        });
+    </script>
+}
+
+<style>
+    .flag-icon {
+        font-size: 1.2em;
+        margin-left: 5px;
+    }
+
+    .nav-tabs .nav-link {
+        color: #495057;
+        border: none;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+
+    .nav-tabs .nav-link:hover {
+        border-bottom-color: #b3962d;
+        background-color: transparent;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #b3962d;
+        font-weight: 600;
+        border-bottom-color: #b3962d;
+        background-color: transparent;
+    }
+
+    .tab-content {
+        padding-top: 1.5rem;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+    }
+</style>

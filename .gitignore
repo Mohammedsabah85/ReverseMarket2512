@@ -1,0 +1,12 @@
+.vs/
+bin/
+obj/
+node_modules/
+*.log
+*.db
+*.sqlite
+*.mdf
+*.ldf
+artifacts/
+appsettings.Local.json
+appsettings.Development.json

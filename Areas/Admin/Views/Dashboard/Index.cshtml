@@ -1,0 +1,176 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "لوحة التحكم الرئيسية";
+}
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <i class="fas fa-users fa-2x mb-3"></i>
+            <h3>@Model.TotalUsers</h3>
+            <p>إجمالي المستخدمين</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-success">
+            <i class="fas fa-list-alt fa-2x mb-3"></i>
+            <h3>@Model.TotalRequests</h3>
+            <p>إجمالي الطلبات</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-warning">
+            <i class="fas fa-clock fa-2x mb-3"></i>
+            <h3>@Model.PendingRequests</h3>
+            <p>طلبات في الانتظار</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-info">
+            <i class="fas fa-store fa-2x mb-3"></i>
+            <h3>@Model.TotalStores</h3>
+            <p>المتاجر المسجلة</p>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Requests -->
+<div class="card-admin">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-list me-2"></i>
+            أحدث الطلبات
+        </h5>
+        <a href="/Admin/Requests" class="btn btn-admin btn-sm">عرض الكل</a>
+    </div>
+    <div class="card-body">
+        @if (Model.RecentRequests.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-admin">
+                    <thead>
+                        <tr>
+                            <th>العنوان</th>
+                            <th>العميل</th>
+                            <th>الفئة</th>
+                            <th>الحالة</th>
+                            <th>التاريخ</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in Model.RecentRequests)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@request.Title</strong>
+                                    @if (request.Description.Length > 50)
+                                    {
+                                        <br>
+                            
+                                        <small class="text-muted">@request.Description.Substring(0, 50)...</small>
+                                    }
+                                </td>
+                                <td>@request.User.FirstName @request.User.LastName</td>
+                                <td>
+                                    <span class="badge bg-primary">@request.Category.Name</span>
+                                </td>
+                                <td>
+                                    @switch (request.Status)
+                                    {
+                                        case RequestStatus.Pending:
+                                            <span class="badge bg-warning">في الانتظار</span>
+                                            break;
+                                        case RequestStatus.Approved:
+                                            <span class="badge bg-success">معتمد</span>
+                                            break;
+                                        case RequestStatus.Rejected:
+                                            <span class="badge bg-danger">مرفوض</span>
+                                            break;
+                                        case RequestStatus.Postponed:
+                                            <span class="badge bg-secondary">مؤجل</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@request.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <a href="/Admin/Requests/Details/@request.Id" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-4">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <p class="text-muted">لا توجد طلبات حديثة</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card-admin">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightning-bolt me-2"></i>
+                    إجراءات سريعة
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="/Admin/Requests?status=1" class="btn btn-warning">
+                        <i class="fas fa-clock me-2"></i>
+                        مراجعة الطلبات المعلقة (@Model.PendingRequests)
+                    </a>
+                    <a href="/Admin/Stores" class="btn btn-info">
+                        <i class="fas fa-store me-2"></i>
+                        إدارة المتاجر
+                    </a>
+                    <a href="/Admin/Categories/Create" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>
+                        إضافة فئة جديدة
+                    </a>
+                    <a href="/Admin/Advertisements/Create" class="btn btn-success">
+                        <i class="fas fa-ad me-2"></i>
+                        إضافة إعلان جديد
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card-admin">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    إحصائيات سريعة
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h4 class="text-primary">@Model.TotalCategories</h4>
+                            <small class="text-muted">الفئات المتاحة</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h4 class="text-success">@((Model.TotalRequests > 0 ? (double)Model.PendingRequests / Model.TotalRequests * 100 : 0).ToString("F1"))%</h4>
+                            <small class="text-muted">نسبة الطلبات المعلقة</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

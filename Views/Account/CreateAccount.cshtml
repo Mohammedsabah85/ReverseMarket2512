@@ -1,0 +1,594 @@
+﻿@model CreateAccountViewModel
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["CreateNewAccount"];
+}
+
+<div class="container-custom">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Progress Bar -->
+            <div class="card-custom mb-4">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="progress-step completed">
+                        <div class="step-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <span>@Localizer["PhoneVerification"]</span>
+                    </div>
+                    <div class="progress-line completed"></div>
+                    <div class="progress-step active">
+                        <div class="step-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span>@Localizer["CreateAccount"]</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step">
+                        <div class="step-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <span>@Localizer["Complete"]</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                    <h1 class="h3 text-primary">@Localizer["CreateNewAccount"]</h1>
+                    <p class="text-muted">@Localizer["CompleteYourData"]</p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        @Localizer["VerifiedPhoneNumber"]: <strong>@ViewBag.PhoneNumber</strong>
+                    </div>
+                </div>
+
+                <form asp-action="CreateAccount" method="post" enctype="multipart/form-data" id="createAccountForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Personal Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-user me-2"></i>
+                            @Localizer["PersonalInformation"]
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label">@Localizer["FirstName"] *</label>
+                                <input asp-for="FirstName" class="form-control" required>
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label">@Localizer["LastName"] *</label>
+                                <input asp-for="LastName" class="form-control" required>
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="DateOfBirth" class="form-label">@Localizer["DateOfBirth"] *</label>
+                                <input asp-for="DateOfBirth" type="date" class="form-control" required>
+                                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Gender" class="form-label">@Localizer["Gender"] *</label>
+                                <select asp-for="Gender" class="form-control" required>
+                                    <option value="">@Localizer["SelectGender"]</option>
+                                    <option value="Male">@Localizer["Male"]</option>
+                                    <option value="Female">@Localizer["Female"]</option>
+                                </select>
+                                <span asp-validation-for="Gender" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Email" class="form-label">@Localizer["Email"]</label>
+                                <input asp-for="Email" type="email" class="form-control" placeholder="@Localizer["Optional"]">
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            @Localizer["LocationInfo"]
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="City" class="form-label">@Localizer["City"] *</label>
+                                <select asp-for="City" class="form-control" required>
+                                    <option value="">@Localizer["SelectCity"]</option>
+                                    <option value="Baghdad">@Localizer["Baghdad"]</option>
+                                    <option value="Basra">@Localizer["Basra"]</option>
+                                    <option value="Erbil">@Localizer["Erbil"]</option>
+                                    <option value="Najaf">@Localizer["Najaf"]</option>
+                                    <option value="Karbala">@Localizer["Karbala"]</option>
+                                    <option value="Mosul">@Localizer["Mosul"]</option>
+                                    <option value="Sulaymaniyah">@Localizer["Sulaymaniyah"]</option>
+                                    <option value="Babylon">@Localizer["Babylon"]</option>
+                                    <option value="Dohuk">@Localizer["Dohuk"]</option>
+                                    <option value="Kirkuk">@Localizer["Kirkuk"]</option>
+                                    <option value="Anbar">@Localizer["Anbar"]</option>
+                                    <option value="Diyala">@Localizer["Diyala"]</option>
+                                    <option value="Saladin">@Localizer["Saladin"]</option>
+                                    <option value="Wasit">@Localizer["Wasit"]</option>
+                                    <option value="ThiQar">@Localizer["ThiQar"]</option>
+                                    <option value="Muthanna">@Localizer["Muthanna"]</option>
+                                    <option value="Qadisiyyah">@Localizer["Qadisiyyah"]</option>
+                                    <option value="Maysan">@Localizer["Maysan"]</option>
+                                </select>
+                                <span asp-validation-for="City" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="District" class="form-label">@Localizer["District"] *</label>
+                                <input asp-for="District" class="form-control" placeholder="@Localizer["DistrictExample"]" required>
+                                <span asp-validation-for="District" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Location" class="form-label">@Localizer["DetailedAddress"]</label>
+                                <input asp-for="Location" class="form-control" placeholder="@Localizer["AddressOptional"]">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Type -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-user-tag me-2"></i>
+                            @Localizer["AccountType"]
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="account-type-card" data-type="1">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-shopping-cart fa-3x text-primary mb-3"></i>
+                                        <h5>@Localizer["Buyer"]</h5>
+                                        <p class="text-muted">@Localizer["BuyerDescription"]</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="account-type-card" data-type="2">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-store fa-3x text-success mb-3"></i>
+                                        <h5>@Localizer["Seller"]</h5>
+                                        <p class="text-muted">@Localizer["SellerDescription"]</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <input asp-for="UserType" type="hidden" id="userTypeInput">
+                        <span asp-validation-for="UserType" class="text-danger"></span>
+                    </div>
+
+                    <!-- Store Information (for sellers) -->
+                    <div id="storeInfo" class="form-section" style="display: none;">
+                        <h5 class="section-title">
+                            <i class="fas fa-store me-2"></i>
+                            @Localizer["StoreInfo"]
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="StoreName" class="form-label">@Localizer["StoreName"] *</label>
+                                <input asp-for="StoreName" class="form-control" placeholder="@Localizer["YourStoreName"]">
+                                <span asp-validation-for="StoreName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>ملاحظة مهمة:</strong> يرجى اختيار التخصص الدقيق لمتجرك من الفئة الفرعية الثانية للحصول على طلبات أكثر دقة.
+                                </div>
+                            </div>
+
+                            <!-- Cascading Category Selection -->
+                            <div class="col-md-4">
+                                <label for="categorySelect" class="form-label">الفئة الأساسية *</label>
+                                <select id="categorySelect" class="form-control" required>
+                                    <option value="">اختر الفئة الأساسية</option>
+                                    @foreach (var category in ViewBag.Categories as List<Category>)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="subCategory1Select" class="form-label">الفئة الفرعية الأولى *</label>
+                                <select id="subCategory1Select" class="form-control" disabled required>
+                                    <option value="">اختر الفئة الفرعية الأولى</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="subCategory2Select" class="form-label">التخصص الدقيق *</label>
+                                <select id="subCategory2Select" class="form-control" disabled required multiple>
+                                    <option value="">اختر التخصص الدقيق</option>
+                                </select>
+                                <div class="form-text">يمكنك اختيار أكثر من تخصص (استخدم Ctrl للاختيار المتعدد)</div>
+                            </div>
+
+                            <!-- Hidden field to store selected SubCategory2 IDs -->
+                            <input type="hidden" asp-for="StoreCategories" id="storeCategoriesHidden" />
+                            <span asp-validation-for="StoreCategories" class="text-danger"></span>
+
+                            <div class="col-12" id="selectedCategoriesDisplay">
+                                <div class="alert alert-success" style="display: none;">
+                                    <strong>التخصصات المختارة:</strong>
+                                    <div id="selectedCategoriesList"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="StoreDescription" class="form-label">@Localizer["StoreDescription"]</label>
+                                <textarea asp-for="StoreDescription" class="form-control" rows="3"
+                                          placeholder="@Localizer["StoreDescriptionPlaceholder"]"></textarea>
+                                <span asp-validation-for="StoreDescription" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="WebsiteUrl1" class="form-label">@Localizer["WebsiteUrl1"]</label>
+                                <input asp-for="WebsiteUrl1" class="form-control" placeholder="https://example.com">
+                                <span asp-validation-for="WebsiteUrl1" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="WebsiteUrl2" class="form-label">@Localizer["WebsiteUrl2"]</label>
+                                <input asp-for="WebsiteUrl2" class="form-control" placeholder="https://facebook.com/yourstore">
+                                <span asp-validation-for="WebsiteUrl2" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="WebsiteUrl3" class="form-label">@Localizer["WebsiteUrl3"]</label>
+                                <input asp-for="WebsiteUrl3" class="form-control" placeholder="https://instagram.com/yourstore">
+                                <span asp-validation-for="WebsiteUrl3" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Image -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-camera me-2"></i>
+                            @Localizer["ProfileImage"]
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label asp-for="ProfileImage" class="form-label">@Localizer["SelectProfileImage"]</label>
+                                <input asp-for="ProfileImage" type="file" class="form-control" accept="image/*"
+                                       onchange="previewProfileImage(this)">
+                                <div class="form-text">@Localizer["ProfileImageNote"]</div>
+                                <span asp-validation-for="ProfileImage" class="text-danger"></span>
+
+                                <div id="imagePreview" class="mt-3" style="display: none;">
+                                    <img id="preview" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;" alt="@Localizer["ImagePreview"]">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Section -->
+                    <div class="form-section">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="/Account/Login" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-right me-2"></i>
+                                @Localizer["Back"]
+                            </a>
+                            <button type="submit" class="btn btn-custom btn-lg" id="submitBtn">
+                                <i class="fas fa-user-plus me-2"></i>
+                                @Localizer["CreateAccount"]
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+    .section-title {
+        color: #b3962d;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        flex: 1;
+    }
+
+    .step-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e9ecef;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .progress-step.completed .step-icon {
+        background: #b3962d;
+        color: white;
+    }
+
+    .progress-step.active .step-icon {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    .progress-line {
+        height: 2px;
+        background: #e9ecef;
+        flex: 1;
+        margin: 25px 20px 0;
+        transition: all 0.3s ease;
+    }
+
+        .progress-line.completed {
+            background: #b3962d;
+        }
+
+    .account-type-card {
+        border: 2px solid var(--border-color);
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+        .account-type-card:hover {
+            border-color: #b3962d;
+            box-shadow: 0 5px 15px rgba(44, 90, 160, 0.1);
+        }
+
+        .account-type-card.selected {
+            border-color: #b3962d;
+            background: rgba(44, 90, 160, 0.05);
+        }
+
+        .account-type-card .card-body {
+            padding: 2rem;
+        }
+
+    #subCategory2Select {
+        min-height: 120px;
+    }
+
+    @@media (max-width: 768px) {
+        .progress-step span {
+            font-size: 0.8rem;
+        }
+
+        .progress-line {
+            margin: 25px 10px 0;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        var selectedCategories = new Map(); // لتخزين الفئات المختارة
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Account type selection
+            document.querySelectorAll('.account-type-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('.account-type-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    const userType = this.getAttribute('data-type');
+                    document.getElementById('userTypeInput').value = userType;
+                    const storeInfo = document.getElementById('storeInfo');
+                    if (userType === '2') {
+                        storeInfo.style.display = 'block';
+                        document.querySelector('[name="StoreName"]').required = true;
+                    } else {
+                        storeInfo.style.display = 'none';
+                        document.querySelector('[name="StoreName"]').required = false;
+                    }
+                });
+            });
+
+            // Cascading dropdowns for categories
+            $('#categorySelect').change(function() {
+                var categoryId = $(this).val();
+                $('#subCategory1Select').html('<option value="">اختر الفئة الفرعية الأولى</option>').prop('disabled', true);
+                $('#subCategory2Select').html('<option value="">اختر التخصص الدقيق</option>').prop('disabled', true);
+
+                if (categoryId) {
+                    $.get('/Requests/GetSubCategories1', { categoryId: categoryId }, function(data) {
+                        if (data.length > 0) {
+                            $('#subCategory1Select').prop('disabled', false);
+                            $.each(data, function(i, item) {
+                                $('#subCategory1Select').append($('<option>', {
+                                    value: item.id,
+                                    text: item.name
+                                }));
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('#subCategory1Select').change(function() {
+                var subCategory1Id = $(this).val();
+                $('#subCategory2Select').html('<option value="">اختر التخصص الدقيق</option>').prop('disabled', true);
+
+                if (subCategory1Id) {
+                    $.get('/Requests/GetSubCategories2', { subCategory1Id: subCategory1Id }, function(data) {
+                        if (data.length > 0) {
+                            $('#subCategory2Select').prop('disabled', false);
+                            $.each(data, function(i, item) {
+                                $('#subCategory2Select').append($('<option>', {
+                                    value: item.id,
+                                    text: item.name
+                                }));
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Handle SubCategory2 selection
+            $('#subCategory2Select').change(function() {
+                var selectedOptions = $(this).find('option:selected');
+                var categoryName = $('#categorySelect option:selected').text();
+                var subCategory1Name = $('#subCategory1Select option:selected').text();
+
+                // Clear previous selections from this SubCategory1
+                var currentSubCat1 = $('#subCategory1Select').val();
+
+                // Add newly selected categories
+                selectedOptions.each(function() {
+                    var id = $(this).val();
+                    var name = $(this).text();
+                    if (id) {
+                        var fullPath = categoryName + ' > ' + subCategory1Name + ' > ' + name;
+                        selectedCategories.set(id, {
+                            id: id,
+                            path: fullPath,
+                            subCategory1Id: currentSubCat1
+                        });
+                    }
+                });
+
+                updateSelectedCategoriesDisplay();
+            });
+
+            function updateSelectedCategoriesDisplay() {
+                var categoriesArray = Array.from(selectedCategories.values());
+                var ids = categoriesArray.map(c => c.id);
+
+                $('#storeCategoriesHidden').val(JSON.stringify(ids));
+
+                if (categoriesArray.length > 0) {
+                    var html = '<ul class="list-unstyled mb-0">';
+                    categoriesArray.forEach(function(cat) {
+                        html += '<li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i>' + cat.path +
+                                ' <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeCategory(\'' + cat.id + '\')">×</button></li>';
+                    });
+                    html += '</ul>';
+
+                    $('#selectedCategoriesList').html(html);
+                    $('#selectedCategoriesDisplay .alert').show();
+                } else {
+                    $('#selectedCategoriesDisplay .alert').hide();
+                }
+            }
+
+            window.removeCategory = function(id) {
+                selectedCategories.delete(id);
+                updateSelectedCategoriesDisplay();
+            };
+
+            document.getElementById('createAccountForm').addEventListener('submit', function(e) {
+                const userType = document.getElementById('userTypeInput').value;
+                if (!userType) {
+                    e.preventDefault();
+                    showAlert('@Localizer["SelectAccountType"]', 'warning');
+                    return false;
+                }
+
+                if (userType === '2') {
+                    const storeName = document.querySelector('[name="StoreName"]').value;
+
+                    if (!storeName.trim()) {
+                        e.preventDefault();
+                        showAlert('@Localizer["EnterStoreName"]', 'warning');
+                        return false;
+                    }
+
+                    if (selectedCategories.size === 0) {
+                        e.preventDefault();
+                        showAlert('يرجى اختيار تخصص واحد على الأقل للمتجر', 'warning');
+                        return false;
+                    }
+                }
+
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> @Localizer["CreatingAccount"]';
+            });
+
+            const dateInput = document.querySelector('[name="DateOfBirth"]');
+            const eighteenYearsAgo = new Date();
+            eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+            dateInput.max = eighteenYearsAgo.toISOString().split('T')[0];
+            const hundredYearsAgo = new Date();
+            hundredYearsAgo.setFullYear(hundredYearsAgo.getFullYear() - 100);
+            dateInput.min = hundredYearsAgo.toISOString().split('T')[0];
+        });
+
+        function previewProfileImage(input) {
+            const preview = document.getElementById('preview');
+            const previewContainer = document.getElementById('imagePreview');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    showAlert('@Localizer["ImageTooLarge"]', 'warning');
+                    input.value = '';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            const container = document.querySelector('.container-custom');
+            container.insertBefore(alertDiv, container.firstChild);
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+            alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    </script>
+}

@@ -1,0 +1,311 @@
+@model Request
+@{
+    ViewData["Title"] = "تعديل الطلب";
+    var categories = ViewBag.Categories as List<Category>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>تعديل الطلب</h3>
+    <a href="/Admin/Requests/Details/@Model.Id" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-right me-2"></i>
+        العودة للتفاصيل
+    </a>
+</div>
+
+<div class="card-admin">
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <input asp-for="Id" type="hidden">
+            <input asp-for="UserId" type="hidden">
+            <input asp-for="Status" type="hidden">
+            <input asp-for="CreatedAt" type="hidden">
+            <input asp-for="ApprovedAt" type="hidden">
+
+            <!-- معلومات الطلب الأساسية -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="text-primary mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        المعلومات الأساسية
+                    </h5>
+                </div>
+
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">عنوان الطلب *</label>
+                        <input asp-for="Title" class="form-control" required>
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">وصف الطلب *</label>
+                        <textarea asp-for="Description" class="form-control" rows="5" required></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- الفئات -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="text-primary mb-3">
+                        <i class="fas fa-tags me-2"></i>
+                        التصنيف
+                    </h5>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="CategoryId" class="form-label">الفئة الرئيسية *</label>
+                        <select asp-for="CategoryId" class="form-control" id="categorySelect" required>
+                            <option value="">اختر الفئة</option>
+                            @if (categories != null)
+                            {
+                                @foreach (var category in categories)
+                                {
+                                    <option value="@category.Id" 
+                                            data-subcategories="@Newtonsoft.Json.JsonConvert.SerializeObject(category.SubCategories1?.Select(s => new { s.Id, s.Name, SubCategories2 = s.SubCategories2?.Select(s2 => new { s2.Id, s2.Name }) }))"
+                                            selected="@(Model.CategoryId == category.Id)">
+                                        @category.Name
+                                    </option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="SubCategory1Id" class="form-label">الفئة الفرعية الأولى</label>
+                        <select asp-for="SubCategory1Id" class="form-control" id="subCategory1Select">
+                            <option value="">اختر الفئة الفرعية</option>
+                        </select>
+                        <span asp-validation-for="SubCategory1Id" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="SubCategory2Id" class="form-label">الفئة الفرعية الثانية</label>
+                        <select asp-for="SubCategory2Id" class="form-control" id="subCategory2Select">
+                            <option value="">اختر الفئة الفرعية الثانية</option>
+                        </select>
+                        <span asp-validation-for="SubCategory2Id" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- الموقع -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="text-primary mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        الموقع
+                    </h5>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="City" class="form-label">المحافظة *</label>
+                        <input asp-for="City" class="form-control" required>
+                        <span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="District" class="form-label">المنطقة *</label>
+                        <input asp-for="District" class="form-control" required>
+                        <span asp-validation-for="District" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label asp-for="Location" class="form-label">العنوان التفصيلي</label>
+                        <input asp-for="Location" class="form-control">
+                        <span asp-validation-for="Location" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- ملاحظات الإدارة -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="text-primary mb-3">
+                        <i class="fas fa-sticky-note me-2"></i>
+                        ملاحظات الإدارة
+                    </h5>
+                </div>
+
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label asp-for="AdminNotes" class="form-label">ملاحظات الإدارة</label>
+                        <textarea asp-for="AdminNotes" class="form-control" rows="3" 
+                                  placeholder="أدخل ملاحظات داخلية للإدارة..."></textarea>
+                        <span asp-validation-for="AdminNotes" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- معلومات الطلب -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="bg-light p-3 rounded">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">
+                                    <strong>رقم الطلب:</strong> #@Model.Id
+                                </small>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">
+                                    <strong>تاريخ الإنشاء:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                </small>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">
+                                    <strong>الحالة:</strong>
+                                    @switch (Model.Status)
+                                    {
+                                        case RequestStatus.Pending:
+                                            <span class="badge bg-warning">في الانتظار</span>
+                                            break;
+                                        case RequestStatus.Approved:
+                                            <span class="badge bg-success">معتمد</span>
+                                            break;
+                                        case RequestStatus.Rejected:
+                                            <span class="badge bg-danger">مرفوض</span>
+                                            break;
+                                        case RequestStatus.Postponed:
+                                            <span class="badge bg-secondary">مؤجل</span>
+                                            break;
+                                    }
+                                </small>
+                            </div>
+                            @if (Model.ApprovedAt.HasValue)
+                            {
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">
+                                        <strong>تاريخ الاعتماد:</strong> @Model.ApprovedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="/Admin/Requests/Details/@Model.Id" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>
+                    إلغاء
+                </a>
+                <button type="submit" class="btn btn-admin">
+                    <i class="fas fa-save me-2"></i>
+                    حفظ التغييرات
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categorySelect = document.getElementById('categorySelect');
+            const subCategory1Select = document.getElementById('subCategory1Select');
+            const subCategory2Select = document.getElementById('subCategory2Select');
+            
+            // القيم الحالية
+            const currentCategoryId = '@Model.CategoryId';
+            const currentSubCategory1Id = '@Model.SubCategory1Id';
+            const currentSubCategory2Id = '@Model.SubCategory2Id';
+            
+            let allSubCategories1 = [];
+            let allSubCategories2 = [];
+
+            // تحميل الفئات الفرعية عند تغيير الفئة الرئيسية
+            categorySelect.addEventListener('change', function() {
+                loadSubCategories1();
+            });
+
+            // تحميل الفئات الفرعية الثانية عند تغيير الفئة الفرعية الأولى
+            subCategory1Select.addEventListener('change', function() {
+                loadSubCategories2();
+            });
+
+            function loadSubCategories1() {
+                const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+                const subcategoriesData = selectedOption.getAttribute('data-subcategories');
+                
+                subCategory1Select.innerHTML = '<option value="">اختر الفئة الفرعية</option>';
+                subCategory2Select.innerHTML = '<option value="">اختر الفئة الفرعية الثانية</option>';
+                
+                if (subcategoriesData) {
+                    try {
+                        allSubCategories1 = JSON.parse(subcategoriesData);
+                        allSubCategories1.forEach(function(sub) {
+                            const option = document.createElement('option');
+                            option.value = sub.Id;
+                            option.textContent = sub.Name;
+                            option.setAttribute('data-subcategories2', JSON.stringify(sub.SubCategories2 || []));
+                            subCategory1Select.appendChild(option);
+                        });
+                        
+                        // تحديد القيمة الحالية إذا وجدت
+                        if (currentSubCategory1Id) {
+                            subCategory1Select.value = currentSubCategory1Id;
+                            loadSubCategories2();
+                        }
+                    } catch (e) {
+                        console.error('Error parsing subcategories:', e);
+                    }
+                }
+            }
+
+            function loadSubCategories2() {
+                const selectedOption = subCategory1Select.options[subCategory1Select.selectedIndex];
+                const subcategories2Data = selectedOption.getAttribute('data-subcategories2');
+                
+                subCategory2Select.innerHTML = '<option value="">اختر الفئة الفرعية الثانية</option>';
+                
+                if (subcategories2Data) {
+                    try {
+                        allSubCategories2 = JSON.parse(subcategories2Data);
+                        allSubCategories2.forEach(function(sub) {
+                            const option = document.createElement('option');
+                            option.value = sub.Id;
+                            option.textContent = sub.Name;
+                            subCategory2Select.appendChild(option);
+                        });
+                        
+                        // تحديد القيمة الحالية إذا وجدت
+                        if (currentSubCategory2Id) {
+                            subCategory2Select.value = currentSubCategory2Id;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing subcategories2:', e);
+                    }
+                }
+            }
+
+            // تحميل البيانات الأولية
+            if (currentCategoryId) {
+                categorySelect.value = currentCategoryId;
+                loadSubCategories1();
+            }
+        });
+    </script>
+}

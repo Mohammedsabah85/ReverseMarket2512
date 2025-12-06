@@ -1,0 +1,334 @@
+﻿@model Request
+@{
+    ViewData["Title"] = Model.Title;
+    var isLoggedIn = Context.Session.GetString("IsLoggedIn") == "true";
+    var currentUserId = Context.Session.GetInt32("UserId");
+    var userType = Context.Session.GetString("UserType");
+
+    // تحديد ما إذا كان المستخدم يمكنه رؤية معلومات التواصل
+    bool canViewContact = isLoggedIn && (userType == "Admin" || currentUserId.HasValue);
+}
+
+<div class="container-custom">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card-custom">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <h1 class="display-6 text-primary mb-2">@Model.Title</h1>
+                        <div class="d-flex gap-2 mb-2">
+                            <span class="badge bg-primary">@Model.Category.Name</span>
+                            @if (Model.SubCategory1 != null)
+                            {
+                                <span class="badge bg-secondary">@Model.SubCategory1.Name</span>
+                            }
+                            @if (Model.SubCategory2 != null)
+                            {
+                                <span class="badge bg-info">@Model.SubCategory2.Name</span>
+                            }
+                        </div>
+                        <p class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            أضيف في @Model.CreatedAt.ToString("dd/MM/yyyy - hh:mm tt")
+                        </p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-success fs-6">معتمد</span>
+                    </div>
+                </div>
+
+                <!-- Images -->
+                @if (Model.Images.Any())
+                {
+                    <div class="mb-4">
+                        <div id="imageCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner rounded">
+                                @for (int i = 0; i < Model.Images.Count; i++)
+                                {
+                                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                                        <img src="@Model.Images.ElementAt(i).ImagePath" class="d-block w-100"
+                                             style="height: 400px; object-fit: cover;" alt="صورة الطلب">
+                                    </div>
+                                }
+                            </div>
+                            @if (Model.Images.Count > 1)
+                            {
+                                <button class="carousel-control-prev" type="button" data-bs-target="#imageCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#imageCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <h4 class="text-primary mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        تفاصيل الطلب
+                    </h4>
+                    <p class="lead">@Model.Description</p>
+                </div>
+
+                <!-- Location -->
+                <div class="mb-4">
+                    <h4 class="text-primary mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        الموقع
+                    </h4>
+                    <div class="bg-light p-3 rounded">
+                        <p class="mb-1"><strong>المحافظة:</strong> @Model.City</p>
+                        <p class="mb-1"><strong>المنطقة:</strong> @Model.District</p>
+                        @if (!string.IsNullOrEmpty(Model.Location))
+                        {
+                            <p class="mb-0"><strong>العنوان التفصيلي:</strong> @Model.Location</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Customer Info -->
+            <div class="card-custom mb-4">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-user me-2"></i>
+                    معلومات العميل
+                </h5>
+                <div class="text-center">
+                    @if (!string.IsNullOrEmpty(Model.User.ProfileImage))
+                    {
+                        <img src="@Model.User.ProfileImage" class="rounded-circle mb-3"
+                             style="width: 80px; height: 80px; object-fit: cover;" alt="صورة العميل">
+                    }
+                    else
+                    {
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width: 80px; height: 80px;">
+                            <i class="fas fa-user fa-2x"></i>
+                        </div>
+                    }
+
+                    @if (canViewContact)
+                    {
+                        <h6>@Model.User.FirstName @Model.User.LastName</h6>
+                        <p class="text-muted small">عضو منذ @Model.User.CreatedAt.ToString("MM/yyyy")</p>
+                    }
+                    else
+                    {
+                        <h6 class="blurred-text">*** ***</h6>
+                        <p class="text-muted small">عضو مسجل</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Contact Actions -->
+            <div class="card-custom mb-4">
+                @Html.Partial("_ContactVerificationPartial", Model.User)
+            </div>
+
+            <!-- Similar Requests -->
+            <div class="card-custom">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-list me-2"></i>
+                    طلبات مشابهة
+                </h5>
+                <div class="d-grid gap-2">
+                    <a href="/Requests?categoryId=@Model.CategoryId" class="btn btn-outline-secondary btn-sm">
+                        طلبات أخرى في @Model.Category.Name
+                    </a>
+                    <a href="/Requests?search=@Model.City" class="btn btn-outline-secondary btn-sm">
+                        طلبات أخرى في @Model.City
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mt-4">
+        <a href="/Requests" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-right me-2"></i>
+            العودة إلى الطلبات
+        </a>
+    </div>
+</div>
+
+<style>
+    .blurred-text {
+        filter: blur(4px);
+        -webkit-filter: blur(4px);
+        user-select: none;
+        pointer-events: none;
+    }
+</style>
+
+
+@* @model Request
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container-custom">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card-custom">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <h1 class="display-6 text-primary mb-2">@Model.Title</h1>
+                        <div class="d-flex gap-2 mb-2">
+                            <span class="badge bg-primary">@Model.Category.Name</span>
+                            @if (Model.SubCategory1 != null)
+                            {
+                                <span class="badge bg-secondary">@Model.SubCategory1.Name</span>
+                            }
+                            @if (Model.SubCategory2 != null)
+                            {
+                                <span class="badge bg-info">@Model.SubCategory2.Name</span>
+                            }
+                        </div>
+                        <p class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            أضيف في @Model.CreatedAt.ToString("dd/MM/yyyy - hh:mm tt")
+                        </p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-success fs-6">معتمد</span>
+                    </div>
+                </div>
+
+                <!-- Images -->
+                @if (Model.Images.Any())
+                {
+                    <div class="mb-4">
+                        <div id="imageCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner rounded">
+                                @for (int i = 0; i < Model.Images.Count; i++)
+                                {
+                                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                                        <img src="@Model.Images.ElementAt(i).ImagePath" class="d-block w-100"
+                                             style="height: 400px; object-fit: cover;" alt="صورة الطلب">
+                                    </div>
+                                }
+                            </div>
+                            @if (Model.Images.Count > 1)
+                            {
+                                <button class="carousel-control-prev" type="button" data-bs-target="#imageCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#imageCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <h4 class="text-primary mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        تفاصيل الطلب
+                    </h4>
+                    <p class="lead">@Model.Description</p>
+                </div>
+
+                <!-- Location -->
+                <div class="mb-4">
+                    <h4 class="text-primary mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        الموقع
+                    </h4>
+                    <div class="bg-light p-3 rounded">
+                        <p class="mb-1"><strong>المحافظة:</strong> @Model.City</p>
+                        <p class="mb-1"><strong>المنطقة:</strong> @Model.District</p>
+                        @if (!string.IsNullOrEmpty(Model.Location))
+                        {
+                            <p class="mb-0"><strong>العنوان التفصيلي:</strong> @Model.Location</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Customer Info -->
+            <div class="card-custom mb-4">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-user me-2"></i>
+                    معلومات العميل
+                </h5>
+                <div class="text-center">
+                    @if (!string.IsNullOrEmpty(Model.User.ProfileImage))
+                    {
+                        <img src="@Model.User.ProfileImage" class="rounded-circle mb-3"
+                             style="width: 80px; height: 80px; object-fit: cover;" alt="صورة العميل">
+                    }
+                    else
+                    {
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width: 80px; height: 80px;">
+                            <i class="fas fa-user fa-2x"></i>
+                        </div>
+                    }
+                    <h6>@Model.User.FirstName @Model.User.LastName</h6>
+                    <p class="text-muted small">عضو منذ @Model.User.CreatedAt.ToString("MM/yyyy")</p>
+                </div>
+            </div>
+
+            <!-- Contact Actions -->
+            <div class="card-custom mb-4">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-phone me-2"></i>
+                    التواصل
+                </h5>
+                <div class="d-grid gap-2">
+                    <a href="tel:@Model.User.PhoneNumber" class="btn btn-outline-primary">
+                        <i class="fas fa-phone me-2"></i>
+                        اتصال مباشر
+                    </a>
+                    <a href="https://wa.me/@Model.User.PhoneNumber.Replace("+", "")" target="_blank" class="btn btn-success">
+                        <i class="fab fa-whatsapp me-2"></i>
+                        واتساب
+                    </a>
+                    @if (!string.IsNullOrEmpty(Model.User.Email))
+                    {
+                        <a href="mailto:@Model.User.Email" class="btn btn-outline-info">
+                            <i class="fas fa-envelope me-2"></i>
+                            بريد إلكتروني
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Similar Requests -->
+            <div class="card-custom">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-list me-2"></i>
+                    طلبات مشابهة
+                </h5>
+                <div class="d-grid gap-2">
+                    <a href="/Requests?categoryId=@Model.CategoryId" class="btn btn-outline-secondary btn-sm">
+                        طلبات أخرى في @Model.Category.Name
+                    </a>
+                    <a href="/Requests?search=@Model.City" class="btn btn-outline-secondary btn-sm">
+                        طلبات أخرى في @Model.City
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mt-4">
+        <a href="/Requests" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-right me-2"></i>
+            العودة إلى الطلبات
+        </a>
+    </div>
+</div> *@

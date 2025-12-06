@@ -1,0 +1,213 @@
+﻿<!-- Views/Diagnostic/Images.cshtml -->
+@using ReverseMarket.Controllers
+@model ImageDiagnosticInfo
+@{
+    ViewData["Title"] = "تشخيص مشاكل الصور";
+}
+
+<div class="container-custom">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-6 text-primary mb-4">
+                <i class="fas fa-stethoscope me-3"></i>
+                تشخيص مشاكل الصور
+            </h1>
+
+            @if (!string.IsNullOrEmpty(Model.DatabaseError))
+            {
+                <div class="alert alert-danger">
+                    <h5><i class="fas fa-database me-2"></i>خطأ في قاعدة البيانات</h5>
+                    <p>@Model.DatabaseError</p>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.FileSystemError))
+            {
+                <div class="alert alert-danger">
+                    <h5><i class="fas fa-folder-open me-2"></i>خطأ في نظام الملفات</h5>
+                    <p>@Model.FileSystemError</p>
+                </div>
+            }
+
+            <!-- إحصائيات عامة -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-primary">@Model.TotalImagesInDb</h3>
+                            <p class="mb-0">الصور في قاعدة البيانات</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-success">@Model.RequestsWithImages</h3>
+                            <p class="mb-0">طلبات تحتوي على صور</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-info">@Model.PhysicalFilesCount</h3>
+                            <p class="mb-0">ملفات فعلية على الخادم</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            @if (Model.HasWritePermissions)
+                            {
+                                <h3 class="text-success"><i class="fas fa-check"></i></h3>
+                                <p class="mb-0">أذونات الكتابة</p>
+                            }
+                            else
+                            {
+                                <h3 class="text-danger"><i class="fas fa-times"></i></h3>
+                                <p class="mb-0">لا توجد أذونات كتابة</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- حالة المجلدات -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-folder me-2"></i>حالة المجلدات</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>
+                                <strong>مجلد الرفع الرئيسي:</strong>
+                                @if (Model.UploadsDirectoryExists)
+                                {
+                                    <span class="badge bg-success">موجود</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">غير موجود</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>
+                                <strong>مجلد صور الطلبات:</strong>
+                                @if (Model.RequestsDirectoryExists)
+                                {
+                                    <span class="badge bg-success">موجود</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">غير موجود</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- عينة من الصور -->
+            @if (Model.SampleImages.Any())
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-images me-2"></i>عينة من الصور (آخر 10 صور)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>مسار الصورة</th>
+                                        <th>Request ID</th>
+                                        <th>تاريخ الإنشاء</th>
+                                        <th>الحالة</th>
+                                        <th>المعاينة</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var image in Model.SampleImages)
+                                    {
+                                        <tr>
+                                            <td>@image.Id</td>
+                                            <td><code>@image.ImagePath</code></td>
+                                            <td>@image.RequestId</td>
+                                            <td>@image.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                <span class="badge bg-info" id="status-@image.Id">فحص...</span>
+                                            </td>
+                                            <td>
+                                                <img src="@image.ImagePath"
+                                                     alt="معاينة"
+                                                     style="width: 50px; height: 50px; object-fit: cover;"
+                                                     class="rounded"
+                                                     onerror="this.style.display='none'; document.getElementById('status-@image.Id').className='badge bg-danger'; document.getElementById('status-@image.Id').textContent='مفقودة';"
+                                                     onload="document.getElementById('status-@image.Id').className='badge bg-success'; document.getElementById('status-@image.Id').textContent='موجودة';">
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- عينة من الملفات الفعلية -->
+            @if (Model.SamplePhysicalFiles.Any())
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-file-image me-2"></i>عينة من الملفات الفعلية</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @foreach (var file in Model.SamplePhysicalFiles)
+                            {
+                                <div class="col-md-3 mb-2">
+                                    <div class="card">
+                                        <img src="/uploads/requests/@file"
+                                             class="card-img-top"
+                                             style="height: 100px; object-fit: cover;"
+                                             alt="@file">
+                                        <div class="card-body p-2">
+                                            <small class="text-muted text-truncate d-block">@file</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- أدوات إضافية -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-tools me-2"></i>أدوات إضافية</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="/Diagnostic/TestUpload" class="btn btn-primary">
+                            <i class="fas fa-upload me-1"></i>
+                            اختبار رفع ملف
+                        </a>
+                        <a href="/Diagnostic/FixIssues" class="btn btn-warning">
+                            <i class="fas fa-wrench me-1"></i>
+                            إصلاح المشاكل الأساسية
+                        </a>
+                        <button onclick="location.reload()" class="btn btn-secondary">
+                            <i class="fas fa-sync me-1"></i>
+                            إعادة فحص
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

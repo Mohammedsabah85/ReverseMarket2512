@@ -1,0 +1,307 @@
+@model ReverseMarket.Models.ViewModels.ContactPageViewModel
+@using Microsoft.Extensions.Localization
+@using ReverseMarket.Resources
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["Contact"];
+    var siteSettings = ViewBag.SiteSettings as ReverseMarket.Models.SiteSettings;
+}
+
+<!-- Advertisements Slider Section -->
+@if (Model.Advertisements.Any())
+{
+    <section class="advertisements-section">
+        <div class="container">
+            <div id="advertisementsCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+                <div class="carousel-indicators">
+                    @for (int i = 0; i < Model.Advertisements.Count; i++)
+                    {
+                        <button type="button" data-bs-target="#advertisementsCarousel" data-bs-slide-to="@i"
+                                class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")"
+                                aria-label="@Localizer["Advertisement"] @(i + 1)"></button>
+                    }
+                </div>
+                <div class="carousel-inner">
+                    @for (int i = 0; i < Model.Advertisements.Count; i++)
+                    {
+                        var ad = Model.Advertisements[i];
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            @if (!string.IsNullOrEmpty(ad.LinkUrl))
+                            {
+                                <a href="@ad.LinkUrl" target="_blank">
+                                    <img src="@ad.ImagePath" class="d-block w-100 advertisement-image" alt="@ad.Title">
+                                </a>
+                            }
+                            else
+                            {
+                                <img src="@ad.ImagePath" class="d-block w-100 advertisement-image" alt="@ad.Title">
+                            }
+
+                            @if (!string.IsNullOrEmpty(ad.Title) || !string.IsNullOrEmpty(ad.Description))
+                            {
+                                <div class="carousel-caption d-none d-md-block">
+                                    @if (!string.IsNullOrEmpty(ad.Title))
+                                    {
+                                        <h5>@ad.Title</h5>
+                                    }
+                                    @if (!string.IsNullOrEmpty(ad.Description))
+                                    {
+                                        <p>@ad.Description</p>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                @if (Model.Advertisements.Count > 1)
+                {
+                    <button class="carousel-control-prev" type="button" data-bs-target="#advertisementsCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">@Localizer["Previous"]</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#advertisementsCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">@Localizer["Next"]</span>
+                    </button>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<div class="container-custom">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card-custom">
+                <div class="text-center mb-5">
+                    <h1 class="display-5 text-primary">
+                        <i class="fas fa-envelope me-3"></i>
+                        @Localizer["Contact"]
+                    </h1>
+                    <p class="lead text-muted">@Localizer["ContactDescription"]</p>
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card-custom border">
+                            <h4 class="text-primary mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                @Localizer["ContactInfo"]
+                            </h4>
+
+                            <div class="mb-3">
+                                <h6><i class="fas fa-phone text-primary me-2"></i>@Localizer["Phone"]</h6>
+                                <p class="text-muted">
+                                    @if (!string.IsNullOrEmpty(siteSettings?.ContactPhone))
+                                    {
+                                        <a href="tel:@siteSettings.ContactPhone">@siteSettings.ContactPhone</a>
+                                    }
+                                    else
+                                    {
+                                        <text>+964 770 123 4567</text>
+                                    }
+                                </p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6><i class="fab fa-whatsapp text-success me-2"></i>@Localizer["WhatsApp"]</h6>
+                                <p class="text-muted">
+                                    @if (!string.IsNullOrEmpty(siteSettings?.ContactWhatsApp))
+                                    {
+                                        <a href="https://wa.me/@siteSettings.ContactWhatsApp.Replace("+", "")" target="_blank">@siteSettings.ContactWhatsApp</a>
+                                    }
+                                    else
+                                    {
+                                        <text>+964 770 123 4567</text>
+                                    }
+                                </p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6><i class="fas fa-envelope text-primary me-2"></i>@Localizer["Email"]</h6>
+                                <p class="text-muted">
+                                    @if (!string.IsNullOrEmpty(siteSettings?.ContactEmail))
+                                    {
+                                        <a href="mailto:@siteSettings.ContactEmail">@siteSettings.ContactEmail</a>
+                                    }
+                                    else
+                                    {
+                                        <text>info@reversemarket.iq</text>
+                                    }
+                                </p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6><i class="fas fa-map-marker-alt text-primary me-2"></i>@Localizer["Location"]</h6>
+                                <p class="text-muted">@Localizer["LocationAddress"]</p>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(siteSettings?.FacebookUrl) ||
+                                                        !string.IsNullOrEmpty(siteSettings?.InstagramUrl) ||
+                                                        !string.IsNullOrEmpty(siteSettings?.TwitterUrl) ||
+                                                        !string.IsNullOrEmpty(siteSettings?.YouTubeUrl))
+                            {
+                                <div class="mb-3">
+                                    <h6><i class="fas fa-share-alt text-primary me-2"></i>@Localizer["SocialMedia"]</h6>
+                                    <div class="social-links d-flex gap-3">
+                                        @if (!string.IsNullOrEmpty(siteSettings?.FacebookUrl))
+                                        {
+                                            <a href="@siteSettings.FacebookUrl" target="_blank" class="text-primary" title="Facebook">
+                                                <i class="fab fa-facebook fa-2x"></i>
+                                            </a>
+                                        }
+                                        @if (!string.IsNullOrEmpty(siteSettings?.InstagramUrl))
+                                        {
+                                            <a href="@siteSettings.InstagramUrl" target="_blank" class="text-danger" title="Instagram">
+                                                <i class="fab fa-instagram fa-2x"></i>
+                                            </a>
+                                        }
+                                        @if (!string.IsNullOrEmpty(siteSettings?.TwitterUrl))
+                                        {
+                                            <a href="@siteSettings.TwitterUrl" target="_blank" class="text-info" title="Twitter">
+                                                <i class="fab fa-twitter fa-2x"></i>
+                                            </a>
+                                        }
+                                        @if (!string.IsNullOrEmpty(siteSettings?.YouTubeUrl))
+                                        {
+                                            <a href="@siteSettings.YouTubeUrl" target="_blank" class="text-danger" title="YouTube">
+                                                <i class="fab fa-youtube fa-2x"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <form asp-action="Contact" method="post" id="contactForm">
+                            @Html.AntiForgeryToken()
+
+                            <h4 class="text-primary mb-3">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                @Localizer["SendMessage"]
+                            </h4>
+
+                            <div class="mb-3">
+                                <label asp-for="ContactForm.Name" class="form-label">@Localizer["FullName"] *</label>
+                                <input asp-for="ContactForm.Name" type="text" class="form-control" required>
+                                <span asp-validation-for="ContactForm.Name" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="ContactForm.Email" class="form-label">@Localizer["Email"] *</label>
+                                <input asp-for="ContactForm.Email" type="email" class="form-control" required>
+                                <span asp-validation-for="ContactForm.Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="ContactForm.Phone" class="form-label">@Localizer["Phone"]</label>
+                                <input asp-for="ContactForm.Phone" type="tel" class="form-control">
+                                <span asp-validation-for="ContactForm.Phone" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="ContactForm.Subject" class="form-label">@Localizer["Subject"] *</label>
+                                <select asp-for="ContactForm.Subject" class="form-control" required>
+                                    <option value="">@Localizer["SelectSubject"]</option>
+                                    <option value="general">@Localizer["GeneralInquiry"]</option>
+                                    <option value="technical">@Localizer["TechnicalIssue"]</option>
+                                    <option value="suggestion">@Localizer["Suggestion"]</option>
+                                    <option value="complaint">@Localizer["Complaint"]</option>
+                                </select>
+                                <span asp-validation-for="ContactForm.Subject" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="ContactForm.Message" class="form-label">@Localizer["Message"] *</label>
+                                <textarea asp-for="ContactForm.Message" class="form-control" rows="5" required></textarea>
+                                <span asp-validation-for="ContactForm.Message" class="text-danger"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-custom w-100" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                @Localizer["SendMessage"]
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <hr class="my-5">
+
+                <div class="text-center">
+                    <h4 class="text-primary mb-3">@Localizer["FAQ"]</h4>
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item mb-2">
+                            <h2 class="accordion-header" id="faq1">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                                    @Localizer["FAQ1Question"]
+                                </button>
+                            </h2>
+                            <div id="collapse1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-start">
+                                    @Localizer["FAQ1Answer"]
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item mb-2">
+                            <h2 class="accordion-header" id="faq2">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                                    @Localizer["FAQ2Question"]
+                                </button>
+                            </h2>
+                            <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-start">
+                                    @Localizer["FAQ2Answer"]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>@Localizer["Sending"]...';
+        });
+    </script>
+}
+
+<style>
+    .social-links a {
+        transition: transform 0.3s ease;
+    }
+
+        .social-links a:hover {
+            transform: translateY(-3px);
+        }
+</style>

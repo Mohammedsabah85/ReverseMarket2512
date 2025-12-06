@@ -1,0 +1,29 @@
+﻿@model List<ApplicationUser>
+@{
+    ViewData["Title"] = "الروابط المعلقة";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>الروابط المعلقة - بانتظار المراجعة</h3>
+    <a href="/Admin/Stores/PendingApproval" class="btn btn-outline-primary">
+        <i class="fas fa-store me-2"></i>
+        المتاجر المعلقة
+    </a>
+</div>
+
+<div class="card-admin">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <!-- باقي المحتوى -->
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                <h5 class="text-muted">لا توجد روابط معلقة</h5>
+                <p class="text-muted">جميع الروابط تمت مراجعتها</p>
+            </div>
+        }
+    </div>
+</div>

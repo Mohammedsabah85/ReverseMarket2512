@@ -1,0 +1,495 @@
+﻿@model RequestsViewModel
+
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["Requests"];
+}
+
+<!-- Advertisements Slider Section -->
+@if (Model.Advertisements.Any())
+{
+    <section class="advertisements-section">
+        <div class="container">
+            <div id="advertisementsCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+                <div class="carousel-indicators">
+                    @for (int i = 0; i < Model.Advertisements.Count; i++)
+                    {
+                        <button type="button" data-bs-target="#advertisementsCarousel" data-bs-slide-to="@i"
+                                class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")"
+                                aria-label="@Localizer["Advertisement"] @(i + 1)"></button>
+                    }
+                </div>
+                <div class="carousel-inner">
+                    @for (int i = 0; i < Model.Advertisements.Count; i++)
+                    {
+                        var ad = Model.Advertisements[i];
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            @if (!string.IsNullOrEmpty(ad.LinkUrl))
+                            {
+                                <a href="@ad.LinkUrl" target="_blank">
+                                    <img src="@ad.ImagePath" class="d-block w-100 advertisement-image" alt="@ad.Title">
+                                </a>
+                            }
+                            else
+                            {
+                                <img src="@ad.ImagePath" class="d-block w-100 advertisement-image" alt="@ad.Title">
+                            }
+
+                            @if (!string.IsNullOrEmpty(ad.Title) || !string.IsNullOrEmpty(ad.Description))
+                            {
+                                <div class="carousel-caption d-none d-md-block">
+                                    @if (!string.IsNullOrEmpty(ad.Title))
+                                    {
+                                        <h5>@ad.Title</h5>
+                                    }
+                                    @if (!string.IsNullOrEmpty(ad.Description))
+                                    {
+                                        <p>@ad.Description</p>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                @if (Model.Advertisements.Count > 1)
+                {
+                    <button class="carousel-control-prev" type="button" data-bs-target="#advertisementsCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">@Localizer["Previous"]</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#advertisementsCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">@Localizer["Next"]</span>
+                    </button>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<div class="container-custom">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-6 text-primary">
+                <i class="fas fa-list me-3"></i>
+                @Localizer["AllRequests"]
+            </h1>
+            <p class="text-muted">@Localizer["BrowseAvailableRequests"]</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="/Requests/Create" class="btn btn-custom">
+                <i class="fas fa-plus me-2"></i>
+                @Localizer["AddRequest"]
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="card-custom mb-4">
+        <form method="get" id="searchForm" class="row g-3">
+            <div class="col-md-3">
+                <label for="search" class="form-label">@Localizer["Search"]</label>
+                <input type="text" name="search" id="search" class="form-control"
+                       placeholder="@Localizer["SearchInTitleOrDescription"]" value="@Model.Search">
+            </div>
+            
+            <div class="col-md-3">
+                <label for="categoryId" class="form-label">@Localizer["Category"]</label>
+                <select name="categoryId" id="categoryId" class="form-control">
+                    <option value="">@Localizer["AllCategories"]</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category.Id" selected="@(Model.SelectedCategoryId == category.Id)">
+                            @category.Name
+                        </option>
+@*                         <option !value="@category.Id" !selected="@(Model.SelectedCategoryId == category.Id ? "selected" : "")">@category.Name</option>
+ *@                      @*   <option value="@category.Id" @(Model.SelectedCategoryId == category.Id ? "selected" : "")>@category.Name</option> *@
+               @*          <option value="@category.Id" selected="@(Model.SelectedCategoryId == category.Id)">@category.Name</option> *@
+                    
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="subCategory1Id" class="form-label">الفئة الفرعية الأولى</label>
+             @*    <select name="subCategory1Id" id="subCategory1Id" class="form-control" @(Model.SubCategories1.Count == 0 ? "disabled" : "")> *@
+                <select name="subCategory1Id" id="subCategory1Id" class="form-control" disabled>
+
+                    <option value="">جميع الفئات الفرعية</option>
+                    @foreach (var subCat in Model.SubCategories1)
+                    {
+                        @* <option value="@subCat.Id" @(Model.SelectedSubCategory1Id == subCat.Id ? "selected" : "")>@subCat.Name</option> *@
+                       @*  <option value="@subCat.Id" selected="@(Model.SelectedSubCategory1Id == subCat.Id)">@subCat.Name</option> *@
+                        <option !value="@subCat.Id" !selected="@(Model.SelectedSubCategory1Id == subCat.Id ? "selected" : "")">@subCat.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="subCategory2Id" class="form-label">الفئة الفرعية الثانية</label>
+             @*    <select name="subCategory2Id" id="subCategory2Id" class="form-control" @(Model.SubCategories2.Count == 0 ? "disabled" : "")> *@
+                <select name="subCategory2Id" id="subCategory2Id" class="form-control" disabled>
+                    <option value="">جميع الفئات الفرعية</option>
+                    @foreach (var subCat in Model.SubCategories2)
+                    {
+                       @*  <option value="@subCat.Id" @(Model.SelectedSubCategory2Id == subCat.Id ? "selected" : "")>@subCat.Name</option> *@
+                      @*   <option value="@subCat.Id" selected="@(Model.SelectedSubCategory2Id == subCat.Id)">@subCat.Name</option> *@
+                        <option !value="@subCat.Id" !selected="@(Model.SelectedSubCategory2Id == subCat.Id ? "selected" : "")">@subCat.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-search me-1"></i>
+                    @Localizer["Search"]
+                </button>
+                <a href="/Requests" class="btn btn-outline-secondary">
+                    <i class="fas fa-redo me-1"></i>
+                    @Localizer["Reset"]
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    @if (Model.Requests.Any())
+    {
+        <div class="cards-grid">
+            @foreach (var request in Model.Requests)
+            {
+                @* <div class="col-lg-4 col-md-6"> *@
+                    <div class="card h-100 shadow-sm">
+                        @if (request.Images.Any())
+                        {
+                            <img src="@request.Images.First().ImagePath" class="card-img-top"
+                                 style="height: 200px; object-fit: cover;" alt="@request.Title">
+                        }
+                        else
+                        {
+                            <div class="bg-light d-flex align-items-center justify-content-center"
+                                 style="height: 200px;">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                            </div>
+                        }
+
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary">@request.Category.Name</span>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    @request.CreatedAt.ToString("dd/MM/yyyy")
+                                </small>
+                            </div>
+
+                            <h5 class="card-title">@request.Title</h5>
+
+                            <p class="card-text text-muted">
+                                @(request.Description.Length > 100 ?
+                                    request.Description.Substring(0, 100) + "..." :
+                                    request.Description)
+                            </p>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    @request.City - @request.District
+                                </small>
+                                <a href="/Requests/Details/@request.Id" class="btn btn-outline-primary btn-sm">
+                                    @Localizer["ViewDetails"]
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+             @*    </div> *@
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?page=@(Model.CurrentPage - 1)&search=@Model.Search&categoryId=@Model.SelectedCategoryId&subCategory1Id=@Model.SelectedSubCategory1Id&subCategory2Id=@Model.SelectedSubCategory2Id">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+
+                    @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="?page=@i&search=@Model.Search&categoryId=@Model.SelectedCategoryId&subCategory1Id=@Model.SelectedSubCategory1Id&subCategory2Id=@Model.SelectedSubCategory2Id">@i</a>
+                        </li>
+                    }
+
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?page=@(Model.CurrentPage + 1)&search=@Model.Search&categoryId=@Model.SelectedCategoryId&subCategory1Id=@Model.SelectedSubCategory1Id&subCategory2Id=@Model.SelectedSubCategory2Id">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-search fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">@Localizer["NoRequests"]</h4>
+            <p class="text-muted">@Localizer["NoRequestsMatchCriteria"]</p>
+            <a href="/Requests/Create" class="btn btn-custom">
+                <i class="fas fa-plus me-2"></i>
+                @Localizer["AddFirstRequest"]
+            </a>
+        </div>
+    }
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            console.log('✅ jQuery loaded');
+
+            // التحقق من أن العناصر موجودة
+            if ($('#categoryId').length === 0) {
+                console.error('❌ عنصر categoryId غير موجود!');
+                return;
+            }
+
+            console.log('✅ عنصر categoryId موجود');
+
+            // عند تغيير الفئة الأساسية
+            $('#categoryId').on('change', function() {
+                var categoryId = $(this).val();
+                console.log('🔄 تم تغيير الفئة:', categoryId);
+
+                // إعادة تعيين الفئات الفرعية
+                var subCat1 = $('#subCategory1Id');
+                var subCat2 = $('#subCategory2Id');
+
+                subCat1.html('<option value="">جميع الفئات الفرعية</option>').prop('disabled', true);
+                subCat2.html('<option value="">جميع الفئات الفرعية</option>').prop('disabled', true);
+
+                if (categoryId && categoryId !== '') {
+                    console.log('📡 جاري جلب الفئات الفرعية الأولى...');
+
+                    // جلب الفئات الفرعية الأولى
+                    $.ajax({
+                        url: '/Requests/GetSubCategories1',
+                        type: 'GET',
+                        data: { categoryId: categoryId },
+                        success: function(data) {
+                            console.log('✅ تم جلب البيانات:', data);
+
+                            if (data && data.length > 0) {
+                                subCat1.prop('disabled', false);
+                                $.each(data, function(i, item) {
+                                    subCat1.append($('<option>', {
+                                        value: item.id,
+                                        text: item.name
+                                    }));
+                                });
+                                console.log('✅ تم إضافة ' + data.length + ' فئة فرعية أولى');
+                            } else {
+                                console.log('⚠️ لا توجد فئات فرعية لهذه الفئة');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('❌ خطأ في جلب الفئات الفرعية الأولى');
+                            console.error('الحالة:', status);
+                            console.error('الخطأ:', error);
+                            console.error('الرد:', xhr.responseText);
+                        }
+                    });
+                } else {
+                    console.log('⚠️ لم يتم اختيار فئة');
+                }
+            });
+
+            // عند تغيير الفئة الفرعية الأولى
+            $('#subCategory1Id').on('change', function() {
+                var subCategory1Id = $(this).val();
+                console.log('🔄 تم تغيير الفئة الفرعية الأولى:', subCategory1Id);
+
+                // إعادة تعيين الفئة الفرعية الثانية
+                var subCat2 = $('#subCategory2Id');
+                subCat2.html('<option value="">جميع الفئات الفرعية</option>').prop('disabled', true);
+
+                if (subCategory1Id && subCategory1Id !== '') {
+                    console.log('📡 جاري جلب الفئات الفرعية الثانية...');
+
+                    // جلب الفئات الفرعية الثانية
+                    $.ajax({
+                        url: '/Requests/GetSubCategories2',
+                        type: 'GET',
+                        data: { subCategory1Id: subCategory1Id },
+                        success: function(data) {
+                            console.log('✅ تم جلب البيانات:', data);
+
+                            if (data && data.length > 0) {
+                                subCat2.prop('disabled', false);
+                                $.each(data, function(i, item) {
+                                    subCat2.append($('<option>', {
+                                        value: item.id,
+                                        text: item.name
+                                    }));
+                                });
+                                console.log('✅ تم إضافة ' + data.length + ' فئة فرعية ثانية');
+                            } else {
+                                console.log('⚠️ لا توجد فئات فرعية ثانية لهذه الفئة');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('❌ خطأ في جلب الفئات الفرعية الثانية');
+                            console.error('الحالة:', status);
+                            console.error('الخطأ:', error);
+                            console.error('الرد:', xhr.responseText);
+                        }
+                    });
+                } else {
+                    console.log('⚠️ لم يتم اختيار فئة فرعية أولى');
+                }
+            });
+
+            console.log('✅ تم تهيئة السكريبت بنجاح');
+        });
+    </script>
+}
+
+@* @section Scripts {
+    <script>
+        $(document).ready(function() {
+            // عند تغيير الفئة الأساسية
+            $('#categoryId').change(function() {
+                var categoryId = $(this).val();
+                
+                // إعادة تعيين الفئات الفرعية
+                $('#subCategory1Id').html('<option value="">جميع الفئات الفرعية</option>').prop('disabled', true);
+                $('#subCategory2Id').html('<option value="">جميع الفئات الفرعية</option>').prop('disabled', true);
+                
+                if (categoryId) {
+                    // جلب الفئات الفرعية الأولى
+                    $.get('/Requests/GetSubCategories1', { categoryId: categoryId }, function(data) {
+                        if (data.length > 0) {
+                            $('#subCategory1Id').prop('disabled', false);
+                            $.each(data, function(i, item) {
+                                $('#subCategory1Id').append($('<option>', {
+                                    value: item.id,
+                                    text: item.name
+                                }));
+                            });
+                        }
+                    });
+                }
+            });
+
+            // عند تغيير الفئة الفرعية الأولى
+            $('#subCategory1Id').change(function() {
+                var subCategory1Id = $(this).val();
+                
+                // إعادة تعيين الفئة الفرعية الثانية
+                $('#subCategory2Id').html('<option value="">جميع الفئات الفرعية</option>').prop('disabled', true);
+                
+                if (subCategory1Id) {
+                    // جلب الفئات الفرعية الثانية
+                    $.get('/Requests/GetSubCategories2', { subCategory1Id: subCategory1Id }, function(data) {
+                        if (data.length > 0) {
+                            $('#subCategory2Id').prop('disabled', false);
+                            $.each(data, function(i, item) {
+                                $('#subCategory2Id').append($('<option>', {
+                                    value: item.id,
+                                    text: item.name
+                                }));
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+
+        $(document).ready(function() {
+            console.log('Script loaded'); // للتأكد من تحميل السكريبت
+            
+            // عند تغيير الفئة الأساسية
+            $('#categoryId').change(function() {
+                var categoryId = $(this).val();
+                console.log('Category changed:', categoryId);
+                
+                // إعادة تعيين الفئات الفرعية
+                $('#subCategory1Id').html('<option value="">جميع الفئات الفرعية</option>').prop('disabled', true);
+                $('#subCategory2Id').html('<option value="">جميع الفئات الفرعية</option>').prop('disabled', true);
+                
+                if (categoryId) {
+                    // جلب الفئات الفرعية الأولى
+                    $.ajax({
+                        url: '/Requests/GetSubCategories1',
+                        type: 'GET',
+                        data: { categoryId: categoryId },
+                        success: function(data) {
+                            console.log('SubCategories1 data:', data);
+                            if (data && data.length > 0) {
+                                $('#subCategory1Id').prop('disabled', false);
+                                $.each(data, function(i, item) {
+                                    $('#subCategory1Id').append($('<option>', {
+                                        value: item.id,
+                                        text: item.name
+                                    }));
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error loading subcategories1:', error);
+                            console.error('Status:', status);
+                            console.error('Response:', xhr.responseText);
+                        }
+                    });
+                }
+            });
+
+            // عند تغيير الفئة الفرعية الأولى
+            $('#subCategory1Id').change(function() {
+                var subCategory1Id = $(this).val();
+                console.log('SubCategory1 changed:', subCategory1Id);
+                
+                // إعادة تعيين الفئة الفرعية الثانية
+                $('#subCategory2Id').html('<option value="">جميع الفئات الفرعية</option>').prop('disabled', true);
+                
+                if (subCategory1Id) {
+                    // جلب الفئات الفرعية الثانية
+                    $.ajax({
+                        url: '/Requests/GetSubCategories2',
+                        type: 'GET',
+                        data: { subCategory1Id: subCategory1Id },
+                        success: function(data) {
+                            console.log('SubCategories2 data:', data);
+                            if (data && data.length > 0) {
+                                $('#subCategory2Id').prop('disabled', false);
+                                $.each(data, function(i, item) {
+                                    $('#subCategory2Id').append($('<option>', {
+                                        value: item.id,
+                                        text: item.name
+                                    }));
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error loading subcategories2:', error);
+                            console.error('Status:', status);
+                            console.error('Response:', xhr.responseText);
+                        }
+                    });
+                }
+            });
+        });
+
+    </script>
+} *@
+

@@ -1,0 +1,224 @@
+﻿@using ReverseMarket.Controllers
+@model EditProfileViewModel
+@{
+    ViewData["Title"] = "تعديل الملف الشخصي";
+}
+
+<div class="container-custom">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-custom">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-edit fa-3x text-primary mb-3"></i>
+                    <h1 class="h3 text-primary">تعديل الملف الشخصي</h1>
+                    <p class="text-muted">قم بتحديث معلوماتك الشخصية</p>
+                </div>
+
+                <form asp-action="Edit" method="post" id="editProfileForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Personal Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-user me-2"></i>
+                            المعلومات الشخصية
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label">الاسم الأول *</label>
+                                <input asp-for="FirstName" class="form-control" required>
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label">اسم العائلة *</label>
+                                <input asp-for="LastName" class="form-control" required>
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label">البريد الإلكتروني</label>
+                                <input asp-for="Email" type="email" class="form-control" placeholder="اختياري">
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="PhoneNumber" class="form-label">رقم الهاتف *</label>
+                                <input asp-for="PhoneNumber" class="form-control" disabled>
+                                <small class="form-text text-muted">لا يمكن تغيير رقم الهاتف</small>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="DateOfBirth" class="form-label">تاريخ الميلاد *</label>
+                                <input asp-for="DateOfBirth" type="date" class="form-control" required>
+                                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Gender" class="form-label">الجنس *</label>
+                                <select asp-for="Gender" class="form-control" required>
+                                    <option value="">اختر الجنس</option>
+                                    <option value="ذكر">ذكر</option>
+                                    <option value="أنثى">أنثى</option>
+                                </select>
+                                <span asp-validation-for="Gender" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            معلومات الموقع
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="City" class="form-label">المحافظة *</label>
+                                <select asp-for="City" class="form-control" required>
+                                    <option value="">اختر المحافظة</option>
+                                    <option value="بغداد">بغداد</option>
+                                    <option value="البصرة">البصرة</option>
+                                    <option value="أربيل">أربيل</option>
+                                    <option value="النجف">النجف</option>
+                                    <option value="كربلاء">كربلاء</option>
+                                    <option value="الموصل">الموصل</option>
+                                    <option value="السليمانية">السليمانية</option>
+                                    <option value="بابل">بابل</option>
+                                    <option value="دهوك">دهوك</option>
+                                    <option value="كركوك">كركوك</option>
+                                    <option value="الأنبار">الأنبار</option>
+                                    <option value="ديالى">ديالى</option>
+                                    <option value="صلاح الدين">صلاح الدين</option>
+                                    <option value="واسط">واسط</option>
+                                    <option value="ذي قار">ذي قار</option>
+                                    <option value="المثنى">المثنى</option>
+                                    <option value="القادسية">القادسية</option>
+                                    <option value="ميسان">ميسان</option>
+                                </select>
+                                <span asp-validation-for="City" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="District" class="form-label">المنطقة *</label>
+                                <input asp-for="District" class="form-control" placeholder="مثال: الكرادة، المعقل" required>
+                                <span asp-validation-for="District" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Location" class="form-label">العنوان التفصيلي</label>
+                                <input asp-for="Location" class="form-control" placeholder="الشارع، رقم البناء (اختياري)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Store Information (للبائعين فقط) -->
+                    @if (!string.IsNullOrEmpty(Model.StoreName))
+                    {
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-store me-2"></i>
+                                معلومات المتجر
+                            </h5>
+
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label asp-for="StoreName" class="form-label">اسم المتجر</label>
+                                    <input asp-for="StoreName" class="form-control">
+                                    <span asp-validation-for="StoreName" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-12">
+                                    <label asp-for="StoreDescription" class="form-label">وصف المتجر</label>
+                                    <textarea asp-for="StoreDescription" class="form-control" rows="3"></textarea>
+                                    <span asp-validation-for="StoreDescription" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="WebsiteUrl1" class="form-label">رابط الموقع الأول</label>
+                                    <input asp-for="WebsiteUrl1" class="form-control" placeholder="https://example.com">
+                                    <span asp-validation-for="WebsiteUrl1" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="WebsiteUrl2" class="form-label">رابط الموقع الثاني</label>
+                                    <input asp-for="WebsiteUrl2" class="form-control" placeholder="https://facebook.com/store">
+                                    <span asp-validation-for="WebsiteUrl2" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="WebsiteUrl3" class="form-label">رابط الموقع الثالث</label>
+                                    <input asp-for="WebsiteUrl3" class="form-control" placeholder="https://instagram.com/store">
+                                    <span asp-validation-for="WebsiteUrl3" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Submit Section -->
+                    <div class="form-section">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="/Profile" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>
+                                إلغاء
+                            </a>
+                            <button type="submit" class="btn btn-custom btn-lg" id="submitBtn">
+                                <i class="fas fa-save me-2"></i>
+                                حفظ التعديلات
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+    .section-title {
+        color: #b3962d;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('editProfileForm');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Set minimum date for date of birth (18 years ago)
+            const dateInput = document.querySelector('[name="DateOfBirth"]');
+            const eighteenYearsAgo = new Date();
+            eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+            dateInput.max = eighteenYearsAgo.toISOString().split('T')[0];
+
+            // Set maximum date (100 years ago)
+            const hundredYearsAgo = new Date();
+            hundredYearsAgo.setFullYear(hundredYearsAgo.getFullYear() - 100);
+            dateInput.min = hundredYearsAgo.toISOString().split('T')[0];
+
+            form.addEventListener('submit', function(e) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري الحفظ...';
+            });
+        });
+    </script>
+}

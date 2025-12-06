@@ -1,0 +1,321 @@
+@model List<ReverseMarket.Models.Notification>
+@{
+    ViewData["Title"] = "سجل الإشعارات";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        سجل الإشعارات المرسلة
+                    </h4>
+                    <a href="@Url.Action("Send")" class="btn btn-light btn-sm">
+                        <i class="fas fa-plus me-1"></i>
+                        إرسال إشعار جديد
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>التاريخ</th>
+                                        <th>العنوان</th>
+                                        <th>المحتوى</th>
+                                        <th>المستهدفون</th>
+                                        <th>حالة الإرسال</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var notification in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <small class="text-muted">
+                                                    @notification.CreatedAt.ToString("yyyy-MM-dd")
+                                                    <br>
+                                                    @notification.CreatedAt.ToString("HH:mm")
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <strong>@notification.Title</strong>
+                                                <br>
+                                                <span class="badge bg-@(GetNotificationTypeBadgeColor(notification.Type))">
+                                                    @GetNotificationTypeText(notification.Type)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="text-truncate" style="max-width: 200px;" title="@notification.Message">
+                                                    @notification.Message
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(notification.UserId))
+                                                {
+                                                    <span class="badge bg-primary">
+                                                        <i class="fas fa-user me-1"></i>
+                                                        مستخدم محدد
+                                                    </span>
+                                                }
+                                                else if (notification.TargetUserType.HasValue)
+                                                {
+                                                    <span class="badge bg-@(notification.TargetUserType == ReverseMarket.Models.Identity.UserType.Buyer ? "success" : "warning")">
+                                                        <i class="fas fa-@(notification.TargetUserType == ReverseMarket.Models.Identity.UserType.Buyer ? "shopping-cart" : "store") me-1"></i>
+                                                        @(notification.TargetUserType == ReverseMarket.Models.Identity.UserType.Buyer ? "المشترين" : "البائعين")
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-info">
+                                                        <i class="fas fa-globe me-1"></i>
+                                                        الجميع
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column gap-1">
+                                                    <!-- حالة الإيميل -->
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-envelope me-1 text-@(notification.EmailSent ? "success" : "muted")"></i>
+                                                        <small class="text-@(notification.EmailSent ? "success" : "muted")">
+                                                            @(notification.EmailSent ? "تم الإرسال" : "لم يرسل")
+                                                        </small>
+                                                    </div>
+                                                    <!-- حالة الواتساب -->
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fab fa-whatsapp me-1 text-@(notification.WhatsAppSent ? "success" : "muted")"></i>
+                                                        <small class="text-@(notification.WhatsAppSent ? "success" : "muted")">
+                                                            @(notification.WhatsAppSent ? "تم الإرسال" : "لم يرسل")
+                                                        </small>
+                                                    </div>
+                                                    <!-- حالة التطبيق -->
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-mobile-alt me-1 text-success"></i>
+                                                        <small class="text-success">تم الإرسال</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-outline-primary" 
+                                                            onclick="viewNotification(@notification.Id)" 
+                                                            title="عرض التفاصيل">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    @if (!string.IsNullOrEmpty(notification.Link))
+                                                    {
+                                                        <a href="@notification.Link" class="btn btn-outline-info" 
+                                                           target="_blank" title="فتح الرابط">
+                                                            <i class="fas fa-external-link-alt"></i>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">لا توجد إشعارات مرسلة</h5>
+                            <p class="text-muted">لم يتم إرسال أي إشعارات من الإدارة حتى الآن</p>
+                            <a href="@Url.Action("Send")" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>
+                                إرسال أول إشعار
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal لعرض تفاصيل الإشعار -->
+<div class="modal fade" id="notificationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-bell me-2"></i>
+                    تفاصيل الإشعار
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="notificationDetails">
+                <!-- سيتم تحميل التفاصيل هنا -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function viewNotification(notificationId) {
+            // البحث عن الإشعار في البيانات المحملة
+            const notifications = @Html.Raw(Json.Serialize(Model));
+            const notification = notifications.find(n => n.id === notificationId);
+            
+            if (notification) {
+                const detailsHtml = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">معلومات الإشعار</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>العنوان:</strong></td>
+                                    <td>${notification.title}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>النوع:</strong></td>
+                                    <td><span class="badge bg-info">${getNotificationTypeText(notification.type)}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>التاريخ:</strong></td>
+                                    <td>${new Date(notification.createdAt).toLocaleString('ar-EG')}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>الرابط:</strong></td>
+                                    <td>${notification.link ? `<a href="${notification.link}" target="_blank">${notification.link}</a>` : 'لا يوجد'}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">حالة الإرسال</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><i class="fas fa-envelope me-1"></i> الإيميل:</td>
+                                    <td>
+                                        <span class="badge bg-${notification.emailSent ? 'success' : 'secondary'}">
+                                            ${notification.emailSent ? 'تم الإرسال' : 'لم يرسل'}
+                                        </span>
+                                        ${notification.emailSentAt ? `<br><small class="text-muted">${new Date(notification.emailSentAt).toLocaleString('ar-EG')}</small>` : ''}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fab fa-whatsapp me-1"></i> الواتساب:</td>
+                                    <td>
+                                        <span class="badge bg-${notification.whatsAppSent ? 'success' : 'secondary'}">
+                                            ${notification.whatsAppSent ? 'تم الإرسال' : 'لم يرسل'}
+                                        </span>
+                                        ${notification.whatsAppSentAt ? `<br><small class="text-muted">${new Date(notification.whatsAppSentAt).toLocaleString('ar-EG')}</small>` : ''}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-mobile-alt me-1"></i> التطبيق:</td>
+                                    <td><span class="badge bg-success">تم الإرسال</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6 class="text-muted mb-2">المحتوى</h6>
+                            <div class="border rounded p-3 bg-light">
+                                ${notification.message.replace(/\n/g, '<br>')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('notificationDetails').innerHTML = detailsHtml;
+                new bootstrap.Modal(document.getElementById('notificationModal')).show();
+            }
+        }
+        
+        function getNotificationTypeText(type) {
+            const types = {
+                0: 'طلب معتمد',
+                1: 'طلب مرفوض', 
+                2: 'طلب جديد للمتجر',
+                3: 'إعلان إداري',
+                4: 'إشعار النظام',
+                5: 'متجر معتمد',
+                6: 'متجر مرفوض',
+                7: 'روابط معتمدة',
+                8: 'روابط مرفوضة',
+                9: 'إشعار عام'
+            };
+            return types[type] || 'غير معروف';
+        }
+    </script>
+}
+
+@functions {
+    string GetNotificationTypeText(NotificationType type)
+    {
+        return type switch
+        {
+            NotificationType.RequestApproved => "طلب معتمد",
+            NotificationType.RequestRejected => "طلب مرفوض",
+            NotificationType.NewRequestForStore => "طلب جديد للمتجر",
+            NotificationType.AdminAnnouncement => "إعلان إداري",
+            NotificationType.SystemNotification => "إشعار النظام",
+            NotificationType.StoreApproved => "متجر معتمد",
+            NotificationType.StoreRejected => "متجر مرفوض",
+            NotificationType.UrlChangeApproved => "روابط معتمدة",
+            NotificationType.UrlChangeRejected => "روابط مرفوضة",
+            NotificationType.General => "إشعار عام",
+            _ => "غير معروف"
+        };
+    }
+    
+    string GetNotificationTypeBadgeColor(NotificationType type)
+    {
+        return type switch
+        {
+            NotificationType.RequestApproved => "success",
+            NotificationType.RequestRejected => "danger",
+            NotificationType.NewRequestForStore => "primary",
+            NotificationType.AdminAnnouncement => "warning",
+            NotificationType.SystemNotification => "info",
+            NotificationType.StoreApproved => "success",
+            NotificationType.StoreRejected => "danger",
+            NotificationType.UrlChangeApproved => "success",
+            NotificationType.UrlChangeRejected => "danger",
+            NotificationType.General => "secondary",
+            _ => "secondary"
+        };
+    }
+}
+
+<style>
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,.02);
+    }
+    
+    .text-truncate {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .badge {
+        font-size: 0.75em;
+    }
+    
+    .btn-group-sm > .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>
