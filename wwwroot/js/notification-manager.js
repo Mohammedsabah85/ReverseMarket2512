@@ -310,27 +310,69 @@ const notificationManager = {
 //        notificationManager.init();
 //    }
 //});
-// منع إغلاق القائمة عند الضغط بداخلها
+// تهيئة عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function () {
-    const notificationDropdown = document.getElementById('notificationDropdown');
+    const notificationBell = document.getElementById('notificationDropdown');
+    const notificationMenu = document.getElementById('notification-menu');
 
-    if (notificationDropdown) {
-        // منع الإغلاق عند النقر داخل القائمة
-        const dropdownMenu = notificationDropdown.nextElementSibling;
-
-        if (dropdownMenu) {
-            dropdownMenu.addEventListener('click', function (e) {
-                // السماح بالإغلاق فقط عند النقر على الروابط
-                if (e.target.tagName === 'A' && e.target.href && !e.target.closest('button')) {
-                    return; // دع الرابط يعمل
-                }
-                e.stopPropagation(); // منع إغلاق القائمة
-            });
-        }
-
-        // تهيئة مدير الإشعارات
-        if (document.getElementById('notification-badge')) {
-            notificationManager.init();
-        }
+    if (!notificationBell || !notificationMenu) {
+        console.log('⚠️ عناصر الإشعارات غير موجودة');
+        return;
     }
+
+    // تهيئة مدير الإشعارات
+    if (document.getElementById('notification-badge')) {
+        notificationManager.init();
+    }
+
+    // معالج النقر على الجرس
+    notificationBell.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const isOpen = notificationMenu.style.display === 'block';
+
+        // إغلاق جميع القوائم الأخرى أولاً
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            if (menu !== notificationMenu) {
+                menu.style.display = 'none';
+            }
+        });
+
+        // تبديل حالة قائمة الإشعارات
+        if (isOpen) {
+            notificationMenu.style.display = 'none';
+            this.setAttribute('aria-expanded', 'false');
+            console.log('📁 تم إغلاق قائمة الإشعارات');
+        } else {
+            notificationMenu.style.display = 'block';
+            this.setAttribute('aria-expanded', 'true');
+            console.log('📂 تم فتح قائمة الإشعارات');
+        }
+    });
+
+    // منع إغلاق القائمة عند النقر داخلها
+    notificationMenu.addEventListener('click', function (e) {
+        // السماح بالإغلاق فقط عند النقر على روابط خارجية
+        if (e.target.tagName === 'A' && e.target.href && e.target.href.includes('/Notifications')) {
+            return; // دع الرابط يعمل
+        }
+        e.stopPropagation(); // منع إغلاق القائمة
+    });
+
+    // إغلاق القائمة عند النقر خارجها
+    document.addEventListener('click', function (e) {
+        if (!notificationBell.contains(e.target) && !notificationMenu.contains(e.target)) {
+            notificationMenu.style.display = 'none';
+            notificationBell.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    // إغلاق القائمة عند الضغط على Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && notificationMenu.style.display === 'block') {
+            notificationMenu.style.display = 'none';
+            notificationBell.setAttribute('aria-expanded', 'false');
+        }
+    });
 });

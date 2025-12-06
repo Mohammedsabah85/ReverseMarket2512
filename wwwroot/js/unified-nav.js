@@ -216,6 +216,12 @@
             const navbar = document.querySelector('.main-navbar, .navbar');
             const toggler = document.querySelector('.navbar-toggler');
 
+            if (e.target.closest('#notificationDropdown') || e.target.closest('#notification-menu')) {
+                return;
+            }
+
+            if (!navbar) return;
+
             // إذا كان النقر على زر التوجل، لا تفعل شيئاً
             if (toggler && toggler.contains(e.target)) {
                 return;
