@@ -66,8 +66,8 @@
 
     <link rel="stylesheet" href="~/css/styles-complete.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/notifications.css" asp-append-version="true" />
-    <!-- ملف CSS الجديد للموبايل - يجب أن يكون آخر ملف -->
-    <link rel="stylesheet" href="~/css/mobile-navbar-fix.css" asp-append-version="true" />
+    <!-- ملف CSS الموحد للقوائم - يجب أن يكون آخر ملف -->
+    <link rel="stylesheet" href="~/css/unified-dropdown.css" asp-append-version="true" />
 
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -195,7 +195,7 @@
 
                         <!-- قائمة اللغات - محسنة -->
                         <li class="nav-item dropdown language-selector">
-                            <a class="nav-link dropdown-toggle language-dropdown" href="#" id="languageMenu"
+                            <a class="nav-link dropdown-toggle language-dropdown" href="javascript:void(0);" id="languageMenu"
                                role="button" aria-expanded="false">
                                 <span class="flag">@currentLangInfo.Flag</span>
                                 <span>@currentLangInfo.NativeName</span>
@@ -230,7 +230,7 @@
                         @if (isLoggedIn)
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle user-dropdown" href="#" id="userMenu"
+                                <a class="nav-link dropdown-toggle user-dropdown" href="javascript:void(0);" id="userMenu"
                                    role="button" aria-expanded="false">
                                     <div class="user-avatar">@(userName?.FirstOrDefault() ?? 'U')</div>
                                     <span>@userName</span>
@@ -578,8 +578,8 @@
 
     <script src="~/js/site-unified.js" asp-append-version="true"></script>
     <script src="~/js/notification-manager.js" asp-append-version="true"></script>
-    <!-- ملف JavaScript الجديد للموبايل -->
-    <script src="~/js/mobile-nav-fix.js" asp-append-version="true"></script>
+    <!-- ملف JavaScript الموحد للتنقل - يجب أن يكون آخر ملف -->
+    <script src="~/js/unified-nav.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

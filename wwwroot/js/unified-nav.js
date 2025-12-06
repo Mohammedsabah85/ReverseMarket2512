@@ -1,0 +1,324 @@
+/**
+ * Unified Navigation System - نظام التنقل الموحد
+ * يعمل على جميع أحجام الشاشات (موبايل + ديسكتوب)
+ * Version: 6.0
+ */
+
+(function() {
+    'use strict';
+
+    // تأكد من تحميل DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initUnifiedNav);
+    } else {
+        initUnifiedNav();
+    }
+
+    function initUnifiedNav() {
+        console.log('🚀 تهيئة نظام التنقل الموحد...');
+
+        // تهيئة جميع المكونات
+        initNavbarToggler();
+        initLanguageDropdown();
+        initUserDropdown();
+        initOutsideClickHandler();
+        initScrollHandler();
+        initResizeHandler();
+
+        console.log('✅ تم تهيئة نظام التنقل الموحد بنجاح');
+    }
+
+    /**
+     * تهيئة زر القائمة الرئيسية (للموبايل)
+     */
+    function initNavbarToggler() {
+        const toggler = document.querySelector('.navbar-toggler');
+        const collapse = document.querySelector('.navbar-collapse');
+
+        if (!toggler || !collapse) return;
+
+        // إزالة المستمعات السابقة
+        const newToggler = toggler.cloneNode(true);
+        toggler.parentNode.replaceChild(newToggler, toggler);
+
+        newToggler.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const isOpen = collapse.classList.contains('show');
+
+            if (isOpen) {
+                closeNavbar();
+            } else {
+                openNavbar();
+            }
+        });
+
+        console.log('✅ تم تهيئة زر القائمة');
+    }
+
+    /**
+     * فتح القائمة الرئيسية
+     */
+    function openNavbar() {
+        const collapse = document.querySelector('.navbar-collapse');
+        if (!collapse) return;
+
+        closeAllDropdowns();
+        collapse.classList.add('show');
+        
+        if (window.innerWidth <= 991) {
+            document.body.style.overflow = 'hidden';
+        }
+        
+        console.log('📂 تم فتح القائمة الرئيسية');
+    }
+
+    /**
+     * إغلاق القائمة الرئيسية
+     */
+    function closeNavbar() {
+        const collapse = document.querySelector('.navbar-collapse');
+        if (!collapse) return;
+
+        collapse.classList.remove('show');
+        document.body.style.overflow = '';
+        closeAllDropdowns();
+
+        console.log('📁 تم إغلاق القائمة الرئيسية');
+    }
+
+    /**
+     * تهيئة قائمة اللغات - تعمل على جميع الأبعاد
+     */
+    function initLanguageDropdown() {
+        const languageToggle = document.querySelector('#languageMenu, .language-dropdown');
+        
+        if (!languageToggle) {
+            console.log('⚠️ لم يتم العثور على زر اللغة');
+            return;
+        }
+
+        // إزالة المستمعات السابقة بنسخ العنصر
+        const newToggle = languageToggle.cloneNode(true);
+        languageToggle.parentNode.replaceChild(newToggle, languageToggle);
+
+        // إضافة مستمع الحدث
+        newToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('🌐 تم النقر على زر اللغة');
+
+            const parent = this.closest('.dropdown, .language-selector, .nav-item');
+            const menu = parent ? parent.querySelector('.dropdown-menu') : null;
+            
+            if (menu) {
+                const isOpen = menu.classList.contains('show');
+                
+                // إغلاق جميع القوائم الأخرى أولاً
+                closeAllDropdowns();
+                
+                if (!isOpen) {
+                    menu.classList.add('show');
+                    this.setAttribute('aria-expanded', 'true');
+                    console.log('📂 تم فتح قائمة اللغات');
+                }
+            }
+        });
+
+        // تهيئة نماذج اللغة
+        initLanguageForms();
+
+        console.log('✅ تم تهيئة قائمة اللغات');
+    }
+
+    /**
+     * تهيئة نماذج تغيير اللغة
+     */
+    function initLanguageForms() {
+        document.querySelectorAll('.language-form').forEach(form => {
+            // إزالة المستمعات السابقة
+            const newForm = form.cloneNode(true);
+            form.parentNode.replaceChild(newForm, form);
+
+            newForm.addEventListener('submit', function(e) {
+                // السماح بإرسال النموذج بشكل طبيعي
+                const button = this.querySelector('button');
+                if (button && !button.disabled) {
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري التغيير...';
+                    button.disabled = true;
+                }
+                console.log('🔄 جاري تغيير اللغة...');
+            });
+        });
+    }
+
+    /**
+     * تهيئة قائمة المستخدم - تعمل على جميع الأبعاد
+     */
+    function initUserDropdown() {
+        const userToggle = document.querySelector('#userMenu, .user-dropdown');
+
+        if (!userToggle) {
+            console.log('ℹ️ لم يتم العثور على قائمة المستخدم (ربما غير مسجل)');
+            return;
+        }
+
+        // إزالة المستمعات السابقة
+        const newToggle = userToggle.cloneNode(true);
+        userToggle.parentNode.replaceChild(newToggle, userToggle);
+
+        newToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('👤 تم النقر على قائمة المستخدم');
+
+            const parent = this.closest('.dropdown, .nav-item');
+            const menu = parent ? parent.querySelector('.dropdown-menu') : this.nextElementSibling;
+            
+            if (menu && menu.classList.contains('dropdown-menu')) {
+                const isOpen = menu.classList.contains('show');
+                
+                // إغلاق جميع القوائم الأخرى أولاً
+                closeAllDropdowns();
+                
+                if (!isOpen) {
+                    menu.classList.add('show');
+                    this.setAttribute('aria-expanded', 'true');
+                    console.log('📂 تم فتح قائمة المستخدم');
+                }
+            }
+        });
+
+        console.log('✅ تم تهيئة قائمة المستخدم');
+    }
+
+    /**
+     * إغلاق جميع القوائم المنسدلة
+     */
+    function closeAllDropdowns() {
+        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+            menu.classList.remove('show');
+        });
+        
+        document.querySelectorAll('[aria-expanded="true"]').forEach(toggle => {
+            toggle.setAttribute('aria-expanded', 'false');
+        });
+    }
+
+    /**
+     * معالج النقر خارج القائمة
+     */
+    function initOutsideClickHandler() {
+        document.addEventListener('click', function(e) {
+            const navbar = document.querySelector('.main-navbar, .navbar');
+            const toggler = document.querySelector('.navbar-toggler');
+
+            // إذا كان النقر على زر التوجل، لا تفعل شيئاً
+            if (toggler && toggler.contains(e.target)) {
+                return;
+            }
+
+            // إذا كان النقر على dropdown-toggle، لا تفعل شيئاً
+            if (e.target.closest('.dropdown-toggle, .language-dropdown, .user-dropdown, #languageMenu, #userMenu')) {
+                return;
+            }
+
+            // إذا كان النقر داخل dropdown-menu، لا تغلق (إلا إذا كان على رابط)
+            const dropdownMenu = e.target.closest('.dropdown-menu');
+            if (dropdownMenu) {
+                // إذا كان النقر على عنصر قابل للنقر داخل القائمة
+                if (e.target.closest('a.dropdown-item') || e.target.closest('button:not([type="submit"])')) {
+                    // أغلق القائمة بعد تأخير قصير
+                    setTimeout(closeAllDropdowns, 100);
+                }
+                return;
+            }
+
+            // إذا كان النقر خارج النافبار بالكامل
+            if (navbar && !navbar.contains(e.target)) {
+                closeNavbar();
+                closeAllDropdowns();
+                return;
+            }
+
+            // إذا كان النقر على رابط عادي في النافبار
+            const clickedLink = e.target.closest('.nav-link:not(.dropdown-toggle):not(.language-dropdown):not(.user-dropdown)');
+            if (clickedLink) {
+                setTimeout(() => {
+                    if (window.innerWidth <= 991) {
+                        closeNavbar();
+                    }
+                    closeAllDropdowns();
+                }, 100);
+            }
+        });
+
+        console.log('✅ تم تهيئة معالج النقر الخارجي');
+    }
+
+    /**
+     * معالج التمرير
+     */
+    function initScrollHandler() {
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(function() {
+                    const currentScrollY = window.scrollY;
+                    
+                    // إغلاق القوائم عند التمرير
+                    if (Math.abs(currentScrollY - lastScrollY) > 50) {
+                        closeAllDropdowns();
+                    }
+
+                    lastScrollY = currentScrollY;
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        console.log('✅ تم تهيئة معالج التمرير');
+    }
+
+    /**
+     * معالج تغيير حجم الشاشة
+     */
+    function initResizeHandler() {
+        let resizeTimeout;
+        
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                // إغلاق كل شيء عند تغيير الحجم
+                closeAllDropdowns();
+                
+                if (window.innerWidth > 991) {
+                    const collapse = document.querySelector('.navbar-collapse');
+                    if (collapse) {
+                        collapse.classList.remove('show');
+                    }
+                    document.body.style.overflow = '';
+                }
+                
+                console.log('📐 تم تغيير حجم الشاشة:', window.innerWidth);
+            }, 250);
+        });
+
+        console.log('✅ تم تهيئة معالج تغيير الحجم');
+    }
+
+    // تصدير الدوال للاستخدام الخارجي
+    window.UnifiedNav = {
+        openNavbar: openNavbar,
+        closeNavbar: closeNavbar,
+        closeAllDropdowns: closeAllDropdowns,
+        reinit: initUnifiedNav
+    };
+
+})();

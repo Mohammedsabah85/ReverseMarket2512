@@ -193,6 +193,32 @@
                             <!-- Cascading Category Selection -->
                             <div class="col-md-4">
                                 <label for="categorySelect" class="form-label">الفئة الأساسية *</label>
+                                <select id="categorySelect" class="form-control">
+                                    <option value="">اختر الفئة الأساسية</option>
+                                    @foreach (var category in ViewBag.Categories as List<Category>)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="subCategory1Select" class="form-label">الفئة الفرعية الأولى *</label>
+                                <select id="subCategory1Select" class="form-control" disabled>
+                                    <option value="">اختر الفئة الفرعية الأولى</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="subCategory2Select" class="form-label">التخصص الدقيق *</label>
+                                <select id="subCategory2Select" class="form-control" disabled multiple>
+                                    <option value="">اختر التخصص الدقيق</option>
+                                </select>
+                                <div class="form-text">يمكنك اختيار أكثر من تخصص (استخدم Ctrl للاختيار المتعدد)</div>
+                            </div>
+                    @*         <!-- Cascading Category Selection -->
+                            <div class="col-md-4">
+                                <label for="categorySelect" class="form-label">الفئة الأساسية *</label>
                                 <select id="categorySelect" class="form-control" required>
                                     <option value="">اختر الفئة الأساسية</option>
                                     @foreach (var category in ViewBag.Categories as List<Category>)
@@ -216,7 +242,7 @@
                                 </select>
                                 <div class="form-text">يمكنك اختيار أكثر من تخصص (استخدم Ctrl للاختيار المتعدد)</div>
                             </div>
-
+ *@
                             <!-- Hidden field to store selected SubCategory2 IDs -->
                             <input type="hidden" asp-for="StoreCategories" id="storeCategoriesHidden" />
                             <span asp-validation-for="StoreCategories" class="text-danger"></span>
@@ -400,24 +426,60 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             // Account type selection
-            document.querySelectorAll('.account-type-card').forEach(card => {
-                card.addEventListener('click', function() {
-                    document.querySelectorAll('.account-type-card').forEach(c => {
-                        c.classList.remove('selected');
-                    });
-                    this.classList.add('selected');
-                    const userType = this.getAttribute('data-type');
-                    document.getElementById('userTypeInput').value = userType;
-                    const storeInfo = document.getElementById('storeInfo');
-                    if (userType === '2') {
-                        storeInfo.style.display = 'block';
-                        document.querySelector('[name="StoreName"]').required = true;
-                    } else {
-                        storeInfo.style.display = 'none';
-                        document.querySelector('[name="StoreName"]').required = false;
-                    }
+                    // Account type selection
+        document.querySelectorAll('.account-type-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.account-type-card').forEach(c => {
+                    c.classList.remove('selected');
                 });
+                this.classList.add('selected');
+                const userType = this.getAttribute('data-type');
+                document.getElementById('userTypeInput').value = userType;
+                const storeInfo = document.getElementById('storeInfo');
+
+                if (userType === '2') { // Seller
+                    storeInfo.style.display = 'block';
+                    // إضافة required لحقول البائع
+                    document.querySelector('[name="StoreName"]').required = true;
+                    document.getElementById('categorySelect').required = true;
+                    document.getElementById('subCategory1Select').required = true;
+                    document.getElementById('subCategory2Select').required = true;
+                } else { // Buyer
+                    storeInfo.style.display = 'none';
+                    // إزالة required من حقول البائع
+                    document.querySelector('[name="StoreName"]').required = false;
+                    document.getElementById('categorySelect').required = false;
+                    document.getElementById('subCategory1Select').required = false;
+                    document.getElementById('subCategory2Select').required = false;
+
+                    // مسح القيم المختارة
+                    selectedCategories.clear();
+                    document.getElementById('categorySelect').value = '';
+                    document.getElementById('subCategory1Select').value = '';
+                    document.getElementById('subCategory2Select').value = '';
+                    $('#storeCategoriesHidden').val('');
+                    $('#selectedCategoriesDisplay .alert').hide();
+                }
             });
+        });
+            // document.querySelectorAll('.account-type-card').forEach(card => {
+            //     card.addEventListener('click', function() {
+            //         document.querySelectorAll('.account-type-card').forEach(c => {
+            //             c.classList.remove('selected');
+            //         });
+            //         this.classList.add('selected');
+            //         const userType = this.getAttribute('data-type');
+            //         document.getElementById('userTypeInput').value = userType;
+            //         const storeInfo = document.getElementById('storeInfo');
+            //         if (userType === '2') {
+            //             storeInfo.style.display = 'block';
+            //             document.querySelector('[name="StoreName"]').required = true;
+            //         } else {
+            //             storeInfo.style.display = 'none';
+            //             document.querySelector('[name="StoreName"]').required = false;
+            //         }
+            //     });
+            // });
 
             // Cascading dropdowns for categories
             $('#categorySelect').change(function() {
