@@ -90,44 +90,90 @@ const notificationManager = {
             });
     },
 
+    //displayNotifications: function (notifications) {
+    //    if (!notifications || notifications.length === 0) {
+    //        this.list.innerHTML = `
+    //            <div class="text-center p-4 text-muted">
+    //                <i class="fas fa-bell-slash fa-2x mb-2"></i>
+    //                <p class="mb-0">لا توجد إشعارات</p>
+    //            </div>
+    //        `;
+    //        return;
+    //    }
     displayNotifications: function (notifications) {
         if (!notifications || notifications.length === 0) {
             this.list.innerHTML = `
-                <div class="text-center p-4 text-muted">
-                    <i class="fas fa-bell-slash fa-2x mb-2"></i>
-                    <p class="mb-0">لا توجد إشعارات</p>
-                </div>
-            `;
+            <div class="text-center p-4 text-muted">
+                <i class="fas fa-bell-slash fa-2x mb-2"></i>
+                <p class="mb-0">لا توجد إشعارات</p>
+            </div>
+        `;
             return;
         }
 
         this.list.innerHTML = notifications.map(n => `
-            <div class="notification-item ${!n.isRead ? 'unread' : ''}" 
-                 data-notification-id="${n.id}">
-                <div class="d-flex align-items-start p-3">
-                    <div class="notification-icon me-3">
-                        <i class="fas ${this.getNotificationIcon(n.type)}"></i>
+        <div class="notification-item ${!n.isRead ? 'unread' : ''}" 
+             data-notification-id="${n.id}">
+            <div class="d-flex align-items-start p-3">
+                <div class="notification-icon me-3">
+                    <i class="fas ${this.getNotificationIcon(n.type)}"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <h6 class="mb-0">
+                            ${!n.isRead ? '<span class="badge bg-primary me-1">جديد</span>' : ''}
+                            ${n.title}
+                        </h6>
+                        <small class="text-muted ms-2">${this.getRelativeTime(n.createdAt)}</small>
                     </div>
-                    <div class="flex-grow-1">
-                        <div class="d-flex justify-content-between align-items-start mb-1">
-                            <h6 class="mb-0">
-                                ${!n.isRead ? '<span class="badge bg-primary me-1">جديد</span>' : ''}
-                                ${n.title}
-                            </h6>
-                            <small class="text-muted ms-2">${this.getRelativeTime(n.createdAt)}</small>
-                        </div>
-                        <p class="mb-2 text-muted small">${n.message}</p>
-                        ${n.link ? `
-                            <a href="${n.link}" class="btn btn-sm btn-outline-primary" 
-                               onclick="notificationManager.markAsRead(${n.id})">
-                                <i class="fas fa-external-link-alt"></i> عرض
-                            </a>
-                        ` : ''}
-                    </div>
+                    <p class="mb-2 text-muted small">${n.message}</p>
+                    ${n.link ? `
+                        <a href="${n.link}" 
+                           class="btn btn-sm btn-outline-primary notification-link" 
+                           onclick="notificationManager.markAsRead(${n.id}); return true;">
+                            <i class="fas fa-external-link-alt"></i> عرض
+                        </a>
+                    ` : ''}
+                    ${!n.isRead ? `
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-success" 
+                                onclick="notificationManager.markAsRead(${n.id}); event.stopPropagation();">
+                            <i class="fas fa-check"></i> تحديد كمقروء
+                        </button>
+                    ` : ''}
                 </div>
             </div>
-        `).join('');
+        </div>
+    `).join('');
     },
+
+    //    this.list.innerHTML = notifications.map(n => `
+    //        <div class="notification-item ${!n.isRead ? 'unread' : ''}" 
+    //             data-notification-id="${n.id}">
+    //            <div class="d-flex align-items-start p-3">
+    //                <div class="notification-icon me-3">
+    //                    <i class="fas ${this.getNotificationIcon(n.type)}"></i>
+    //                </div>
+    //                <div class="flex-grow-1">
+    //                    <div class="d-flex justify-content-between align-items-start mb-1">
+    //                        <h6 class="mb-0">
+    //                            ${!n.isRead ? '<span class="badge bg-primary me-1">جديد</span>' : ''}
+    //                            ${n.title}
+    //                        </h6>
+    //                        <small class="text-muted ms-2">${this.getRelativeTime(n.createdAt)}</small>
+    //                    </div>
+    //                    <p class="mb-2 text-muted small">${n.message}</p>
+    //                    ${n.link ? `
+    //                        <a href="${n.link}" class="btn btn-sm btn-outline-primary" 
+    //                           onclick="notificationManager.markAsRead(${n.id})">
+    //                            <i class="fas fa-external-link-alt"></i> عرض
+    //                        </a>
+    //                    ` : ''}
+    //                </div>
+    //            </div>
+    //        </div>
+    //    `).join('');
+    //},
 
     handleNewNotification: function (notification) {
         this.loadNotifications();
@@ -259,8 +305,32 @@ const notificationManager = {
 };
 
 // تهيئة عند تحميل الصفحة
+//document.addEventListener('DOMContentLoaded', function () {
+//    if (document.getElementById('notification-badge')) {
+//        notificationManager.init();
+//    }
+//});
+// منع إغلاق القائمة عند الضغط بداخلها
 document.addEventListener('DOMContentLoaded', function () {
-    if (document.getElementById('notification-badge')) {
-        notificationManager.init();
+    const notificationDropdown = document.getElementById('notificationDropdown');
+
+    if (notificationDropdown) {
+        // منع الإغلاق عند النقر داخل القائمة
+        const dropdownMenu = notificationDropdown.nextElementSibling;
+
+        if (dropdownMenu) {
+            dropdownMenu.addEventListener('click', function (e) {
+                // السماح بالإغلاق فقط عند النقر على الروابط
+                if (e.target.tagName === 'A' && e.target.href && !e.target.closest('button')) {
+                    return; // دع الرابط يعمل
+                }
+                e.stopPropagation(); // منع إغلاق القائمة
+            });
+        }
+
+        // تهيئة مدير الإشعارات
+        if (document.getElementById('notification-badge')) {
+            notificationManager.init();
+        }
     }
 });
