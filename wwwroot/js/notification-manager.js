@@ -31,34 +31,30 @@ const notificationManager = {
     },
 
     connectSignalR: function () {
-        // إنشاء الاتصال
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl("/notificationHub")
             .withAutomaticReconnect()
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
-        // عند استقبال إشعار جديد
         this.connection.on("ReceiveNotification", (notification) => {
             console.log('📬 إشعار جديد:', notification);
             this.handleNewNotification(notification);
         });
 
-        // بدء الاتصال
         this.connection.start()
             .then(() => {
                 console.log('✅ تم الاتصال بـ SignalR بنجاح');
             })
             .catch(err => {
                 console.error('❌ خطأ في الاتصال بـ SignalR:', err);
-                // إعادة المحاولة بعد 5 ثواني
                 setTimeout(() => this.connectSignalR(), 5000);
             });
     },
 
     loadNotifications: function () {
         console.log('📥 تحميل الإشعارات...');
-        
+
         fetch('/Notifications/GetLatestNotifications?take=5')
             .then(response => {
                 console.log('📡 استجابة الخادم:', response.status);
@@ -134,21 +130,13 @@ const notificationManager = {
     },
 
     handleNewNotification: function (notification) {
-        // إضافة الإشعار للقائمة
         this.loadNotifications();
-
-        // تحديث العداد
         this.updateBadgeCount();
-
-        // إظهار Toast
         this.showToast(notification);
-
-        // تشغيل صوت (اختياري)
         this.playNotificationSound();
     },
 
     showToast: function (notification) {
-        // استخدام Bootstrap Toast
         const toastHtml = `
             <div class="toast align-items-center text-white bg-primary border-0" 
                  role="alert" aria-live="assertive" aria-atomic="true">
@@ -181,7 +169,6 @@ const notificationManager = {
     },
 
     playNotificationSound: function () {
-        // تشغيل صوت الإشعار (اختياري)
         try {
             const audio = new Audio('/sounds/notification.mp3');
             audio.volume = 0.5;
@@ -197,14 +184,20 @@ const notificationManager = {
             .then(data => {
                 const count = data.count || 0;
                 if (this.badge) {
-                    this.badge.textContent = count;
-                    this.badge.style.display = count > 0 ? 'inline-block' : 'none';
+                    if (count > 0) {
+                        this.badge.textContent = count > 99 ? '99+' : count;
+                        this.badge.style.display = 'flex';
+                    } else {
+                        this.badge.style.display = 'none';
+                    }
                 }
             })
             .catch(err => console.error('خطأ في تحديث العداد:', err));
     },
 
     markAsRead: function (notificationId) {
+        if (!notificationId) return;
+
         fetch(`/Notifications/MarkAsRead?id=${notificationId}`, {
             method: 'POST',
             headers: {

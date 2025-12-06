@@ -3,7 +3,59 @@
 /* ======================
    Notification Badge
    ====================== */
-#notification-badge {
+/* نقطة حمراء على جرس الإشعارات */
+.notification-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: #dc3545;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse-badge 2s infinite;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.5);
+    border: 2px solid white;
+    z-index: 10;
+}
+
+[dir="ltr"] .notification-badge {
+    right: auto;
+    left: 5px;
+}
+
+@keyframes pulse-badge {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.5);
+    }
+
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.8);
+    }
+}
+
+/* للموبايل */
+@media (max-width: 991.98px) {
+    .notification-badge {
+        top: 0.5rem;
+        right: 0.75rem;
+    }
+
+    [dir="ltr"] .notification-badge {
+        right: auto;
+        left: 0.75rem;
+    }
+}
+/*#notification-badge {
     position: absolute;
     top: -5px;
     right: -10px;
@@ -24,7 +76,7 @@
     50% {
         transform: scale(1.1);
     }
-}
+}*/
 
 /* ======================
    Notification Dropdown
