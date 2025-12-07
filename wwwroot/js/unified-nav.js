@@ -1,10 +1,10 @@
 /**
  * Unified Navigation System - نظام التنقل الموحد
  * يعمل على جميع أحجام الشاشات (موبايل + ديسكتوب)
- * Version: 6.0
+ * Version: 6.1 - مع إصلاح قائمة الإشعارات
  */
 
-(function() {
+(function () {
     'use strict';
 
     // تأكد من تحميل DOM
@@ -41,7 +41,7 @@
         const newToggler = toggler.cloneNode(true);
         toggler.parentNode.replaceChild(newToggler, toggler);
 
-        newToggler.addEventListener('click', function(e) {
+        newToggler.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
 
@@ -66,11 +66,11 @@
 
         closeAllDropdowns();
         collapse.classList.add('show');
-        
+
         if (window.innerWidth <= 991) {
             document.body.style.overflow = 'hidden';
         }
-        
+
         console.log('📂 تم فتح القائمة الرئيسية');
     }
 
@@ -93,7 +93,7 @@
      */
     function initLanguageDropdown() {
         const languageToggle = document.querySelector('#languageMenu, .language-dropdown');
-        
+
         if (!languageToggle) {
             console.log('⚠️ لم يتم العثور على زر اللغة');
             return;
@@ -104,21 +104,21 @@
         languageToggle.parentNode.replaceChild(newToggle, languageToggle);
 
         // إضافة مستمع الحدث
-        newToggle.addEventListener('click', function(e) {
+        newToggle.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             console.log('🌐 تم النقر على زر اللغة');
 
             const parent = this.closest('.dropdown, .language-selector, .nav-item');
             const menu = parent ? parent.querySelector('.dropdown-menu') : null;
-            
+
             if (menu) {
                 const isOpen = menu.classList.contains('show');
-                
-                // إغلاق جميع القوائم الأخرى أولاً
+
+                // إغلاق جميع القوائم الأخرى أولاً (ما عدا الإشعارات)
                 closeAllDropdowns();
-                
+
                 if (!isOpen) {
                     menu.classList.add('show');
                     this.setAttribute('aria-expanded', 'true');
@@ -142,7 +142,7 @@
             const newForm = form.cloneNode(true);
             form.parentNode.replaceChild(newForm, form);
 
-            newForm.addEventListener('submit', function(e) {
+            newForm.addEventListener('submit', function (e) {
                 // السماح بإرسال النموذج بشكل طبيعي
                 const button = this.querySelector('button');
                 if (button && !button.disabled) {
@@ -169,21 +169,21 @@
         const newToggle = userToggle.cloneNode(true);
         userToggle.parentNode.replaceChild(newToggle, userToggle);
 
-        newToggle.addEventListener('click', function(e) {
+        newToggle.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             console.log('👤 تم النقر على قائمة المستخدم');
 
             const parent = this.closest('.dropdown, .nav-item');
             const menu = parent ? parent.querySelector('.dropdown-menu') : this.nextElementSibling;
-            
+
             if (menu && menu.classList.contains('dropdown-menu')) {
                 const isOpen = menu.classList.contains('show');
-                
-                // إغلاق جميع القوائم الأخرى أولاً
+
+                // إغلاق جميع القوائم الأخرى أولاً (ما عدا الإشعارات)
                 closeAllDropdowns();
-                
+
                 if (!isOpen) {
                     menu.classList.add('show');
                     this.setAttribute('aria-expanded', 'true');
@@ -196,14 +196,22 @@
     }
 
     /**
-     * إغلاق جميع القوائم المنسدلة
+     * إغلاق جميع القوائم المنسدلة (ما عدا الإشعارات)
      */
     function closeAllDropdowns() {
         document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+            // ⭐ لا تغلق قائمة الإشعارات
+            if (menu.id === 'notification-menu' || menu.closest('.notification-dropdown')) {
+                return;
+            }
             menu.classList.remove('show');
         });
-        
+
         document.querySelectorAll('[aria-expanded="true"]').forEach(toggle => {
+            // ⭐ لا تغير حالة جرس الإشعارات
+            if (toggle.id === 'notificationDropdown' || toggle.closest('.notification-bell')) {
+                return;
+            }
             toggle.setAttribute('aria-expanded', 'false');
         });
     }
@@ -212,12 +220,17 @@
      * معالج النقر خارج القائمة
      */
     function initOutsideClickHandler() {
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             const navbar = document.querySelector('.main-navbar, .navbar');
             const toggler = document.querySelector('.navbar-toggler');
 
-            if (e.target.closest('#notificationDropdown') || e.target.closest('#notification-menu')) {
-                return;
+            // ⭐⭐⭐ استثناء قائمة الإشعارات - عدم التعامل معها هنا ⭐⭐⭐
+            if (e.target.closest('#notificationDropdown') ||
+                e.target.closest('#notification-menu') ||
+                e.target.closest('.notification-dropdown') ||
+                e.target.closest('.notification-bell')) {
+                console.log('🔔 تم النقر على عنصر من الإشعارات - تجاهل');
+                return; // دع notification-manager.js يتعامل معها
             }
 
             if (!navbar) return;
@@ -251,7 +264,7 @@
             }
 
             // إذا كان النقر على رابط عادي في النافبار
-            const clickedLink = e.target.closest('.nav-link:not(.dropdown-toggle):not(.language-dropdown):not(.user-dropdown)');
+            const clickedLink = e.target.closest('.nav-link:not(.dropdown-toggle):not(.language-dropdown):not(.user-dropdown):not(.notification-bell)');
             if (clickedLink) {
                 setTimeout(() => {
                     if (window.innerWidth <= 991) {
@@ -262,7 +275,7 @@
             }
         });
 
-        console.log('✅ تم تهيئة معالج النقر الخارجي');
+        console.log('✅ تم تهيئة معالج النقر الخارجي (مع استثناء قائمة الإشعارات)');
     }
 
     /**
@@ -272,12 +285,12 @@
         let lastScrollY = window.scrollY;
         let ticking = false;
 
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             if (!ticking) {
-                window.requestAnimationFrame(function() {
+                window.requestAnimationFrame(function () {
                     const currentScrollY = window.scrollY;
-                    
-                    // إغلاق القوائم عند التمرير
+
+                    // إغلاق القوائم عند التمرير (ما عدا الإشعارات)
                     if (Math.abs(currentScrollY - lastScrollY) > 50) {
                         closeAllDropdowns();
                     }
@@ -297,13 +310,13 @@
      */
     function initResizeHandler() {
         let resizeTimeout;
-        
-        window.addEventListener('resize', function() {
+
+        window.addEventListener('resize', function () {
             clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(function() {
-                // إغلاق كل شيء عند تغيير الحجم
+            resizeTimeout = setTimeout(function () {
+                // إغلاق كل شيء عند تغيير الحجم (ما عدا الإشعارات)
                 closeAllDropdowns();
-                
+
                 if (window.innerWidth > 991) {
                     const collapse = document.querySelector('.navbar-collapse');
                     if (collapse) {
@@ -311,7 +324,7 @@
                     }
                     document.body.style.overflow = '';
                 }
-                
+
                 console.log('📐 تم تغيير حجم الشاشة:', window.innerWidth);
             }, 250);
         });
