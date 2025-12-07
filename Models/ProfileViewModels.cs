@@ -43,6 +43,10 @@ namespace ReverseMarket.Models
         [Required(ErrorMessage = "الجنس مطلوب")]
         public string Gender { get; set; }
 
+        // ✅ نوع المستخدم - للعرض فقط (لا يتم إرساله أو تعديله في النموذج)
+        // هذا الحقل لعرض نوع الحساب في الواجهة فقط
+        public UserType? UserType { get; set; }
+
         // للبائعين فقط
         public string? StoreName { get; set; }
         public string? StoreDescription { get; set; }
@@ -53,6 +57,5 @@ namespace ReverseMarket.Models
         public string? PendingWebsiteUrl1 { get; set; }
         public string? PendingWebsiteUrl2 { get; set; }
         public string? PendingWebsiteUrl3 { get; set; }
-        public UserType UserType { get; internal set; }
     }
 }

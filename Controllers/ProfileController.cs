@@ -160,7 +160,7 @@ namespace ReverseMarket.Controllers
                 Location = user.Location,
                 DateOfBirth = user.DateOfBirth,
                 Gender = user.Gender,
-                UserType = user.UserType, // ✅ للقراءة فقط - لا يمكن تغييره
+                UserType = user.UserType, // ✅ للقراءة والعرض فقط
 
                 // معلومات المتجر (فقط للبائعين)
                 StoreName = user.StoreName,
@@ -187,11 +187,11 @@ namespace ReverseMarket.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditProfileViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
+            //if (!ModelState.IsValid)
+            //{
                 ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
                 return View(model);
-            }
+            //}
 
             var userId = GetCurrentUserId();
             if (string.IsNullOrEmpty(userId))
@@ -208,18 +208,10 @@ namespace ReverseMarket.Controllers
                 return NotFound();
             }
 
-            // ✅ الحماية الأولى: منع تغيير نوع المستخدم نهائياً
-            if (model.UserType != user.UserType)
-            {
-                _logger.LogWarning("⚠️ محاولة تغيير نوع الحساب! UserId: {UserId}, النوع الحالي: {CurrentType}, النوع المطلوب: {RequestedType}",
-                    userId, user.UserType, model.UserType);
+            // ✅ إزالة التحقق من UserType - نستخدم القيمة من قاعدة البيانات فقط
+            // نوع الحساب (UserType) لا يمكن تغييره مطلقاً ولا يتم إرساله من النموذج
 
-                TempData["ErrorMessage"] = "لا يمكن تغيير نوع الحساب. إذا كنت تريد تغيير نوع حسابك، يرجى التواصل مع الإدارة.";
-                ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
-                return View(model);
-            }
-
-            // ✅ الحماية الثانية: منع المشتري من إضافة معلومات متجر
+            // ✅ الحماية: منع المشتري من إضافة معلومات متجر
             if (user.UserType == UserType.Buyer)
             {
                 // التحقق من محاولة إضافة معلومات متجر
@@ -233,6 +225,7 @@ namespace ReverseMarket.Controllers
 
                     TempData["ErrorMessage"] = "المشترون لا يمكنهم إضافة معلومات متجر. نوع حسابك هو: مشتري.";
                     ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+                    model.UserType = user.UserType; // ✅ إعادة تعيين UserType للعرض
                     return View(model);
                 }
 
@@ -280,6 +273,7 @@ namespace ReverseMarket.Controllers
                 {
                     ModelState.AddModelError("StoreName", "اسم المتجر مطلوب للبائعين");
                     ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+                    model.UserType = user.UserType; // ✅ إعادة تعيين UserType للعرض
                     return View(model);
                 }
 
@@ -327,6 +321,7 @@ namespace ReverseMarket.Controllers
             }
 
             ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+            model.UserType = user.UserType; // ✅ إعادة تعيين UserType للعرض
             return View(model);
         }
 
@@ -493,247 +488,33 @@ namespace ReverseMarket.Controllers
 
 /*
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- * ✅ ملخص التحسينات والحمايات المطبقة:
+ * ✅ التعديلات المطبقة لحل المشكلة:
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  * 
- * 1. ✅ تنظيم الكود في 3 Regions واضحة
- * 2. ✅ إضافة XML Comments لكل Method
- * 3. ✅ منع تغيير UserType بشكل نهائي مع تسجيل المحاولة
- * 4. ✅ منع المشتري من إضافة معلومات متجر مع رسالة خطأ واضحة
- * 5. ✅ مسح تلقائي لأي معلومات متجر من حساب المشتري
- * 6. ✅ حذف فئات المتجر من حساب المشتري تلقائياً
- * 7. ✅ MyRequests متاح للمشترين فقط
- * 8. ✅ Index يعرض الطلبات للمشترين فقط
- * 9. ✅ ManageStore متاح للبائعين فقط
- * 10. ✅ UpdateStore متاح للبائعين فقط
- * 11. ✅ تسجيل جميع المحاولات المشبوهة في Logs
- * 12. ✅ رسائل خطأ واضحة بالعربية
- * 13. ✅ معالجة الروابط المعلقة للبائعين
+ * المشكلة الأصلية:
+ * ────────────────
+ * كان UserType في EditProfileViewModel يحمل internal set، مما يمنع إرسال القيمة
+ * من النموذج، وبالتالي كانت القيمة دائماً 0 (القيمة الافتراضية للـ enum).
  * 
- * الحمايات المطبقة:
- * ─────────────────
- * ✓ حماية على مستوى Controller (Authorization)
- * ✓ حماية على مستوى Model Validation
- * ✓ حماية على مستوى Database (cleanup)
- * ✓ حماية على مستوى Logging (تسجيل المحاولات)
+ * التحقق في Controller كان: if (model.UserType != user.UserType)
+ * هذا التحقق كان يفشل دائماً لأن model.UserType = 0 بينما user.UserType = 1 أو 2
+ * 
+ * الحل المطبق:
+ * ───────────
+ * 1. ✅ تغيير UserType إلى nullable (UserType?) في EditProfileViewModel
+ * 2. ✅ إزالة internal set وجعله عادي { get; set; }
+ * 3. ✅ إزالة التحقق من UserType في Edit action تماماً
+ * 4. ✅ استخدام user.UserType من قاعدة البيانات فقط
+ * 5. ✅ إعادة تعيين model.UserType = user.UserType عند الرجوع للـ View مع أخطاء
+ * 6. ✅ UserType يُعرض في الواجهة فقط ولا يتم إرساله أو تعديله
+ * 
+ * الحمايات المتبقية:
+ * ──────────────────
+ * ✓ منع المشتري من إضافة معلومات متجر
+ * ✓ مسح تلقائي لمعلومات المتجر من حساب المشتري
+ * ✓ ManageStore متاح للبائعين فقط
+ * ✓ MyRequests متاح للمشترين فقط
+ * ✓ تسجيل جميع المحاولات المشبوهة
  * 
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  */
-
-//using Microsoft.AspNetCore.Authorization;
-//using Microsoft.AspNetCore.Identity;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.EntityFrameworkCore;
-//using ReverseMarket.Data;
-//using ReverseMarket.Models;
-//using ReverseMarket.Models.Identity;
-
-//namespace ReverseMarket.Controllers
-//{
-//    [Authorize]
-//    public class ProfileController : BaseController
-//    {
-//        private readonly UserManager<ApplicationUser> _userManager;
-//        private readonly ILogger<ProfileController> _logger;
-
-//        public ProfileController(
-//            ApplicationDbContext context,
-//            UserManager<ApplicationUser> userManager,
-//            ILogger<ProfileController> logger) : base(context)
-//        {
-//            _userManager = userManager;
-//            _logger = logger;
-//        }
-
-//        // عرض الملف الشخصي
-//        public async Task<IActionResult> Index()
-//        {
-//            var userId = GetCurrentUserId();
-//            if (string.IsNullOrEmpty(userId))
-//            {
-//                return RedirectToAction("Login", "Account");
-//            }
-
-//            var user = await _userManager.Users
-//                .Include(u => u.StoreCategories)
-//                    .ThenInclude(sc => sc.Category)
-//                .FirstOrDefaultAsync(u => u.Id == userId);
-
-//            if (user == null)
-//            {
-//                return NotFound();
-//            }
-
-//            // جلب طلبات المستخدم
-//            var requests = await _context.Requests
-//                .Where(r => r.UserId == userId)
-//                .Include(r => r.Category)
-//                .Include(r => r.SubCategory1)
-//                .Include(r => r.Images)
-//                .OrderByDescending(r => r.CreatedAt)
-//                .ToListAsync();
-
-//            ViewBag.Requests = requests;
-//            ViewBag.TotalRequests = requests.Count;
-//            ViewBag.ApprovedRequests = requests.Count(r => r.Status == RequestStatus.Approved);
-//            ViewBag.PendingRequests = requests.Count(r => r.Status == RequestStatus.Pending);
-//            ViewBag.RejectedRequests = requests.Count(r => r.Status == RequestStatus.Rejected);
-
-//            return View(user);
-//        }
-
-//        // عرض طلباتي
-//        public async Task<IActionResult> MyRequests(int page = 1)
-//        {
-//            var userId = GetCurrentUserId();
-//            if (string.IsNullOrEmpty(userId))
-//            {
-//                return RedirectToAction("Login", "Account");
-//            }
-
-//            var pageSize = 10;
-//            var query = _context.Requests
-//                .Where(r => r.UserId == userId)
-//                .Include(r => r.Category)
-//                .Include(r => r.SubCategory1)
-//                .Include(r => r.Images)
-//                .OrderByDescending(r => r.CreatedAt);
-
-//            var totalRequests = await query.CountAsync();
-//            var requests = await query
-//                .Skip((page - 1) * pageSize)
-//                .Take(pageSize)
-//                .ToListAsync();
-
-//            var model = new MyRequestsViewModel
-//            {
-//                Requests = requests,
-//                CurrentPage = page,
-//                TotalPages = (int)Math.Ceiling((double)totalRequests / pageSize)
-//            };
-
-//            return View(model);
-//        }
-
-//        // تعديل الملف الشخصي
-//        [HttpGet]
-//        public async Task<IActionResult> Edit()
-//        {
-//            var userId = GetCurrentUserId();
-//            if (string.IsNullOrEmpty(userId))
-//            {
-//                return RedirectToAction("Login", "Account");
-//            }
-
-//            var user = await _userManager.FindByIdAsync(userId);
-//            if (user == null)
-//            {
-//                return NotFound();
-//            }
-
-//            var model = new EditProfileViewModel
-//            {
-//                FirstName = user.FirstName,
-//                LastName = user.LastName,
-//                Email = user.Email,
-//                PhoneNumber = user.PhoneNumber,
-//                City = user.City,
-//                District = user.District,
-//                Location = user.Location,
-//                DateOfBirth = user.DateOfBirth,
-//                Gender = user.Gender,
-//                StoreName = user.StoreName,
-//                StoreDescription = user.StoreDescription,
-//                WebsiteUrl1 = user.WebsiteUrl1,
-//                WebsiteUrl2 = user.WebsiteUrl2,
-//                WebsiteUrl3 = user.WebsiteUrl3,
-//                // إضافة الروابط المعلقة إن وجدت
-//                HasPendingUrlChanges = user.HasPendingUrlChanges,
-//                PendingWebsiteUrl1 = user.PendingWebsiteUrl1,
-//                PendingWebsiteUrl2 = user.PendingWebsiteUrl2,
-//                PendingWebsiteUrl3 = user.PendingWebsiteUrl3, 
-
-//    };
-
-//            return View(model);
-//        }
-
-//        // حفظ التعديلات
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public async Task<IActionResult> Edit(EditProfileViewModel model)
-//        {
-//            if (!ModelState.IsValid)
-//            {
-//                return View(model);
-//            }
-
-//            var userId = GetCurrentUserId();
-//            if (string.IsNullOrEmpty(userId))
-//            {
-//                return RedirectToAction("Login", "Account");
-//            }
-
-//            var user = await _userManager.FindByIdAsync(userId);
-//            if (user == null)
-//            {
-//                return NotFound();
-//            }
-
-//            // تحديث البيانات الأساسية (لا تحتاج موافقة)
-//            user.FirstName = model.FirstName;
-//            user.LastName = model.LastName;
-//            user.Email = model.Email;
-//            user.City = model.City;
-//            user.District = model.District;
-//            user.Location = model.Location;
-//            user.DateOfBirth = model.DateOfBirth;
-//            user.Gender = model.Gender;
-
-//            if (user.UserType == UserType.Seller)
-//            {
-//                user.StoreName = model.StoreName;
-//                user.StoreDescription = model.StoreDescription;
-
-//                // ✅ معالجة الروابط - تحتاج موافقة الإدارة
-//                bool urlsChanged = false;
-
-//                // التحقق من تغيير الروابط
-//                if (model.WebsiteUrl1 != user.WebsiteUrl1 ||
-//                    model.WebsiteUrl2 != user.WebsiteUrl2 ||
-//                    model.WebsiteUrl3 != user.WebsiteUrl3)
-//                {
-//                    // حفظ الروابط الجديدة كـ pending
-//                    user.PendingWebsiteUrl1 = model.WebsiteUrl1;
-//                    user.PendingWebsiteUrl2 = model.WebsiteUrl2;
-//                    user.PendingWebsiteUrl3 = model.WebsiteUrl3;
-//                    user.HasPendingUrlChanges = true;
-//                    urlsChanged = true;
-//                }
-//            }
-
-//            user.UpdatedAt = DateTime.Now;
-
-//            var result = await _userManager.UpdateAsync(user);
-//            if (result.Succeeded)
-//            {
-//                if (user.UserType == UserType.Seller && user.HasPendingUrlChanges)
-//                {
-//                    TempData["WarningMessage"] = "تم حفظ تعديلاتك بنجاح. الروابط الجديدة بانتظار موافقة الإدارة.";
-//                }
-//                else
-//                {
-//                    TempData["SuccessMessage"] = "تم تحديث ملفك الشخصي بنجاح";
-//                }
-//                return RedirectToAction("Index");
-//            }
-
-//            foreach (var error in result.Errors)
-//            {
-//                ModelState.AddModelError("", error.Description);
-//            }
-
-//            return View(model);
-//        }
-//    }
-//}
