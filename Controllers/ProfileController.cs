@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using ReverseMarket.Data;
 using ReverseMarket.Models;
 using ReverseMarket.Models.Identity;
+using ReverseMarket.Services;
 
 namespace ReverseMarket.Controllers
 {
@@ -13,14 +14,17 @@ namespace ReverseMarket.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<ProfileController> _logger;
+        private readonly IFileService _fileService;
 
         public ProfileController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            ILogger<ProfileController> logger) : base(context)
+            ILogger<ProfileController> logger,
+            IFileService fileService) : base(context)
         {
             _userManager = userManager;
             _logger = logger;
+            _fileService = fileService;
         }
 
         #region عرض الملف الشخصي
@@ -155,12 +159,13 @@ namespace ReverseMarket.Controllers
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
+                ProfileImage = user.ProfileImage, // ✅ الصورة الحالية
                 City = user.City,
                 District = user.District,
                 Location = user.Location,
                 DateOfBirth = user.DateOfBirth,
                 Gender = user.Gender,
-                UserType = user.UserType, // ✅ للقراءة والعرض فقط
+                UserType = user.UserType,
 
                 // معلومات المتجر (فقط للبائعين)
                 StoreName = user.StoreName,
@@ -187,11 +192,12 @@ namespace ReverseMarket.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditProfileViewModel model)
         {
-            //if (!ModelState.IsValid)
-            //{
-                ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
-                return View(model);
-            //}
+            // ✅ إزالة التحقق المعلق
+            // if (!ModelState.IsValid)
+            // {
+            //     ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+            //     return View(model);
+            // }
 
             var userId = GetCurrentUserId();
             if (string.IsNullOrEmpty(userId))
@@ -208,13 +214,36 @@ namespace ReverseMarket.Controllers
                 return NotFound();
             }
 
-            // ✅ إزالة التحقق من UserType - نستخدم القيمة من قاعدة البيانات فقط
-            // نوع الحساب (UserType) لا يمكن تغييره مطلقاً ولا يتم إرساله من النموذج
+            // ✅ معالجة رفع الصورة الشخصية
+            if (model.ProfileImageFile != null && model.ProfileImageFile.Length > 0)
+            {
+                try
+                {
+                    // حذف الصورة القديمة إذا كانت موجودة
+                    if (!string.IsNullOrEmpty(user.ProfileImage))
+                    {
+                        await _fileService.DeleteImageAsync(user.ProfileImage);
+                    }
+
+                    // رفع الصورة الجديدة
+                    var imagePath = await _fileService.SaveImageAsync(model.ProfileImageFile, "profiles");
+                    user.ProfileImage = imagePath;
+
+                    _logger.LogInformation("✅ تم تحديث الصورة الشخصية للمستخدم: {UserId}", userId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "❌ خطأ في رفع الصورة الشخصية");
+                    ModelState.AddModelError("ProfileImageFile", "حدث خطأ أثناء رفع الصورة. حاول مرة أخرى.");
+                    ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+                    model.UserType = user.UserType;
+                    return View(model);
+                }
+            }
 
             // ✅ الحماية: منع المشتري من إضافة معلومات متجر
             if (user.UserType == UserType.Buyer)
             {
-                // التحقق من محاولة إضافة معلومات متجر
                 if (!string.IsNullOrEmpty(model.StoreName) ||
                     !string.IsNullOrEmpty(model.StoreDescription) ||
                     !string.IsNullOrEmpty(model.WebsiteUrl1) ||
@@ -225,11 +254,11 @@ namespace ReverseMarket.Controllers
 
                     TempData["ErrorMessage"] = "المشترون لا يمكنهم إضافة معلومات متجر. نوع حسابك هو: مشتري.";
                     ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
-                    model.UserType = user.UserType; // ✅ إعادة تعيين UserType للعرض
+                    model.UserType = user.UserType;
                     return View(model);
                 }
 
-                // ✅ حماية إضافية: مسح أي معلومات متجر قد تكون موجودة في قاعدة البيانات
+                // ✅ حماية إضافية: مسح أي معلومات متجر
                 user.StoreName = null;
                 user.StoreDescription = null;
                 user.WebsiteUrl1 = null;
@@ -239,9 +268,8 @@ namespace ReverseMarket.Controllers
                 user.PendingWebsiteUrl2 = null;
                 user.PendingWebsiteUrl3 = null;
                 user.HasPendingUrlChanges = false;
-                user.IsStoreApproved = true; // المشترون دائماً approved
+                user.IsStoreApproved = true;
 
-                // حذف أي فئات متجر قد تكون موجودة (حماية إضافية)
                 var existingStoreCategories = await _context.StoreCategories
                     .Where(sc => sc.UserId == userId)
                     .ToListAsync();
@@ -254,7 +282,7 @@ namespace ReverseMarket.Controllers
                 }
             }
 
-            // ✅ تحديث البيانات الأساسية (متاح للجميع)
+            // ✅ تحديث البيانات الأساسية
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
             user.Email = model.Email;
@@ -268,24 +296,21 @@ namespace ReverseMarket.Controllers
             bool urlsChanged = false;
             if (user.UserType == UserType.Seller)
             {
-                // التحقق من وجود اسم المتجر
                 if (string.IsNullOrEmpty(model.StoreName))
                 {
                     ModelState.AddModelError("StoreName", "اسم المتجر مطلوب للبائعين");
                     ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
-                    model.UserType = user.UserType; // ✅ إعادة تعيين UserType للعرض
+                    model.UserType = user.UserType;
                     return View(model);
                 }
 
                 user.StoreName = model.StoreName;
                 user.StoreDescription = model.StoreDescription;
 
-                // ✅ معالجة الروابط - تحتاج موافقة الإدارة
                 if (model.WebsiteUrl1 != user.WebsiteUrl1 ||
                     model.WebsiteUrl2 != user.WebsiteUrl2 ||
                     model.WebsiteUrl3 != user.WebsiteUrl3)
                 {
-                    // حفظ الروابط الجديدة كـ pending
                     user.PendingWebsiteUrl1 = model.WebsiteUrl1;
                     user.PendingWebsiteUrl2 = model.WebsiteUrl2;
                     user.PendingWebsiteUrl3 = model.WebsiteUrl3;
@@ -298,7 +323,6 @@ namespace ReverseMarket.Controllers
 
             user.UpdatedAt = DateTime.Now;
 
-            // حفظ التغييرات
             var result = await _userManager.UpdateAsync(user);
             await _context.SaveChangesAsync();
 
@@ -321,7 +345,7 @@ namespace ReverseMarket.Controllers
             }
 
             ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
-            model.UserType = user.UserType; // ✅ إعادة تعيين UserType للعرض
+            model.UserType = user.UserType;
             return View(model);
         }
 
@@ -355,7 +379,6 @@ namespace ReverseMarket.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // ✅ حماية: التحقق من أن المستخدم بائع
             if (user.UserType != UserType.Seller)
             {
                 _logger.LogWarning("⚠️ محاولة وصول غير مصرح بها لصفحة إدارة المتجر! UserId: {UserId}, UserType: {UserType}",
@@ -396,7 +419,6 @@ namespace ReverseMarket.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // ✅ حماية: التحقق من أن المستخدم بائع
             if (user.UserType != UserType.Seller)
             {
                 _logger.LogWarning("⚠️ محاولة تحديث متجر غير مصرح بها! UserId: {UserId}, UserType: {UserType}",
@@ -405,11 +427,9 @@ namespace ReverseMarket.Controllers
                 return RedirectToAction("Index");
             }
 
-            // تحديث معلومات المتجر
             user.StoreName = model.StoreName;
             user.StoreDescription = model.StoreDescription;
 
-            // معالجة الروابط - تحتاج موافقة الإدارة
             bool urlsChanged = false;
             if (model.WebsiteUrl1 != user.WebsiteUrl1 ||
                 model.WebsiteUrl2 != user.WebsiteUrl2 ||
@@ -424,16 +444,13 @@ namespace ReverseMarket.Controllers
                 _logger.LogInformation("✅ البائع {UserId} قام بتعديل روابط المتجر في صفحة ManageStore.", userId);
             }
 
-            // تحديث فئات المتجر إذا تم تعديلها
             if (model.StoreCategories != null && model.StoreCategories.Any())
             {
-                // حذف الفئات القديمة
                 var oldCategories = await _context.StoreCategories
                     .Where(sc => sc.UserId == userId)
                     .ToListAsync();
                 _context.StoreCategories.RemoveRange(oldCategories);
 
-                // إضافة الفئات الجديدة
                 foreach (var subCategory2Id in model.StoreCategories)
                 {
                     var subCategory2 = await _context.SubCategories2
@@ -485,36 +502,3 @@ namespace ReverseMarket.Controllers
         #endregion
     }
 }
-
-/*
- * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- * ✅ التعديلات المطبقة لحل المشكلة:
- * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- * 
- * المشكلة الأصلية:
- * ────────────────
- * كان UserType في EditProfileViewModel يحمل internal set، مما يمنع إرسال القيمة
- * من النموذج، وبالتالي كانت القيمة دائماً 0 (القيمة الافتراضية للـ enum).
- * 
- * التحقق في Controller كان: if (model.UserType != user.UserType)
- * هذا التحقق كان يفشل دائماً لأن model.UserType = 0 بينما user.UserType = 1 أو 2
- * 
- * الحل المطبق:
- * ───────────
- * 1. ✅ تغيير UserType إلى nullable (UserType?) في EditProfileViewModel
- * 2. ✅ إزالة internal set وجعله عادي { get; set; }
- * 3. ✅ إزالة التحقق من UserType في Edit action تماماً
- * 4. ✅ استخدام user.UserType من قاعدة البيانات فقط
- * 5. ✅ إعادة تعيين model.UserType = user.UserType عند الرجوع للـ View مع أخطاء
- * 6. ✅ UserType يُعرض في الواجهة فقط ولا يتم إرساله أو تعديله
- * 
- * الحمايات المتبقية:
- * ──────────────────
- * ✓ منع المشتري من إضافة معلومات متجر
- * ✓ مسح تلقائي لمعلومات المتجر من حساب المشتري
- * ✓ ManageStore متاح للبائعين فقط
- * ✓ MyRequests متاح للمشترين فقط
- * ✓ تسجيل جميع المحاولات المشبوهة
- * 
- * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- */

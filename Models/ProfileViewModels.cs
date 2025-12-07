@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 using ReverseMarket.Models;
 using ReverseMarket.Models.Identity;
 
@@ -29,6 +30,10 @@ namespace ReverseMarket.Models
         [Required(ErrorMessage = "رقم الهاتف مطلوب")]
         public string PhoneNumber { get; set; }
 
+        // ✅ الصورة الشخصية
+        public string? ProfileImage { get; set; }
+        public IFormFile? ProfileImageFile { get; set; }
+
         [Required(ErrorMessage = "المحافظة مطلوبة")]
         public string City { get; set; }
 
@@ -44,7 +49,6 @@ namespace ReverseMarket.Models
         public string Gender { get; set; }
 
         // ✅ نوع المستخدم - للعرض فقط (لا يتم إرساله أو تعديله في النموذج)
-        // هذا الحقل لعرض نوع الحساب في الواجهة فقط
         public UserType? UserType { get; set; }
 
         // للبائعين فقط
