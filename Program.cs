@@ -159,6 +159,7 @@ builder.Services.AddScoped<ReverseMarket.Services.IWhatsAppService, ReverseMarke
 
 // Email Service
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 // 🔔 Notification Service
 builder.Services.AddScoped<INotificationService, NotificationService>();

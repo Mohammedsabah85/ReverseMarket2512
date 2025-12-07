@@ -15,7 +15,150 @@
     <div class="card-body">
         @if (Model.Any())
         {
-            <!-- باقي المحتوى -->
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                يوجد <strong>@Model.Count</strong> متجر بانتظار مراجعة الروابط
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-admin">
+                    <thead>
+                        <tr>
+                            <th>اسم المتجر</th>
+                            <th>المالك</th>
+                            <th>الروابط الحالية</th>
+                            <th>الروابط الجديدة (المعلقة)</th>
+                            <th>تاريخ التحديث</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var store in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@store.StoreName</strong>
+                                    @if (!string.IsNullOrEmpty(store.StoreDescription))
+                                    {
+                                        <br>
+                                        <small class="text-muted">@(store.StoreDescription.Length > 50 ? store.StoreDescription.Substring(0, 50) + "..." : store.StoreDescription)</small>
+                                    }
+                                </td>
+                                <td>
+                                    @store.FirstName @store.LastName
+                                    <br>
+                                    <small class="text-muted">@store.PhoneNumber</small>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(store.WebsiteUrl1))
+                                    {
+                                        <div class="mb-2">
+                                            <small class="text-muted d-block">الرابط 1:</small>
+                                            <a href="@store.WebsiteUrl1" target="_blank" class="text-primary small">
+                                                <i class="fas fa-external-link-alt me-1"></i>
+                                                @(store.WebsiteUrl1.Length > 30 ? store.WebsiteUrl1.Substring(0, 30) + "..." : store.WebsiteUrl1)
+                                            </a>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(store.WebsiteUrl2))
+                                    {
+                                        <div class="mb-2">
+                                            <small class="text-muted d-block">الرابط 2:</small>
+                                            <a href="@store.WebsiteUrl2" target="_blank" class="text-primary small">
+                                                <i class="fas fa-external-link-alt me-1"></i>
+                                                @(store.WebsiteUrl2.Length > 30 ? store.WebsiteUrl2.Substring(0, 30) + "..." : store.WebsiteUrl2)
+                                            </a>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(store.WebsiteUrl3))
+                                    {
+                                        <div class="mb-2">
+                                            <small class="text-muted d-block">الرابط 3:</small>
+                                            <a href="@store.WebsiteUrl3" target="_blank" class="text-primary small">
+                                                <i class="fas fa-external-link-alt me-1"></i>
+                                                @(store.WebsiteUrl3.Length > 30 ? store.WebsiteUrl3.Substring(0, 30) + "..." : store.WebsiteUrl3)
+                                            </a>
+                                        </div>
+                                    }
+                                    @if (string.IsNullOrEmpty(store.WebsiteUrl1) &&
+                                                                string.IsNullOrEmpty(store.WebsiteUrl2) &&
+                                                                string.IsNullOrEmpty(store.WebsiteUrl3))
+                                    {
+                                        <span class="text-muted small">لا توجد روابط حالية</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(store.PendingWebsiteUrl1))
+                                    {
+                                        <div class="mb-2">
+                                            <small class="text-warning d-block fw-bold">
+                                                <i class="fas fa-clock me-1"></i>
+                                                الرابط 1:
+                                            </small>
+                                            <a href="@store.PendingWebsiteUrl1" target="_blank" class="text-warning small">
+                                                <i class="fas fa-external-link-alt me-1"></i>
+                                                @(store.PendingWebsiteUrl1.Length > 30 ? store.PendingWebsiteUrl1.Substring(0, 30) + "..." : store.PendingWebsiteUrl1)
+                                            </a>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(store.PendingWebsiteUrl2))
+                                    {
+                                        <div class="mb-2">
+                                            <small class="text-warning d-block fw-bold">
+                                                <i class="fas fa-clock me-1"></i>
+                                                الرابط 2:
+                                            </small>
+                                            <a href="@store.PendingWebsiteUrl2" target="_blank" class="text-warning small">
+                                                <i class="fas fa-external-link-alt me-1"></i>
+                                                @(store.PendingWebsiteUrl2.Length > 30 ? store.PendingWebsiteUrl2.Substring(0, 30) + "..." : store.PendingWebsiteUrl2)
+                                            </a>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(store.PendingWebsiteUrl3))
+                                    {
+                                        <div class="mb-2">
+                                            <small class="text-warning d-block fw-bold">
+                                                <i class="fas fa-clock me-1"></i>
+                                                الرابط 3:
+                                            </small>
+                                            <a href="@store.PendingWebsiteUrl3" target="_blank" class="text-warning small">
+                                                <i class="fas fa-external-link-alt me-1"></i>
+                                                @(store.PendingWebsiteUrl3.Length > 30 ? store.PendingWebsiteUrl3.Substring(0, 30) + "..." : store.PendingWebsiteUrl3)
+                                            </a>
+                                        </div>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (store.UpdatedAt.HasValue)
+                                    {
+                                        <span class="d-block">@store.UpdatedAt.Value.ToString("dd/MM/yyyy")</span>
+                                        <small class="text-muted">@store.UpdatedAt.Value.ToString("HH:mm")</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <form method="post" asp-action="ApproveUrlChanges" asp-route-id="@store.Id" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-success btn-sm"
+                                                    onclick="return confirm('هل أنت متأكد من اعتماد الروابط الجديدة؟')">
+                                                <i class="fas fa-check"></i> موافقة
+                                            </button>
+                                        </form>
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                                onclick="rejectUrlChanges('@store.Id', '@store.StoreName')">
+                                            <i class="fas fa-times"></i> رفض
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         }
         else
         {
@@ -27,3 +170,58 @@
         }
     </div>
 </div>
+
+<style>
+    .table-admin {
+        font-size: 0.9rem;
+    }
+
+        .table-admin td {
+            vertical-align: middle;
+        }
+
+        .table-admin a {
+            text-decoration: none;
+        }
+
+            .table-admin a:hover {
+                text-decoration: underline;
+            }
+
+    .btn-group .btn {
+        margin: 0 2px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function rejectUrlChanges(id, name) {
+            var reason = prompt(`سبب رفض الروابط الجديدة لمتجر "${name}":`);
+            if (reason && reason.trim()) {
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/Admin/Stores/RejectUrlChanges/${id}`;
+
+                var reasonInput = document.createElement('input');
+                reasonInput.type = 'hidden';
+                reasonInput.name = 'reason';
+                reasonInput.value = reason;
+                form.appendChild(reasonInput);
+
+                var token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    var tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = token.value;
+                    form.appendChild(tokenInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            } else if (reason !== null) {
+                alert('يجب إدخال سبب الرفض');
+            }
+        }
+    </script>
+}
