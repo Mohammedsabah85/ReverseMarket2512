@@ -262,30 +262,63 @@ namespace ReverseMarket.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+
         public async Task<IActionResult> ToggleStatus(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
-                return Json(new { success = false, message = "معرف المستخدم غير صحيح" });
+                TempData["ErrorMessage"] = "معرف المستخدم غير صحيح";
+                return RedirectToAction(nameof(Index));
             }
 
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
-                return Json(new { success = false, message = "المستخدم غير موجود" });
+                TempData["ErrorMessage"] = "المستخدم غير موجود";
+                return RedirectToAction(nameof(Index));
             }
 
             user.IsActive = !user.IsActive;
-            user.UpdatedAt = System.DateTime.Now;
+            user.UpdatedAt = DateTime.Now;
+
             var result = await _userManager.UpdateAsync(user);
 
             if (result.Succeeded)
             {
-                return Json(new { success = true, isActive = user.IsActive });
+                var status = user.IsActive ? "تفعيل" : "إيقاف";
+                TempData["SuccessMessage"] = $"تم {status} المستخدم بنجاح";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "فشل تحديث حالة المستخدم";
             }
 
-            return Json(new { success = false, message = "فشل تحديث حالة المستخدم" });
+            return RedirectToAction(nameof(Index));
         }
+        //public async Task<IActionResult> ToggleStatus(string id)
+        //{
+        //    if (string.IsNullOrEmpty(id))
+        //    {
+        //        return Json(new { success = false, message = "معرف المستخدم غير صحيح" });
+        //    }
+
+        //    var user = await _userManager.FindByIdAsync(id);
+        //    if (user == null)
+        //    {
+        //        return Json(new { success = false, message = "المستخدم غير موجود" });
+        //    }
+
+        //    user.IsActive = !user.IsActive;
+        //    user.UpdatedAt = System.DateTime.Now;
+        //    var result = await _userManager.UpdateAsync(user);
+
+        //    if (result.Succeeded)
+        //    {
+        //        return Json(new { success = true, isActive = user.IsActive });
+        //    }
+
+        //    return Json(new { success = false, message = "فشل تحديث حالة المستخدم" });
+        //}
 
         [HttpPost]
         [ValidateAntiForgeryToken]
