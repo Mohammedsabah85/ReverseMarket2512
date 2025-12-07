@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using ReverseMarket.Models;
+using ReverseMarket.Models.Identity;
 
 namespace ReverseMarket.Models
 {
@@ -52,5 +53,6 @@ namespace ReverseMarket.Models
         public string? PendingWebsiteUrl1 { get; set; }
         public string? PendingWebsiteUrl2 { get; set; }
         public string? PendingWebsiteUrl3 { get; set; }
+        public UserType UserType { get; internal set; }
     }
 }

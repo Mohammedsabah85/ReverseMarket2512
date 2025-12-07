@@ -532,6 +532,8 @@ namespace ReverseMarket.Controllers
 
             return View(new CreateAccountViewModel());
         }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateAccount(CreateAccountViewModel model)
@@ -568,6 +570,45 @@ namespace ReverseMarket.Controllers
                     }
                 }
 
+                // ✅ 1. التحقق من نوع المستخدم
+                if (model.UserType != UserType.Buyer && model.UserType != UserType.Seller)
+                {
+                    ModelState.AddModelError("UserType", "يجب اختيار نوع الحساب (مشتري أو بائع)");
+                    ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+                    return View(model);
+                }
+
+                // ✅ 2. إذا كان مشتري، تأكد من عدم إدخال معلومات متجر
+                if (model.UserType == UserType.Buyer)
+                {
+                    if (!string.IsNullOrEmpty(model.StoreName) ||
+                        !string.IsNullOrEmpty(model.StoreDescription) ||
+                        !string.IsNullOrEmpty(model.StoreCategories))
+                    {
+                        ModelState.AddModelError("", "المشترون لا يمكنهم إضافة متجر. يرجى اختيار نوع البائع إذا كنت تريد إنشاء متجر.");
+                        ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+                        return View(model);
+                    }
+                }
+
+                // ✅ 3. إذا كان بائع، تأكد من إدخال معلومات المتجر
+                if (model.UserType == UserType.Seller)
+                {
+                    if (string.IsNullOrEmpty(model.StoreName))
+                    {
+                        ModelState.AddModelError("StoreName", "اسم المتجر مطلوب للبائعين");
+                        ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+                        return View(model);
+                    }
+
+                    if (string.IsNullOrEmpty(model.StoreCategories))
+                    {
+                        ModelState.AddModelError("StoreCategories", "يجب اختيار تخصص واحد على الأقل للمتجر");
+                        ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+                        return View(model);
+                    }
+                }
+
                 // Create new user
                 var user = new ApplicationUser
                 {
@@ -581,17 +622,22 @@ namespace ReverseMarket.Controllers
                     District = model.District,
                     Location = model.Location,
                     Email = model.Email,
-                    UserType = model.UserType,
-                    StoreName = model.StoreName,
-                    StoreDescription = model.StoreDescription,
-                    WebsiteUrl1 = model.WebsiteUrl1,
-                    WebsiteUrl2 = model.WebsiteUrl2,
-                    WebsiteUrl3 = model.WebsiteUrl3,
+                    UserType = model.UserType, // ✅ نوع الحساب يُحدد هنا ولا يمكن تغييره
+
+                    // ✅ 4. معلومات المتجر فقط للبائعين
+                    StoreName = model.UserType == UserType.Seller ? model.StoreName : null,
+                    StoreDescription = model.UserType == UserType.Seller ? model.StoreDescription : null,
+                    WebsiteUrl1 = model.UserType == UserType.Seller ? model.WebsiteUrl1 : null,
+                    WebsiteUrl2 = model.UserType == UserType.Seller ? model.WebsiteUrl2 : null,
+                    WebsiteUrl3 = model.UserType == UserType.Seller ? model.WebsiteUrl3 : null,
+
                     PhoneNumberConfirmed = true,
                     IsPhoneVerified = true,
                     IsActive = true,
-                    // إضافة حقل الموافقة على المتجر
+
+                    // ✅ 5. حالة الموافقة على المتجر
                     IsStoreApproved = model.UserType == UserType.Buyer ? true : false, // المشترون تلقائي، البائعون يحتاجون موافقة
+
                     CreatedAt = DateTime.Now
                 };
 
@@ -618,10 +664,12 @@ namespace ReverseMarket.Controllers
                 new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
                 new Claim(ClaimTypes.GivenName, user.FirstName),
                 new Claim(ClaimTypes.Surname, user.LastName),
-                new Claim("UserType", user.UserType.ToString())
+                new Claim("UserType", user.UserType.ToString()) // ✅ حفظ نوع المستخدم في Claims
             };
 
                     await _userManager.AddClaimsAsync(user, claims);
+
+                    // ✅ 6. إضافة فئات المتجر فقط للبائعين
                     if (model.UserType == UserType.Seller && !string.IsNullOrWhiteSpace(model.StoreCategories))
                     {
                         try
@@ -658,64 +706,20 @@ namespace ReverseMarket.Controllers
                         }
                     }
 
-                    // Add store categories for sellers
-                    //////////if (model.UserType == UserType.Seller && model.StoreCategories?.Any() == true)
-                    //////////{
-                    //////////    foreach (var subCategory2IdStr in model.StoreCategories)
-                    //////////    {
-                    //////////        if (int.TryParse(subCategory2IdStr.ToString(), out int subCategory2Id))
-                    //////////        {
-                    //////////            // جلب SubCategory2 للحصول على المعلومات الكاملة
-                    //////////            var subCategory2 = await _context.SubCategories2
-                    //////////                .Include(sc2 => sc2.SubCategory1)
-                    //////////                .FirstOrDefaultAsync(sc2 => sc2.Id == subCategory2Id);
-
-                    //////////            if (subCategory2 != null)
-                    //////////            {
-                    //////////                var storeCategory = new StoreCategory
-                    //////////                {
-                    //////////                    UserId = user.Id,
-                    //////////                    CategoryId = subCategory2.SubCategory1.CategoryId,
-                    //////////                    SubCategory1Id = subCategory2.SubCategory1Id,
-                    //////////                    SubCategory2Id = subCategory2.Id,
-                    //////////                    CreatedAt = DateTime.Now
-                    //////////                };
-                    //////////                _context.StoreCategories.Add(storeCategory);
-                    //////////            }
-                    //////////        }
-                    //////////    }
-                    //////////    await _context.SaveChangesAsync();
-                    //////////}
-
-                    //if (model.UserType == UserType.Seller && model.StoreCategories?.Any() == true)
-                    //{
-                    //    foreach (var categoryId in model.StoreCategories)
-                    //    {
-                    //        var storeCategory = new StoreCategory
-                    //        {
-                    //            UserId = user.Id,
-                    //            CategoryId = categoryId,
-                    //            CreatedAt = DateTime.Now
-                    //        };
-                    //        _context.StoreCategories.Add(storeCategory);
-                    //    }
-                    //    await _context.SaveChangesAsync();
-                    //}
-
-                    // Sign in the user مع isPersistent = true للحفاظ على الجلسة
+                    // Sign in the user
                     await _signInManager.SignInAsync(user, isPersistent: true);
 
                     // Clear session
                     ClearVerificationSession();
 
-                    // رسالة مختلفة حسب نوع المستخدم
+                    // ✅ 7. رسالة مختلفة حسب نوع المستخدم
                     if (model.UserType == UserType.Seller)
                     {
                         TempData["WarningMessage"] = $"مرحباً بك {user.FirstName}! تم إنشاء حسابك بنجاح. متجرك قيد المراجعة من الإدارة.";
                     }
                     else
                     {
-                        TempData["SuccessMessage"] = $"مرحباً بك {user.FirstName}! تم إنشاء حسابك بنجاح";
+                        TempData["SuccessMessage"] = $"مرحباً بك {user.FirstName}! تم إنشاء حسابك بنجاح كمشتري";
                     }
 
                     return RedirectToAction("Index", "Home");
@@ -732,6 +736,206 @@ namespace ReverseMarket.Controllers
             ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
             return View(model);
         }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> CreateAccount(CreateAccountViewModel model)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        var phoneNumber = HttpContext.Session.GetString("PhoneNumber");
+        //        var phoneVerified = HttpContext.Session.GetString("PhoneVerified");
+        //        var loginType = HttpContext.Session.GetString("LoginType");
+
+        //        if (string.IsNullOrEmpty(phoneNumber) || phoneVerified != "true" || loginType != "NewUser")
+        //        {
+        //            ModelState.AddModelError("", "جلسة التحقق منتهية الصلاحية");
+        //            return RedirectToAction("Login");
+        //        }
+
+        //        // Check if user already exists
+        //        var existingUser = await _userManager.FindByNameAsync(phoneNumber);
+        //        if (existingUser != null)
+        //        {
+        //            ModelState.AddModelError("", "هذا الرقم مسجل مسبقاً");
+        //            return RedirectToAction("Login");
+        //        }
+
+        //        // Check email uniqueness if provided
+        //        if (!string.IsNullOrEmpty(model.Email))
+        //        {
+        //            var emailExists = await _userManager.FindByEmailAsync(model.Email);
+        //            if (emailExists != null)
+        //            {
+        //                ModelState.AddModelError("Email", "هذا البريد الإلكتروني مستخدم مسبقاً");
+        //                ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+        //                return View(model);
+        //            }
+        //        }
+
+        //        // Create new user
+        //        var user = new ApplicationUser
+        //        {
+        //            UserName = phoneNumber,
+        //            PhoneNumber = phoneNumber,
+        //            FirstName = model.FirstName,
+        //            LastName = model.LastName,
+        //            DateOfBirth = model.DateOfBirth,
+        //            Gender = model.Gender,
+        //            City = model.City,
+        //            District = model.District,
+        //            Location = model.Location,
+        //            Email = model.Email,
+        //            UserType = model.UserType,
+        //            StoreName = model.StoreName,
+        //            StoreDescription = model.StoreDescription,
+        //            WebsiteUrl1 = model.WebsiteUrl1,
+        //            WebsiteUrl2 = model.WebsiteUrl2,
+        //            WebsiteUrl3 = model.WebsiteUrl3,
+        //            PhoneNumberConfirmed = true,
+        //            IsPhoneVerified = true,
+        //            IsActive = true,
+        //            // إضافة حقل الموافقة على المتجر
+        //            IsStoreApproved = model.UserType == UserType.Buyer ? true : false, // المشترون تلقائي، البائعون يحتاجون موافقة
+        //            CreatedAt = DateTime.Now
+        //        };
+
+        //        // Save profile image if provided
+        //        if (model.ProfileImage != null)
+        //        {
+        //            var imagePath = await SaveProfileImageAsync(model.ProfileImage);
+        //            user.ProfileImage = imagePath;
+        //        }
+
+        //        // Create user with a temporary password
+        //        var result = await _userManager.CreateAsync(user, "TempPassword@123");
+
+        //        if (result.Succeeded)
+        //        {
+        //            // Assign role based on user type
+        //            var roleName = model.UserType == UserType.Seller ? "Seller" : "Buyer";
+        //            await _userManager.AddToRoleAsync(user, roleName);
+
+        //            // Add claims
+        //            var claims = new List<Claim>
+        //    {
+        //        new Claim("PhoneNumberConfirmed", "true"),
+        //        new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
+        //        new Claim(ClaimTypes.GivenName, user.FirstName),
+        //        new Claim(ClaimTypes.Surname, user.LastName),
+        //        new Claim("UserType", user.UserType.ToString())
+        //    };
+
+        //            await _userManager.AddClaimsAsync(user, claims);
+        //            if (model.UserType == UserType.Seller && !string.IsNullOrWhiteSpace(model.StoreCategories))
+        //            {
+        //                try
+        //                {
+        //                    var categoryIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(model.StoreCategories);
+
+        //                    if (categoryIds != null && categoryIds.Any())
+        //                    {
+        //                        foreach (var subCategory2Id in categoryIds)
+        //                        {
+        //                            var subCategory2 = await _context.SubCategories2
+        //                                .Include(sc2 => sc2.SubCategory1)
+        //                                .FirstOrDefaultAsync(sc2 => sc2.Id == subCategory2Id);
+
+        //                            if (subCategory2 != null)
+        //                            {
+        //                                var storeCategory = new StoreCategory
+        //                                {
+        //                                    UserId = user.Id,
+        //                                    CategoryId = subCategory2.SubCategory1.CategoryId,
+        //                                    SubCategory1Id = subCategory2.SubCategory1Id,
+        //                                    SubCategory2Id = subCategory2.Id,
+        //                                    CreatedAt = DateTime.Now
+        //                                };
+        //                                _context.StoreCategories.Add(storeCategory);
+        //                            }
+        //                        }
+        //                        await _context.SaveChangesAsync();
+        //                    }
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    _logger.LogError(ex, "خطأ في معالجة فئات المتجر");
+        //                }
+        //            }
+
+        //            // Add store categories for sellers
+        //            //////////if (model.UserType == UserType.Seller && model.StoreCategories?.Any() == true)
+        //            //////////{
+        //            //////////    foreach (var subCategory2IdStr in model.StoreCategories)
+        //            //////////    {
+        //            //////////        if (int.TryParse(subCategory2IdStr.ToString(), out int subCategory2Id))
+        //            //////////        {
+        //            //////////            // جلب SubCategory2 للحصول على المعلومات الكاملة
+        //            //////////            var subCategory2 = await _context.SubCategories2
+        //            //////////                .Include(sc2 => sc2.SubCategory1)
+        //            //////////                .FirstOrDefaultAsync(sc2 => sc2.Id == subCategory2Id);
+
+        //            //////////            if (subCategory2 != null)
+        //            //////////            {
+        //            //////////                var storeCategory = new StoreCategory
+        //            //////////                {
+        //            //////////                    UserId = user.Id,
+        //            //////////                    CategoryId = subCategory2.SubCategory1.CategoryId,
+        //            //////////                    SubCategory1Id = subCategory2.SubCategory1Id,
+        //            //////////                    SubCategory2Id = subCategory2.Id,
+        //            //////////                    CreatedAt = DateTime.Now
+        //            //////////                };
+        //            //////////                _context.StoreCategories.Add(storeCategory);
+        //            //////////            }
+        //            //////////        }
+        //            //////////    }
+        //            //////////    await _context.SaveChangesAsync();
+        //            //////////}
+
+        //            //if (model.UserType == UserType.Seller && model.StoreCategories?.Any() == true)
+        //            //{
+        //            //    foreach (var categoryId in model.StoreCategories)
+        //            //    {
+        //            //        var storeCategory = new StoreCategory
+        //            //        {
+        //            //            UserId = user.Id,
+        //            //            CategoryId = categoryId,
+        //            //            CreatedAt = DateTime.Now
+        //            //        };
+        //            //        _context.StoreCategories.Add(storeCategory);
+        //            //    }
+        //            //    await _context.SaveChangesAsync();
+        //            //}
+
+        //            // Sign in the user مع isPersistent = true للحفاظ على الجلسة
+        //            await _signInManager.SignInAsync(user, isPersistent: true);
+
+        //            // Clear session
+        //            ClearVerificationSession();
+
+        //            // رسالة مختلفة حسب نوع المستخدم
+        //            if (model.UserType == UserType.Seller)
+        //            {
+        //                TempData["WarningMessage"] = $"مرحباً بك {user.FirstName}! تم إنشاء حسابك بنجاح. متجرك قيد المراجعة من الإدارة.";
+        //            }
+        //            else
+        //            {
+        //                TempData["SuccessMessage"] = $"مرحباً بك {user.FirstName}! تم إنشاء حسابك بنجاح";
+        //            }
+
+        //            return RedirectToAction("Index", "Home");
+        //        }
+        //        else
+        //        {
+        //            foreach (var error in result.Errors)
+        //            {
+        //                ModelState.AddModelError("", error.Description);
+        //            }
+        //        }
+        //    }
+
+        //    ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+        //    return View(model);
+        //}
         //[HttpPost]
         //[ValidateAntiForgeryToken]
         //public async Task<IActionResult> CreateAccount(CreateAccountViewModel model)

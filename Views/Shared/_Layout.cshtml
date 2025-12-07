@@ -1,8 +1,11 @@
 @using Microsoft.Extensions.Localization
 @using ReverseMarket.Services
 @using ReverseMarket.Resources
+@using Microsoft.AspNetCore.Identity
+@using ReverseMarket.Models.Identity
 @inject IStringLocalizer<SharedResource> Localizer
 @inject ILanguageService LanguageService
+@inject UserManager<ApplicationUser> UserManager
 
 @{
     var currentLanguage = LanguageService.GetCurrentLanguage();
@@ -16,6 +19,21 @@
     var isLoggedIn = User.Identity?.IsAuthenticated ?? false;
     var userName = isLoggedIn ? (User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? User.Identity?.Name) : null;
     var isAdmin = isLoggedIn && User.IsInRole("Admin");
+
+    // ✅ جلب نوع المستخدم الحالي
+    ApplicationUser currentUser = null;
+    var isBuyer = false;
+    var isSeller = false;
+
+    if (isLoggedIn && !isAdmin)
+    {
+        currentUser = await UserManager.GetUserAsync(User);
+        if (currentUser != null)
+        {
+            isBuyer = currentUser.UserType == UserType.Buyer;
+            isSeller = currentUser.UserType == UserType.Seller;
+        }
+    }
 }
 
 <!DOCTYPE html>
@@ -182,28 +200,6 @@
                     <!-- القوائم الثانوية -->
                     <ul class="navbar-nav">
                         <!-- جرس الإشعارات -->
-                   @*      @if (isLoggedIn)
-                        {
-                            <li class="nav-item">
-                                <a href="/Notifications" class="nav-link notification-bell position-relative">
-                                    <i class="fas fa-bell @(direction == "rtl" ? "ms-2" : "me-2")"></i>
-                                    <span class="d-lg-none">@Localizer["Notifications"]</span>
-                                    <span class="badge bg-danger rounded-pill" id="notification-badge" style="display: none;">0</span>
-                                </a>
-                            </li>
-                        } *@
-@* 
-                        @if (isLoggedIn)
-                        {
-                            <li class="nav-item">
-                                <a href="/Notifications" class="nav-link notification-bell position-relative">
-                                    <i class="fas fa-bell"></i>
-                                    <span class="d-lg-none">@Localizer["Notifications"]</span>
-                                    <span class="notification-badge" id="notification-badge" style="display: none;">0</span>
-                                </a>
-                            </li>
-                        } *@
-
                         @if (isLoggedIn)
                         {
                             <li class="nav-item dropdown">
@@ -256,110 +252,6 @@
                                 </div>
                             </li>
                         }
-              @*           @if (isLoggedIn)
-                        {
-                            <li class="nav-item dropdown">
-                                <a href="javascript:void(0);"
-                                   class="nav-link notification-bell position-relative"
-                                   id="notificationDropdown"
-                                   data-bs-toggle="dropdown"
-                                   data-bs-auto-close="outside"
-                                   aria-expanded="false"
-                                   role="button">
-                                    <i class="fas fa-bell"></i>
-                                    <span class="d-lg-none">@Localizer["Notifications"]</span>
-                                    <span class="notification-badge" id="notification-badge" style="display: none;">0</span>
-                                </a>
-
-                                <!-- Dropdown Menu للإشعارات -->
-                                <div class="dropdown-menu dropdown-menu-end shadow-lg notification-dropdown"
-                                     aria-labelledby="notificationDropdown"
-                                     style="width: 380px; max-height: 500px;">
-
-                                    <!-- Header -->
-                                    <div class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
-                                        <div>
-                                            <i class="fas fa-bell text-primary"></i>
-                                            <strong>الإشعارات</strong>
-                                        </div>
-                                        <div>
-                                            <a href="/Notifications" class="btn btn-sm btn-link text-decoration-none">
-                                                عرض الكل
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                    <!-- قائمة الإشعارات -->
-                                    <div id="notification-list" style="max-height: 350px; overflow-y: auto;">
-                                        <div class="text-center p-4 text-muted">
-                                            <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
-                                            <p class="mb-0">جاري تحميل الإشعارات...</p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Footer -->
-                                    <div class="dropdown-divider m-0"></div>
-                                    <div class="text-center py-2">
-                                        <button type="button"
-                                                onclick="notificationManager.markAllAsRead()"
-                                                class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-check-double"></i> تحديد الكل كمقروء
-                                        </button>
-                                    </div>
-                                </div>
-                            </li>
-                        } *@
-@* 
-                        @if (isLoggedIn)
-                        {
-                            <li class="nav-item dropdown">
-                                <a href="#" class="nav-link notification-bell position-relative"
-                                   id="notificationDropdown"
-                                   data-bs-toggle="dropdown"
-                                   aria-expanded="false">
-                                    <i class="fas fa-bell"></i>
-                                    <span class="d-lg-none">@Localizer["Notifications"]</span>
-                                    <span class="notification-badge" id="notification-badge" style="display: none;">0</span>
-                                </a>
-
-                                <!-- Dropdown Menu للإشعارات -->
-                                <div class="dropdown-menu dropdown-menu-end shadow-lg"
-                                     aria-labelledby="notificationDropdown"
-                                     style="width: 380px; max-height: 500px;">
-
-                                    <!-- Header -->
-                                    <div class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
-                                        <div>
-                                            <i class="fas fa-bell text-primary"></i>
-                                            <strong>الإشعارات</strong>
-                                        </div>
-                                        <div>
-                                            <a href="/Notifications" class="btn btn-sm btn-link text-decoration-none">
-                                                عرض الكل
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                    <!-- قائمة الإشعارات -->
-                                    <div id="notification-list" style="max-height: 350px; overflow-y: auto;">
-                                        <div class="text-center p-4 text-muted">
-                                            <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
-                                            <p class="mb-0">جاري تحميل الإشعارات...</p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Footer -->
-                                    <div class="dropdown-divider m-0"></div>
-                                    <div class="text-center py-2">
-                                        <button onclick="notificationManager.markAllAsRead()"
-                                                class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-check-double"></i> تحديد الكل كمقروء
-                                        </button>
-                                    </div>
-                                </div>
-                            </li>
-                        }
- *@
 
                         <!-- قائمة اللغات - محسنة -->
                         <li class="nav-item dropdown language-selector">
@@ -421,18 +313,24 @@
                                                 @Localizer["Profile"]
                                             </a>
                                         </li>
-                                        <li>
-                                            <a class="dropdown-item" href="/Requests/Create">
-                                                <i class="fas fa-plus @(direction == "rtl" ? "ms-2" : "me-2")"></i>
-                                                @Localizer["AddRequest"]
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="/Profile/MyRequests">
-                                                <i class="fas fa-list-alt @(direction == "rtl" ? "ms-2" : "me-2")"></i>
-                                                @Localizer["MyRequests"]
-                                            </a>
-                                        </li>
+
+                                        @* ✅ إظهار "إضافة طلب" و "طلباتي" فقط للمشترين *@
+                                        @if (isBuyer)
+                                        {
+                                            <li>
+                                                <a class="dropdown-item" href="/Requests/Create">
+                                                    <i class="fas fa-plus @(direction == "rtl" ? "ms-2" : "me-2")"></i>
+                                                    @Localizer["AddRequest"]
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="/Profile/MyRequests">
+                                                    <i class="fas fa-list-alt @(direction == "rtl" ? "ms-2" : "me-2")"></i>
+                                                    @Localizer["MyRequests"]
+                                                </a>
+                                            </li>
+                                        }
+
                                         <li>
                                             <a class="dropdown-item" href="/Chat">
                                                 <i class="fas fa-comments @(direction == "rtl" ? "ms-2" : "me-2")"></i>
@@ -461,8 +359,9 @@
                         }
                         else
                         {
+                            @* ✅ زر "إضافة طلب" فقط لغير المسجلين *@
                             <li class="nav-item">
-                                <a class="nav-link" href="/Requests/Create">
+                                <a class="nav-link" href="/Account/Login">
                                     <i class="fas fa-plus @(direction == "rtl" ? "ms-2" : "me-2")"></i>
                                     @Localizer["AddRequest"]
                                 </a>

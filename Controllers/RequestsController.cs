@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿// Controllers/RequestsController.cs - النسخة المحدثة
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReverseMarket.Data;
@@ -139,6 +140,29 @@ namespace ReverseMarket.Controllers
         [Authorize]
         public async Task<IActionResult> Create()
         {
+            // ✅ التحقق من نوع المستخدم - فقط المشترين يمكنهم إضافة طلبات
+            var userId = GetCurrentUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["ErrorMessage"] = "جلسة المستخدم منتهية الصلاحية";
+                return RedirectToAction("Login", "Account");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "المستخدم غير موجود";
+                return RedirectToAction("Login", "Account");
+            }
+
+            // ✅ منع البائعين من إضافة طلبات
+            if (user.UserType != UserType.Buyer)
+            {
+                TempData["ErrorMessage"] = "عذراً، إضافة الطلبات متاحة للمشترين فقط. البائعون يستطيعون الرد على الطلبات الموجودة.";
+                return RedirectToAction("Index");
+            }
+
             ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
             return View();
         }
@@ -155,6 +179,14 @@ namespace ReverseMarket.Controllers
                 {
                     TempData["ErrorMessage"] = "جلسة المستخدم منتهية الصلاحية";
                     return RedirectToAction("Login", "Account");
+                }
+
+                // ✅ التحقق المزدوج من نوع المستخدم
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null || user.UserType != UserType.Buyer)
+                {
+                    TempData["ErrorMessage"] = "عذراً، إضافة الطلبات متاحة للمشترين فقط.";
+                    return RedirectToAction("Index");
                 }
 
                 try
@@ -322,11 +354,12 @@ namespace ReverseMarket.Controllers
                 _logger.LogError(ex, "❌ خطأ في إرسال إشعار للإدارة");
             }
         }
+
         [HttpGet]
         public async Task<IActionResult> GetSubCategories1(int categoryId)
         {
             var subCategories = await _context.SubCategories1
-                .Where(sc => sc.CategoryId == categoryId) // إزالة && sc.IsActive
+                .Where(sc => sc.CategoryId == categoryId)
                 .Select(sc => new { id = sc.Id, name = sc.Name })
                 .ToListAsync();
 
@@ -337,33 +370,11 @@ namespace ReverseMarket.Controllers
         public async Task<IActionResult> GetSubCategories2(int subCategory1Id)
         {
             var subCategories = await _context.SubCategories2
-                .Where(sc => sc.SubCategory1Id == subCategory1Id) // إزالة && sc.IsActive
+                .Where(sc => sc.SubCategory1Id == subCategory1Id)
                 .Select(sc => new { id = sc.Id, name = sc.Name })
                 .ToListAsync();
 
             return Json(subCategories);
         }
-        //[HttpGet]
-        //public async Task<IActionResult> GetSubCategories1(int categoryId)
-        //{
-        //    var subCategories = await _context.SubCategories1
-        //        .Where(sc => sc.CategoryId == categoryId && sc.IsActive)
-        //        .Select(sc => new { id = sc.Id, name = sc.Name })
-        //        .ToListAsync();
-
-        //    return Json(subCategories);
-        //}
-
-        //[HttpGet]
-        //public async Task<IActionResult> GetSubCategories2(int subCategory1Id)
-        //{
-        //    var subCategories = await _context.SubCategories2
-        //        .Where(sc => sc.SubCategory1Id == subCategory1Id && sc.IsActive)
-        //        .Select(sc => new { id = sc.Id, name = sc.Name })
-        //        .ToListAsync();
-
-        //    return Json(subCategories);
-        //}
     }
 }
-
