@@ -1,0 +1,339 @@
+@model ReverseMarket.Areas.Admin.Controllers.AdminChatViewModel
+@{
+    ViewData["Title"] = "عرض المحادثة";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-comments me-2"></i>
+                            محادثة بين المستخدمين
+                        </h4>
+                        <a href="@Url.Action("Index")" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>
+                            العودة للقائمة
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <!-- معلومات المشاركين -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px; font-size: 24px;">
+                                            @(Model.User1?.FirstName?.FirstOrDefault() ?? 'U')
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-1">@Model.User1?.FirstName @Model.User1?.LastName</h5>
+                                            <p class="mb-1 text-muted">
+                                                <i class="fas fa-phone me-1"></i>
+                                                @Model.User1?.PhoneNumber
+                                            </p>
+                                            <span class="badge bg-@(Model.User1?.UserType == ReverseMarket.Models.Identity.UserType.Buyer ? "success" : "warning")">
+                                                @(Model.User1?.UserType == ReverseMarket.Models.Identity.UserType.Buyer ? "مشتري" : "بائع")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px; font-size: 24px;">
+                                            @(Model.User2?.FirstName?.FirstOrDefault() ?? 'U')
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-1">@Model.User2?.FirstName @Model.User2?.LastName</h5>
+                                            <p class="mb-1 text-muted">
+                                                <i class="fas fa-phone me-1"></i>
+                                                @Model.User2?.PhoneNumber
+                                            </p>
+                                            <span class="badge bg-@(Model.User2?.UserType == ReverseMarket.Models.Identity.UserType.Buyer ? "success" : "warning")">
+                                                @(Model.User2?.UserType == ReverseMarket.Models.Identity.UserType.Buyer ? "مشتري" : "بائع")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- إحصائيات المحادثة -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-info text-white text-center">
+                                <div class="card-body">
+                                    <h3>@Model.Messages.Count</h3>
+                                    <small>إجمالي الرسائل</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-warning text-white text-center">
+                                <div class="card-body">
+                                    <h3>@Model.Messages.Count(m => !m.IsRead)</h3>
+                                    <small>رسائل غير مقروءة</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-success text-white text-center">
+                                <div class="card-body">
+                                    <h3>@(Model.Messages.Any() ? Model.Messages.Max(m => m.SentAt).ToString("dd/MM/yyyy") : "-")</h3>
+                                    <small>آخر نشاط</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- الرسائل -->
+                    <div class="chat-container">
+                        <h5 class="mb-3">
+                            <i class="fas fa-envelope me-2"></i>
+                            الرسائل
+                        </h5>
+                        
+                        @if (Model.Messages.Any())
+                        {
+                            <div class="messages-list" style="max-height: 600px; overflow-y: auto; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                                @foreach (var message in Model.Messages)
+                                {
+                                    var isUser1Sender = message.SenderId == Model.User1?.UserName;
+                                    var senderName = isUser1Sender ? $"{Model.User1?.FirstName} {Model.User1?.LastName}" : $"{Model.User2?.FirstName} {Model.User2?.LastName}";
+                                    
+                                    <div class="message-item mb-3 @(isUser1Sender ? "text-end" : "text-start")">
+                                        <div class="d-inline-block" style="max-width: 70%;">
+                                            <div class="message-header mb-1">
+                                                <small class="text-muted">
+                                                    <strong>@senderName</strong>
+                                                    <span class="mx-1">•</span>
+                                                    @message.SentAt.ToString("dd/MM/yyyy HH:mm")
+                                                    @if (!message.IsRead)
+                                                    {
+                                                        <span class="badge bg-warning ms-1">غير مقروءة</span>
+                                                    }
+                                                </small>
+                                            </div>
+                                            <div class="message-content p-3 rounded @(isUser1Sender ? "bg-primary text-white" : "bg-white border")">
+                                                @if (!string.IsNullOrEmpty(message.FilePath))
+                                                {
+                                                    <div class="file-attachment">
+                                                        <i class="fas fa-file me-2"></i>
+                                                        <a href="@message.FilePath" target="_blank" class="@(isUser1Sender ? "text-white" : "text-primary")">
+                                                            ملف مرفق (@message.FileType)
+                                                        </a>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    @message.Message
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">لا توجد رسائل</h5>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- إرسال رسالة من الإدارة -->
+                    <div class="card mt-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                إرسال رسالة من الإدارة
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="adminMessageForm">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">المستلم</label>
+                                        <select class="form-select" id="receiverSelect" required>
+                                            <option value="">-- اختر المستلم --</option>
+                                            <option value="@Model.User1?.UserName">@Model.User1?.FirstName @Model.User1?.LastName</option>
+                                            <option value="@Model.User2?.UserName">@Model.User2?.FirstName @Model.User2?.LastName</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-8 mb-3">
+                                        <label class="form-label">الرسالة</label>
+                                        <textarea class="form-control" id="adminMessage" rows="2" placeholder="اكتب رسالتك هنا..." required></textarea>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-send me-1"></i>
+                                    إرسال
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- الإجراءات -->
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-danger" onclick="deleteConversation('@Model.User1?.UserName', '@Model.User2?.UserName')">
+                            <i class="fas fa-trash me-1"></i>
+                            حذف المحادثة
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // إرسال رسالة من الإدارة
+        $('#adminMessageForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            var receiverId = $('#receiverSelect').val();
+            var message = $('#adminMessage').val();
+            
+            if (!receiverId || !message) {
+                alert('الرجاء تعبئة جميع الحقول');
+                return;
+            }
+            
+            $.post('@Url.Action("SendAdminMessage")', {
+                receiverId: receiverId,
+                message: message,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            })
+            .done(function(response) {
+                if (response.success) {
+                    alert('تم إرسال الرسالة بنجاح');
+                    $('#adminMessage').val('');
+                    location.reload();
+                } else {
+                    alert('خطأ: ' + response.message);
+                }
+            })
+            .fail(function() {
+                alert('حدث خطأ في إرسال الرسالة');
+            });
+        });
+        
+        // حذف المحادثة
+        function deleteConversation(user1, user2) {
+            if (!confirm('هل أنت متأكد من حذف هذه المحادثة؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                return;
+            }
+            
+            $.post('@Url.Action("DeleteConversation")', {
+                user1: user1,
+                user2: user2,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            })
+            .done(function(response) {
+                if (response.success) {
+                    alert('تم حذف المحادثة بنجاح');
+                    window.location.href = '@Url.Action("Index")';
+                } else {
+                    alert('خطأ: ' + response.message);
+                }
+            })
+            .fail(function() {
+                alert('حدث خطأ في حذف المحادثة');
+            });
+        }
+    </script>
+}
+
+<style>
+    .user-avatar {
+        font-weight: bold;
+    }
+    
+    .messages-list {
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e0 #f7fafc;
+    }
+    
+    .messages-list::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .messages-list::-webkit-scrollbar-track {
+        background: #f7fafc;
+        border-radius: 10px;
+    }
+    
+    .messages-list::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 10px;
+    }
+    
+    .messages-list::-webkit-scrollbar-thumb:hover {
+        background: #a0aec0;
+    }
+    
+    .message-item {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .message-content {
+        word-wrap: break-word;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .file-attachment a {
+        text-decoration: none;
+    }
+    
+    .file-attachment a:hover {
+        text-decoration: underline;
+    }
+    
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+</style>
+
+@Html.AntiForgeryToken()

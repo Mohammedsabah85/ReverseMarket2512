@@ -19,8 +19,8 @@ namespace ReverseMarket.Areas.Admin.Controllers
         private readonly ILogger<ChatController> _logger;
 
         public ChatController(
-            ApplicationDbContext context, 
-            UserManager<ApplicationUser> userManager, 
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
             IHubContext<ChatHub> hubContext,
             ILogger<ChatController> logger)
         {
@@ -37,11 +37,25 @@ namespace ReverseMarket.Areas.Admin.Controllers
         {
             try
             {
-                // جلب جميع المحادثات مع معلومات المستخدمين
-                var conversations = await _context.ChatMessages
-                    .GroupBy(m => new { 
-                        User1 = m.SenderId.CompareTo(m.ReceiverId) < 0 ? m.SenderId : m.ReceiverId,
-                        User2 = m.SenderId.CompareTo(m.ReceiverId) < 0 ? m.ReceiverId : m.SenderId
+                // ✅ الحل: جلب جميع الرسائل أولاً ثم المعالجة في الذاكرة
+                var allMessages = await _context.ChatMessages
+                    .OrderByDescending(m => m.SentAt)
+                    .ToListAsync();
+
+                if (!allMessages.Any())
+                {
+                    TempData["ErrorMessage"] = "لا توجد محادثات في النظام";
+                    return View(new List<AdminConversationViewModel>());
+                }
+
+                // تجميع المحادثات في الذاكرة (بدلاً من SQL)
+                var conversations = allMessages
+                    .GroupBy(m => new
+                    {
+                        User1 = string.Compare(m.SenderId, m.ReceiverId, StringComparison.Ordinal) < 0
+                            ? m.SenderId : m.ReceiverId,
+                        User2 = string.Compare(m.SenderId, m.ReceiverId, StringComparison.Ordinal) < 0
+                            ? m.ReceiverId : m.SenderId
                     })
                     .Select(g => new
                     {
@@ -49,13 +63,17 @@ namespace ReverseMarket.Areas.Admin.Controllers
                         User2 = g.Key.User2,
                         LastMessage = g.OrderByDescending(m => m.SentAt).First(),
                         MessageCount = g.Count(),
-                        UnreadCount = g.Count(m => !m.IsRead && m.ReceiverId != User.Identity.Name)
+                        UnreadCount = g.Count(m => !m.IsRead)
                     })
                     .OrderByDescending(c => c.LastMessage.SentAt)
-                    .ToListAsync();
+                    .ToList();
 
                 // جلب معلومات المستخدمين
-                var userIds = conversations.SelectMany(c => new[] { c.User1, c.User2 }).Distinct().ToList();
+                var userIds = conversations
+                    .SelectMany(c => new[] { c.User1, c.User2 })
+                    .Distinct()
+                    .ToList();
+
                 var users = await _userManager.Users
                     .Where(u => userIds.Contains(u.UserName))
                     .ToDictionaryAsync(u => u.UserName, u => u);
@@ -76,7 +94,7 @@ namespace ReverseMarket.Areas.Admin.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "خطأ في جلب المحادثات");
-                TempData["ErrorMessage"] = "حدث خطأ في جلب المحادثات";
+                TempData["ErrorMessage"] = $"حدث خطأ في جلب المحادثات: {ex.Message}";
                 return View(new List<AdminConversationViewModel>());
             }
         }
@@ -116,7 +134,7 @@ namespace ReverseMarket.Areas.Admin.Controllers
                     User1 = userInfo1,
                     User2 = userInfo2,
                     Messages = messages,
-                    CurrentAdminId = User.Identity.Name
+                    CurrentAdminId = User.Identity?.Name ?? string.Empty
                 };
 
                 return View(viewModel);
@@ -143,7 +161,7 @@ namespace ReverseMarket.Areas.Admin.Controllers
                     return Json(new { success = false, message = "البيانات غير مكتملة" });
                 }
 
-                var adminId = User.Identity.Name;
+                var adminId = User.Identity?.Name ?? string.Empty;
                 var receiver = await _userManager.FindByNameAsync(receiverId);
 
                 if (receiver == null)
@@ -166,7 +184,7 @@ namespace ReverseMarket.Areas.Admin.Controllers
 
                 // إرسال الرسالة عبر SignalR
                 await _hubContext.Clients.User(receiverId)
-                    .SendAsync("ReceiveMessage", adminId, chatMessage.Message, 
+                    .SendAsync("ReceiveMessage", adminId, chatMessage.Message,
                               chatMessage.SentAt.ToString("HH:mm"), null, null);
 
                 _logger.LogInformation("تم إرسال رسالة من الإدارة {AdminId} إلى {ReceiverId}", adminId, receiverId);
@@ -204,8 +222,8 @@ namespace ReverseMarket.Areas.Admin.Controllers
                     _context.ChatMessages.RemoveRange(messages);
                     await _context.SaveChangesAsync();
 
-                    _logger.LogInformation("تم حذف المحادثة بين {User1} و {User2} بواسطة الإدارة {AdminId}", 
-                                         user1, user2, User.Identity.Name);
+                    _logger.LogInformation("تم حذف المحادثة بين {User1} و {User2} بواسطة الإدارة {AdminId}",
+                                         user1, user2, User.Identity?.Name ?? "Unknown");
                 }
 
                 return Json(new { success = true, message = "تم حذف المحادثة بنجاح" });
@@ -225,26 +243,34 @@ namespace ReverseMarket.Areas.Admin.Controllers
         {
             try
             {
+                // جلب جميع الرسائل للمعالجة في الذاكرة
+                var allMessages = await _context.ChatMessages.ToListAsync();
+
+                var uniqueConversations = allMessages
+                    .GroupBy(m => new
+                    {
+                        User1 = string.Compare(m.SenderId, m.ReceiverId, StringComparison.Ordinal) < 0
+                            ? m.SenderId : m.ReceiverId,
+                        User2 = string.Compare(m.SenderId, m.ReceiverId, StringComparison.Ordinal) < 0
+                            ? m.ReceiverId : m.SenderId
+                    })
+                    .Count();
+
+                var todayMessages = allMessages
+                    .Count(m => m.SentAt.Date == DateTime.Today);
+
+                var activeUsersToday = allMessages
+                    .Where(m => m.SentAt.Date == DateTime.Today)
+                    .Select(m => m.SenderId)
+                    .Distinct()
+                    .Count();
+
                 var stats = new
                 {
-                    TotalConversations = await _context.ChatMessages
-                        .GroupBy(m => new { 
-                            User1 = m.SenderId.CompareTo(m.ReceiverId) < 0 ? m.SenderId : m.ReceiverId,
-                            User2 = m.SenderId.CompareTo(m.ReceiverId) < 0 ? m.ReceiverId : m.SenderId
-                        })
-                        .CountAsync(),
-                    
-                    TotalMessages = await _context.ChatMessages.CountAsync(),
-                    
-                    TodayMessages = await _context.ChatMessages
-                        .Where(m => m.SentAt.Date == DateTime.Today)
-                        .CountAsync(),
-                    
-                    ActiveUsersToday = await _context.ChatMessages
-                        .Where(m => m.SentAt.Date == DateTime.Today)
-                        .Select(m => m.SenderId)
-                        .Distinct()
-                        .CountAsync()
+                    TotalConversations = uniqueConversations,
+                    TotalMessages = allMessages.Count,
+                    TodayMessages = todayMessages,
+                    ActiveUsersToday = activeUsersToday
                 };
 
                 return Json(stats);
@@ -260,8 +286,8 @@ namespace ReverseMarket.Areas.Admin.Controllers
     // ViewModels للإدارة
     public class AdminConversationViewModel
     {
-        public string User1Id { get; set; } = "";
-        public string User2Id { get; set; } = "";
+        public string User1Id { get; set; } = string.Empty;
+        public string User2Id { get; set; } = string.Empty;
         public ApplicationUser? User1 { get; set; }
         public ApplicationUser? User2 { get; set; }
         public ChatMessage? LastMessage { get; set; }
@@ -274,6 +300,6 @@ namespace ReverseMarket.Areas.Admin.Controllers
         public ApplicationUser User1 { get; set; } = null!;
         public ApplicationUser User2 { get; set; } = null!;
         public List<ChatMessage> Messages { get; set; } = new();
-        public string CurrentAdminId { get; set; } = "";
+        public string CurrentAdminId { get; set; } = string.Empty;
     }
 }
