@@ -179,7 +179,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label asp-for="StoreName" class="form-label">@Localizer["StoreName"] *</label>
-                                <input asp-for="StoreName" class="form-control" placeholder="@Localizer["YourStoreName"]">
+                                <input asp-for="StoreName" class="form-control" placeholder="@Localizer["YourStoreName"]" id="storeNameInput">
                                 <span asp-validation-for="StoreName" class="text-danger"></span>
                             </div>
 
@@ -211,46 +211,20 @@
 
                             <div class="col-md-4">
                                 <label for="subCategory2Select" class="form-label">التخصص الدقيق *</label>
-                                <select id="subCategory2Select" class="form-control" disabled multiple>
+                                <select id="subCategory2Select" class="form-control" disabled multiple size="5">
                                     <option value="">اختر التخصص الدقيق</option>
                                 </select>
                                 <div class="form-text">يمكنك اختيار أكثر من تخصص (استخدم Ctrl للاختيار المتعدد)</div>
                             </div>
-                    @*         <!-- Cascading Category Selection -->
-                            <div class="col-md-4">
-                                <label for="categorySelect" class="form-label">الفئة الأساسية *</label>
-                                <select id="categorySelect" class="form-control" required>
-                                    <option value="">اختر الفئة الأساسية</option>
-                                    @foreach (var category in ViewBag.Categories as List<Category>)
-                                    {
-                                        <option value="@category.Id">@category.Name</option>
-                                    }
-                                </select>
-                            </div>
 
-                            <div class="col-md-4">
-                                <label for="subCategory1Select" class="form-label">الفئة الفرعية الأولى *</label>
-                                <select id="subCategory1Select" class="form-control" disabled required>
-                                    <option value="">اختر الفئة الفرعية الأولى</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label for="subCategory2Select" class="form-label">التخصص الدقيق *</label>
-                                <select id="subCategory2Select" class="form-control" disabled required multiple>
-                                    <option value="">اختر التخصص الدقيق</option>
-                                </select>
-                                <div class="form-text">يمكنك اختيار أكثر من تخصص (استخدم Ctrl للاختيار المتعدد)</div>
-                            </div>
- *@
                             <!-- Hidden field to store selected SubCategory2 IDs -->
                             <input type="hidden" asp-for="StoreCategories" id="storeCategoriesHidden" />
                             <span asp-validation-for="StoreCategories" class="text-danger"></span>
 
                             <div class="col-12" id="selectedCategoriesDisplay">
                                 <div class="alert alert-success" style="display: none;">
-                                    <strong>التخصصات المختارة:</strong>
-                                    <div id="selectedCategoriesList"></div>
+                                    <strong><i class="fas fa-check-circle me-2"></i>التخصصات المختارة:</strong>
+                                    <div id="selectedCategoriesList" class="mt-2"></div>
                                 </div>
                             </div>
 
@@ -408,6 +382,21 @@
         min-height: 120px;
     }
 
+    #selectedCategoriesList ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    #selectedCategoriesList li {
+        padding: 8px 0;
+        border-bottom: 1px dashed #d4edda;
+    }
+
+        #selectedCategoriesList li:last-child {
+            border-bottom: none;
+        }
+
     @@media (max-width: 768px) {
         .progress-step span {
             font-size: 0.8rem;
@@ -422,119 +411,119 @@
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        var selectedCategories = new Map(); // لتخزين الفئات المختارة
+        // ✅ متغير عام لتخزين الفئات المختارة
+        var selectedCategories = new Map();
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Account type selection
-                    // Account type selection
-        document.querySelectorAll('.account-type-card').forEach(card => {
-            card.addEventListener('click', function() {
-                document.querySelectorAll('.account-type-card').forEach(c => {
-                    c.classList.remove('selected');
+
+            // ✅ اختيار نوع الحساب
+            document.querySelectorAll('.account-type-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    // إزالة الاختيار من كل البطاقات
+                    document.querySelectorAll('.account-type-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+
+                    // إضافة الاختيار للبطاقة الحالية
+                    this.classList.add('selected');
+
+                    const userType = this.getAttribute('data-type');
+                    document.getElementById('userTypeInput').value = userType;
+                    const storeInfo = document.getElementById('storeInfo');
+
+                    if (userType === '2') { // Seller - بائع
+                        storeInfo.style.display = 'block';
+                        document.getElementById('storeNameInput').required = true;
+                    } else { // Buyer - مشتري
+                        storeInfo.style.display = 'none';
+                        document.getElementById('storeNameInput').required = false;
+
+                        // ✅ مسح القيم المختارة للفئات عند اختيار مشتري
+                        selectedCategories.clear();
+                        document.getElementById('categorySelect').value = '';
+                        document.getElementById('subCategory1Select').innerHTML = '<option value="">اختر الفئة الفرعية الأولى</option>';
+                        document.getElementById('subCategory1Select').disabled = true;
+                        document.getElementById('subCategory2Select').innerHTML = '<option value="">اختر التخصص الدقيق</option>';
+                        document.getElementById('subCategory2Select').disabled = true;
+                        document.getElementById('storeCategoriesHidden').value = '';
+                        document.querySelector('#selectedCategoriesDisplay .alert').style.display = 'none';
+                    }
                 });
-                this.classList.add('selected');
-                const userType = this.getAttribute('data-type');
-                document.getElementById('userTypeInput').value = userType;
-                const storeInfo = document.getElementById('storeInfo');
-
-                if (userType === '2') { // Seller
-                    storeInfo.style.display = 'block';
-                    // إضافة required لحقول البائع
-                    document.querySelector('[name="StoreName"]').required = true;
-                    document.getElementById('categorySelect').required = true;
-                    document.getElementById('subCategory1Select').required = true;
-                    document.getElementById('subCategory2Select').required = true;
-                } else { // Buyer
-                    storeInfo.style.display = 'none';
-                    // إزالة required من حقول البائع
-                    document.querySelector('[name="StoreName"]').required = false;
-                    document.getElementById('categorySelect').required = false;
-                    document.getElementById('subCategory1Select').required = false;
-                    document.getElementById('subCategory2Select').required = false;
-
-                    // مسح القيم المختارة
-                    selectedCategories.clear();
-                    document.getElementById('categorySelect').value = '';
-                    document.getElementById('subCategory1Select').value = '';
-                    document.getElementById('subCategory2Select').value = '';
-                    $('#storeCategoriesHidden').val('');
-                    $('#selectedCategoriesDisplay .alert').hide();
-                }
             });
-        });
-            // document.querySelectorAll('.account-type-card').forEach(card => {
-            //     card.addEventListener('click', function() {
-            //         document.querySelectorAll('.account-type-card').forEach(c => {
-            //             c.classList.remove('selected');
-            //         });
-            //         this.classList.add('selected');
-            //         const userType = this.getAttribute('data-type');
-            //         document.getElementById('userTypeInput').value = userType;
-            //         const storeInfo = document.getElementById('storeInfo');
-            //         if (userType === '2') {
-            //             storeInfo.style.display = 'block';
-            //             document.querySelector('[name="StoreName"]').required = true;
-            //         } else {
-            //             storeInfo.style.display = 'none';
-            //             document.querySelector('[name="StoreName"]').required = false;
-            //         }
-            //     });
-            // });
 
-            // Cascading dropdowns for categories
+            // ✅ Cascading dropdown - الفئة الأساسية
             $('#categorySelect').change(function() {
                 var categoryId = $(this).val();
-                $('#subCategory1Select').html('<option value="">اختر الفئة الفرعية الأولى</option>').prop('disabled', true);
-                $('#subCategory2Select').html('<option value="">اختر التخصص الدقيق</option>').prop('disabled', true);
+                var $subCategory1 = $('#subCategory1Select');
+                var $subCategory2 = $('#subCategory2Select');
+
+                // إعادة تعيين الفئات الفرعية
+                $subCategory1.html('<option value="">اختر الفئة الفرعية الأولى</option>').prop('disabled', true);
+                $subCategory2.html('<option value="">اختر التخصص الدقيق</option>').prop('disabled', true);
 
                 if (categoryId) {
-                    $.get('/Requests/GetSubCategories1', { categoryId: categoryId }, function(data) {
-                        if (data.length > 0) {
-                            $('#subCategory1Select').prop('disabled', false);
-                            $.each(data, function(i, item) {
-                                $('#subCategory1Select').append($('<option>', {
-                                    value: item.id,
-                                    text: item.name
-                                }));
-                            });
+                    $.ajax({
+                        url: '/Requests/GetSubCategories1',
+                        data: { categoryId: categoryId },
+                        success: function(data) {
+                            if (data && data.length > 0) {
+                                $subCategory1.prop('disabled', false);
+                                $.each(data, function(i, item) {
+                                    $subCategory1.append($('<option>', {
+                                        value: item.id,
+                                        text: item.name
+                                    }));
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('خطأ في جلب الفئات الفرعية:', error);
                         }
                     });
                 }
             });
 
+            // ✅ Cascading dropdown - الفئة الفرعية الأولى
             $('#subCategory1Select').change(function() {
                 var subCategory1Id = $(this).val();
-                $('#subCategory2Select').html('<option value="">اختر التخصص الدقيق</option>').prop('disabled', true);
+                var $subCategory2 = $('#subCategory2Select');
+
+                $subCategory2.html('<option value="">اختر التخصص الدقيق</option>').prop('disabled', true);
 
                 if (subCategory1Id) {
-                    $.get('/Requests/GetSubCategories2', { subCategory1Id: subCategory1Id }, function(data) {
-                        if (data.length > 0) {
-                            $('#subCategory2Select').prop('disabled', false);
-                            $.each(data, function(i, item) {
-                                $('#subCategory2Select').append($('<option>', {
-                                    value: item.id,
-                                    text: item.name
-                                }));
-                            });
+                    $.ajax({
+                        url: '/Requests/GetSubCategories2',
+                        data: { subCategory1Id: subCategory1Id },
+                        success: function(data) {
+                            if (data && data.length > 0) {
+                                $subCategory2.prop('disabled', false);
+                                $.each(data, function(i, item) {
+                                    $subCategory2.append($('<option>', {
+                                        value: item.id,
+                                        text: item.name
+                                    }));
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('خطأ في جلب التخصصات:', error);
                         }
                     });
                 }
             });
 
-            // Handle SubCategory2 selection
+            // ✅ معالجة اختيار التخصص الدقيق (SubCategory2)
             $('#subCategory2Select').change(function() {
                 var selectedOptions = $(this).find('option:selected');
                 var categoryName = $('#categorySelect option:selected').text();
                 var subCategory1Name = $('#subCategory1Select option:selected').text();
-
-                // Clear previous selections from this SubCategory1
                 var currentSubCat1 = $('#subCategory1Select').val();
 
-                // Add newly selected categories
+                // إضافة الفئات المختارة الجديدة
                 selectedOptions.each(function() {
                     var id = $(this).val();
                     var name = $(this).text();
-                    if (id) {
+                    if (id && id !== '') {
                         var fullPath = categoryName + ' > ' + subCategory1Name + ' > ' + name;
                         selectedCategories.set(id, {
                             id: id,
@@ -547,42 +536,19 @@
                 updateSelectedCategoriesDisplay();
             });
 
-            function updateSelectedCategoriesDisplay() {
-                var categoriesArray = Array.from(selectedCategories.values());
-                var ids = categoriesArray.map(c => c.id);
-
-                $('#storeCategoriesHidden').val(JSON.stringify(ids));
-
-                if (categoriesArray.length > 0) {
-                    var html = '<ul class="list-unstyled mb-0">';
-                    categoriesArray.forEach(function(cat) {
-                        html += '<li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i>' + cat.path +
-                                ' <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeCategory(\'' + cat.id + '\')">×</button></li>';
-                    });
-                    html += '</ul>';
-
-                    $('#selectedCategoriesList').html(html);
-                    $('#selectedCategoriesDisplay .alert').show();
-                } else {
-                    $('#selectedCategoriesDisplay .alert').hide();
-                }
-            }
-
-            window.removeCategory = function(id) {
-                selectedCategories.delete(id);
-                updateSelectedCategoriesDisplay();
-            };
-
+            // ✅ التحقق عند إرسال النموذج
             document.getElementById('createAccountForm').addEventListener('submit', function(e) {
                 const userType = document.getElementById('userTypeInput').value;
+
                 if (!userType) {
                     e.preventDefault();
                     showAlert('@Localizer["SelectAccountType"]', 'warning');
                     return false;
                 }
 
+                // التحقق من حقول البائع
                 if (userType === '2') {
-                    const storeName = document.querySelector('[name="StoreName"]').value;
+                    const storeName = document.getElementById('storeNameInput').value;
 
                     if (!storeName.trim()) {
                         e.preventDefault();
@@ -595,6 +561,12 @@
                         showAlert('يرجى اختيار تخصص واحد على الأقل للمتجر', 'warning');
                         return false;
                     }
+
+                    // ✅ تحديث الحقل المخفي قبل الإرسال
+                    var ids = Array.from(selectedCategories.values()).map(c => parseInt(c.id));
+                    document.getElementById('storeCategoriesHidden').value = JSON.stringify(ids);
+
+                    console.log('📤 الفئات المرسلة:', document.getElementById('storeCategoriesHidden').value);
                 }
 
                 const submitBtn = document.getElementById('submitBtn');
@@ -602,15 +574,58 @@
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> @Localizer["CreatingAccount"]';
             });
 
+            // تعيين حدود تاريخ الميلاد
             const dateInput = document.querySelector('[name="DateOfBirth"]');
-            const eighteenYearsAgo = new Date();
-            eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
-            dateInput.max = eighteenYearsAgo.toISOString().split('T')[0];
-            const hundredYearsAgo = new Date();
-            hundredYearsAgo.setFullYear(hundredYearsAgo.getFullYear() - 100);
-            dateInput.min = hundredYearsAgo.toISOString().split('T')[0];
+            if (dateInput) {
+                const eighteenYearsAgo = new Date();
+                eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+                dateInput.max = eighteenYearsAgo.toISOString().split('T')[0];
+
+                const hundredYearsAgo = new Date();
+                hundredYearsAgo.setFullYear(hundredYearsAgo.getFullYear() - 100);
+                dateInput.min = hundredYearsAgo.toISOString().split('T')[0];
+            }
         });
 
+        // ✅ تحديث عرض الفئات المختارة
+        function updateSelectedCategoriesDisplay() {
+            var categoriesArray = Array.from(selectedCategories.values());
+            var ids = categoriesArray.map(c => parseInt(c.id));
+
+            // تحديث الحقل المخفي
+            document.getElementById('storeCategoriesHidden').value = JSON.stringify(ids);
+
+            console.log('📋 الفئات المختارة:', ids);
+
+            if (categoriesArray.length > 0) {
+                var html = '<ul class="list-unstyled mb-0">';
+                categoriesArray.forEach(function(cat) {
+                    html += '<li class="mb-1">' +
+                            '<i class="fas fa-check-circle text-success me-2"></i>' +
+                            cat.path +
+                            ' <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeCategory(\'' + cat.id + '\')">' +
+                            '<i class="fas fa-times"></i>' +
+                            '</button></li>';
+                });
+                html += '</ul>';
+
+                document.getElementById('selectedCategoriesList').innerHTML = html;
+                document.querySelector('#selectedCategoriesDisplay .alert').style.display = 'block';
+            } else {
+                document.querySelector('#selectedCategoriesDisplay .alert').style.display = 'none';
+            }
+        }
+
+        // ✅ إزالة فئة من القائمة
+        function removeCategory(id) {
+            selectedCategories.delete(id);
+            updateSelectedCategoriesDisplay();
+
+            // إلغاء تحديد الخيار في القائمة
+            $('#subCategory2Select option[value="' + id + '"]').prop('selected', false);
+        }
+
+        // معاينة صورة الملف الشخصي
         function previewProfileImage(input) {
             const preview = document.getElementById('preview');
             const previewContainer = document.getElementById('imagePreview');
@@ -635,6 +650,7 @@
             }
         }
 
+        // عرض رسالة تنبيه
         function showAlert(message, type) {
             const alertDiv = document.createElement('div');
             alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
@@ -645,11 +661,13 @@
             `;
             const container = document.querySelector('.container-custom');
             container.insertBefore(alertDiv, container.firstChild);
+
             setTimeout(() => {
                 if (alertDiv.parentNode) {
                     alertDiv.remove();
                 }
             }, 5000);
+
             alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     </script>

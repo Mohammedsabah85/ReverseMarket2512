@@ -6,6 +6,7 @@ using ReverseMarket.Data;
 using ReverseMarket.Models;
 using ReverseMarket.Models.Identity;
 using ReverseMarket.Services;
+using System.Text.Json;
 
 namespace ReverseMarket.Controllers
 {
@@ -153,13 +154,26 @@ namespace ReverseMarket.Controllers
                 return NotFound();
             }
 
+            // ✅ جلب فئات المتجر الحالية للبائعين
+            List<StoreCategoryDisplay>? currentStoreCategories = null;
+            if (user.UserType == UserType.Seller && user.StoreCategories != null && user.StoreCategories.Any())
+            {
+                currentStoreCategories = user.StoreCategories.Select(sc => new StoreCategoryDisplay
+                {
+                    SubCategory2Id = sc.SubCategory2Id ?? 0,
+                    CategoryName = sc.Category?.Name ?? "",
+                    SubCategory1Name = sc.SubCategory1?.Name ?? "",
+                    SubCategory2Name = sc.SubCategory2?.Name ?? ""
+                }).ToList();
+            }
+
             var model = new EditProfileViewModel
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                ProfileImage = user.ProfileImage, // ✅ الصورة الحالية
+                ProfileImage = user.ProfileImage,
                 City = user.City,
                 District = user.District,
                 Location = user.Location,
@@ -178,7 +192,10 @@ namespace ReverseMarket.Controllers
                 HasPendingUrlChanges = user.HasPendingUrlChanges,
                 PendingWebsiteUrl1 = user.PendingWebsiteUrl1,
                 PendingWebsiteUrl2 = user.PendingWebsiteUrl2,
-                PendingWebsiteUrl3 = user.PendingWebsiteUrl3
+                PendingWebsiteUrl3 = user.PendingWebsiteUrl3,
+
+                // ✅ فئات المتجر الحالية
+                CurrentStoreCategories = currentStoreCategories
             };
 
             ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
@@ -192,13 +209,6 @@ namespace ReverseMarket.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditProfileViewModel model)
         {
-            // ✅ إزالة التحقق المعلق
-            // if (!ModelState.IsValid)
-            // {
-            //     ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
-            //     return View(model);
-            // }
-
             var userId = GetCurrentUserId();
             if (string.IsNullOrEmpty(userId))
             {
@@ -301,6 +311,7 @@ namespace ReverseMarket.Controllers
                     ModelState.AddModelError("StoreName", "اسم المتجر مطلوب للبائعين");
                     ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
                     model.UserType = user.UserType;
+                    await LoadCurrentStoreCategories(model, userId);
                     return View(model);
                 }
 
@@ -318,6 +329,52 @@ namespace ReverseMarket.Controllers
                     urlsChanged = true;
 
                     _logger.LogInformation("✅ البائع {UserId} قام بتعديل روابط المتجر. في انتظار موافقة الإدارة.", userId);
+                }
+
+                // ✅ تحديث فئات المتجر
+                if (!string.IsNullOrWhiteSpace(model.StoreCategories))
+                {
+                    try
+                    {
+                        var categoryIds = JsonSerializer.Deserialize<List<int>>(model.StoreCategories);
+
+                        if (categoryIds != null && categoryIds.Any())
+                        {
+                            // حذف الفئات القديمة
+                            var oldCategories = await _context.StoreCategories
+                                .Where(sc => sc.UserId == userId)
+                                .ToListAsync();
+                            _context.StoreCategories.RemoveRange(oldCategories);
+
+                            // إضافة الفئات الجديدة
+                            foreach (var subCategory2Id in categoryIds)
+                            {
+                                var subCategory2 = await _context.SubCategories2
+                                    .Include(sc2 => sc2.SubCategory1)
+                                    .FirstOrDefaultAsync(sc2 => sc2.Id == subCategory2Id);
+
+                                if (subCategory2 != null)
+                                {
+                                    var storeCategory = new StoreCategory
+                                    {
+                                        UserId = userId,
+                                        CategoryId = subCategory2.SubCategory1.CategoryId,
+                                        SubCategory1Id = subCategory2.SubCategory1Id,
+                                        SubCategory2Id = subCategory2.Id,
+                                        CreatedAt = DateTime.Now
+                                    };
+                                    _context.StoreCategories.Add(storeCategory);
+                                }
+                            }
+
+                            _logger.LogInformation("✅ تم تحديث فئات المتجر للبائع {UserId}. عدد الفئات: {Count}",
+                                userId, categoryIds.Count);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "❌ خطأ في معالجة فئات المتجر");
+                    }
                 }
             }
 
@@ -346,7 +403,32 @@ namespace ReverseMarket.Controllers
 
             ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
             model.UserType = user.UserType;
+            await LoadCurrentStoreCategories(model, userId);
             return View(model);
+        }
+
+        /// <summary>
+        /// جلب فئات المتجر الحالية للعرض
+        /// </summary>
+        private async Task LoadCurrentStoreCategories(EditProfileViewModel model, string userId)
+        {
+            var storeCategories = await _context.StoreCategories
+                .Where(sc => sc.UserId == userId)
+                .Include(sc => sc.Category)
+                .Include(sc => sc.SubCategory1)
+                .Include(sc => sc.SubCategory2)
+                .ToListAsync();
+
+            if (storeCategories.Any())
+            {
+                model.CurrentStoreCategories = storeCategories.Select(sc => new StoreCategoryDisplay
+                {
+                    SubCategory2Id = sc.SubCategory2Id ?? 0,
+                    CategoryName = sc.Category?.Name ?? "",
+                    SubCategory1Name = sc.SubCategory1?.Name ?? "",
+                    SubCategory2Name = sc.SubCategory2?.Name ?? ""
+                }).ToList();
+            }
         }
 
         #endregion
@@ -497,6 +579,38 @@ namespace ReverseMarket.Controllers
 
             ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
             return View("ManageStore", await _userManager.FindByIdAsync(userId));
+        }
+
+        #endregion
+
+        #region API Endpoints للفئات
+
+        /// <summary>
+        /// جلب الفئات الفرعية الأولى حسب الفئة الرئيسية
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetSubCategories1(int categoryId)
+        {
+            var subCategories = await _context.SubCategories1
+                .Where(sc => sc.CategoryId == categoryId && sc.IsActive)
+                .Select(sc => new { id = sc.Id, name = sc.Name })
+                .ToListAsync();
+
+            return Json(subCategories);
+        }
+
+        /// <summary>
+        /// جلب الفئات الفرعية الثانية حسب الفئة الفرعية الأولى
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetSubCategories2(int subCategory1Id)
+        {
+            var subCategories = await _context.SubCategories2
+                .Where(sc => sc.SubCategory1Id == subCategory1Id && sc.IsActive)
+                .Select(sc => new { id = sc.Id, name = sc.Name })
+                .ToListAsync();
+
+            return Json(subCategories);
         }
 
         #endregion

@@ -1,17 +1,37 @@
 ﻿@using ReverseMarket.Controllers
+@using ReverseMarket.Models.Identity
 @model EditProfileViewModel
 @{
     ViewData["Title"] = "تعديل الملف الشخصي";
+    var isSeller = Model.UserType == UserType.Seller;
 }
 
 <div class="container-custom">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-10">
             <div class="card-custom">
                 <div class="text-center mb-4">
                     <i class="fas fa-user-edit fa-3x text-primary mb-3"></i>
                     <h1 class="h3 text-primary">تعديل الملف الشخصي</h1>
                     <p class="text-muted">قم بتحديث معلوماتك الشخصية</p>
+
+                    @* عرض نوع المستخدم *@
+                    <div class="mt-2">
+                        @if (isSeller)
+                        {
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-store me-1"></i>
+                                حساب بائع
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-primary fs-6">
+                                <i class="fas fa-shopping-cart me-1"></i>
+                                حساب مشتري
+                            </span>
+                        }
+                    </div>
                 </div>
 
                 <form asp-action="Edit" method="post" id="editProfileForm" enctype="multipart/form-data">
@@ -161,8 +181,8 @@
                         </div>
                     </div>
 
-                    <!-- Store Information (للبائعين فقط) -->
-                    @if (!string.IsNullOrEmpty(Model.StoreName))
+                    @* ✅ قسم معلومات المتجر - للبائعين فقط *@
+                    @if (isSeller)
                     {
                         <div class="form-section">
                             <h5 class="section-title">
@@ -171,16 +191,28 @@
                             </h5>
 
                             <div class="row g-3">
-                                <div class="col-12">
-                                    <label asp-for="StoreName" class="form-label">اسم المتجر</label>
-                                    <input asp-for="StoreName" class="form-control">
+                                <div class="col-md-6">
+                                    <label asp-for="StoreName" class="form-label">اسم المتجر *</label>
+                                    <input asp-for="StoreName" class="form-control" required>
                                     <span asp-validation-for="StoreName" class="text-danger"></span>
                                 </div>
 
                                 <div class="col-12">
                                     <label asp-for="StoreDescription" class="form-label">وصف المتجر</label>
-                                    <textarea asp-for="StoreDescription" class="form-control" rows="3"></textarea>
+                                    <textarea asp-for="StoreDescription" class="form-control" rows="3"
+                                              placeholder="اكتب وصفاً مختصراً عن متجرك وخدماتك"></textarea>
                                     <span asp-validation-for="StoreDescription" class="text-danger"></span>
+                                </div>
+
+                                @* روابط المتجر مع تنبيه الموافقة *@
+                                <div class="col-12">
+                                    @if (Model.HasPendingUrlChanges)
+                                    {
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-clock me-2"></i>
+                                            <strong>ملاحظة:</strong> لديك روابط معلقة بانتظار موافقة الإدارة
+                                        </div>
+                                    }
                                 </div>
 
                                 <div class="col-md-4">
@@ -199,6 +231,82 @@
                                     <label asp-for="WebsiteUrl3" class="form-label">رابط الموقع الثالث</label>
                                     <input asp-for="WebsiteUrl3" class="form-control" placeholder="https://instagram.com/store">
                                     <span asp-validation-for="WebsiteUrl3" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* ✅ قسم تخصصات المتجر (الفئات) *@
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-tags me-2"></i>
+                                تخصصات المتجر
+                            </h5>
+
+                            @* عرض الفئات الحالية *@
+                            @if (Model.CurrentStoreCategories != null && Model.CurrentStoreCategories.Any())
+                            {
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">التخصصات الحالية:</label>
+                                    <div class="current-categories">
+                                        @foreach (var cat in Model.CurrentStoreCategories)
+                                        {
+                                            <div class="badge bg-success me-2 mb-2 p-2">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                @cat.FullPath
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info mb-4">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    لم يتم تحديد أي تخصصات للمتجر بعد. يرجى إضافة تخصصات لتظهر في نتائج البحث.
+                                </div>
+                            }
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>ملاحظة:</strong> اختر التخصصات الدقيقة لمتجرك للحصول على طلبات أكثر دقة.
+                            </div>
+
+                            <div class="row g-3">
+                                <!-- Cascading Category Selection -->
+                                <div class="col-md-4">
+                                    <label for="categorySelect" class="form-label">الفئة الأساسية</label>
+                                    <select id="categorySelect" class="form-control">
+                                        <option value="">اختر الفئة الأساسية</option>
+                                        @foreach (var category in ViewBag.Categories as List<Category>)
+                                        {
+                                            <option value="@category.Id">@category.Name</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="subCategory1Select" class="form-label">الفئة الفرعية الأولى</label>
+                                    <select id="subCategory1Select" class="form-control" disabled>
+                                        <option value="">اختر الفئة الفرعية الأولى</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="subCategory2Select" class="form-label">التخصص الدقيق</label>
+                                    <select id="subCategory2Select" class="form-control" disabled multiple>
+                                        <option value="">اختر التخصص الدقيق</option>
+                                    </select>
+                                    <div class="form-text">يمكنك اختيار أكثر من تخصص (استخدم Ctrl للاختيار المتعدد)</div>
+                                </div>
+
+                                <!-- Hidden field to store selected SubCategory2 IDs -->
+                                <input type="hidden" asp-for="StoreCategories" id="storeCategoriesHidden" />
+
+                                <div class="col-12" id="selectedCategoriesDisplay">
+                                    <div class="alert alert-success" style="display: none;">
+                                        <strong><i class="fas fa-check-circle me-2"></i>التخصصات المختارة الجديدة:</strong>
+                                        <div id="selectedCategoriesList" class="mt-2"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -256,14 +364,64 @@
         .profile-preview.d-inline-flex {
             display: inline-flex !important;
         }
+
+    .current-categories {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+    }
+
+    #subCategory2Select {
+        min-height: 100px;
+    }
+
+    #selectedCategoriesList ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    #selectedCategoriesList li {
+        padding: 5px 0;
+        border-bottom: 1px dashed #d4edda;
+    }
+
+        #selectedCategoriesList li:last-child {
+            border-bottom: none;
+        }
 </style>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
+        // ✅ متغير لتخزين الفئات المختارة
+        var selectedCategories = new Map();
+
+        // ✅ تحميل الفئات الحالية عند فتح الصفحة
+        @if (Model.CurrentStoreCategories != null && Model.CurrentStoreCategories.Any())
+        {
+                <text>
+                $(document).ready(function() {
+                    @foreach (var cat in Model.CurrentStoreCategories)
+                    {
+                            <text>
+                            selectedCategories.set('@cat.SubCategory2Id', {
+                                id: '@cat.SubCategory2Id',
+                                path: '@cat.FullPath',
+                                subCategory1Id: '0'
+                            });
+                            </text>
+                    }
+                    updateSelectedCategoriesDisplay();
+                });
+                </text>
+        }
+
         // ✅ معاينة الصورة قبل الرفع
         function previewImage(input) {
             const preview = document.getElementById('profileImagePreview');
@@ -311,19 +469,116 @@
 
             // Set minimum date for date of birth (18 years ago)
             const dateInput = document.querySelector('[name="DateOfBirth"]');
-            const eighteenYearsAgo = new Date();
-            eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
-            dateInput.max = eighteenYearsAgo.toISOString().split('T')[0];
+            if (dateInput) {
+                const eighteenYearsAgo = new Date();
+                eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+                dateInput.max = eighteenYearsAgo.toISOString().split('T')[0];
 
-            // Set maximum date (100 years ago)
-            const hundredYearsAgo = new Date();
-            hundredYearsAgo.setFullYear(hundredYearsAgo.getFullYear() - 100);
-            dateInput.min = hundredYearsAgo.toISOString().split('T')[0];
+                // Set maximum date (100 years ago)
+                const hundredYearsAgo = new Date();
+                hundredYearsAgo.setFullYear(hundredYearsAgo.getFullYear() - 100);
+                dateInput.min = hundredYearsAgo.toISOString().split('T')[0];
+            }
 
             form.addEventListener('submit', function(e) {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري الحفظ...';
             });
+
+            // ✅ Cascading dropdowns للفئات
+            $('#categorySelect').change(function() {
+                var categoryId = $(this).val();
+                $('#subCategory1Select').html('<option value="">اختر الفئة الفرعية الأولى</option>').prop('disabled', true);
+                $('#subCategory2Select').html('<option value="">اختر التخصص الدقيق</option>').prop('disabled', true);
+
+                if (categoryId) {
+                    $.get('/Profile/GetSubCategories1', { categoryId: categoryId }, function(data) {
+                        if (data.length > 0) {
+                            $('#subCategory1Select').prop('disabled', false);
+                            $.each(data, function(i, item) {
+                                $('#subCategory1Select').append($('<option>', {
+                                    value: item.id,
+                                    text: item.name
+                                }));
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('#subCategory1Select').change(function() {
+                var subCategory1Id = $(this).val();
+                $('#subCategory2Select').html('<option value="">اختر التخصص الدقيق</option>').prop('disabled', true);
+
+                if (subCategory1Id) {
+                    $.get('/Profile/GetSubCategories2', { subCategory1Id: subCategory1Id }, function(data) {
+                        if (data.length > 0) {
+                            $('#subCategory2Select').prop('disabled', false);
+                            $.each(data, function(i, item) {
+                                $('#subCategory2Select').append($('<option>', {
+                                    value: item.id,
+                                    text: item.name
+                                }));
+                            });
+                        }
+                    });
+                }
+            });
+
+            // ✅ معالجة اختيار SubCategory2
+            $('#subCategory2Select').change(function() {
+                var selectedOptions = $(this).find('option:selected');
+                var categoryName = $('#categorySelect option:selected').text();
+                var subCategory1Name = $('#subCategory1Select option:selected').text();
+                var currentSubCat1 = $('#subCategory1Select').val();
+
+                // إضافة الفئات المختارة
+                selectedOptions.each(function() {
+                    var id = $(this).val();
+                    var name = $(this).text();
+                    if (id) {
+                        var fullPath = categoryName + ' > ' + subCategory1Name + ' > ' + name;
+                        selectedCategories.set(id, {
+                            id: id,
+                            path: fullPath,
+                            subCategory1Id: currentSubCat1
+                        });
+                    }
+                });
+
+                updateSelectedCategoriesDisplay();
+            });
         });
+
+        // ✅ تحديث عرض الفئات المختارة
+        function updateSelectedCategoriesDisplay() {
+            var categoriesArray = Array.from(selectedCategories.values());
+            var ids = categoriesArray.map(c => c.id);
+
+            $('#storeCategoriesHidden').val(JSON.stringify(ids));
+
+            if (categoriesArray.length > 0) {
+                var html = '<ul class="list-unstyled mb-0">';
+                categoriesArray.forEach(function(cat) {
+                    html += '<li class="mb-1">' +
+                            '<i class="fas fa-check-circle text-success me-2"></i>' +
+                            cat.path +
+                            ' <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeCategory(\'' + cat.id + '\')">×</button>' +
+                            '</li>';
+                });
+                html += '</ul>';
+
+                $('#selectedCategoriesList').html(html);
+                $('#selectedCategoriesDisplay .alert').show();
+            } else {
+                $('#selectedCategoriesDisplay .alert').hide();
+            }
+        }
+
+        // ✅ إزالة فئة
+        window.removeCategory = function(id) {
+            selectedCategories.delete(id);
+            updateSelectedCategoriesDisplay();
+        };
     </script>
 }

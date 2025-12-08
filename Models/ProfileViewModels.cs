@@ -61,5 +61,45 @@ namespace ReverseMarket.Models
         public string? PendingWebsiteUrl1 { get; set; }
         public string? PendingWebsiteUrl2 { get; set; }
         public string? PendingWebsiteUrl3 { get; set; }
+
+        // ✅ فئات المتجر للبائعين
+        public string? StoreCategories { get; set; } // JSON string of selected SubCategory2 IDs
+        public List<StoreCategoryDisplay>? CurrentStoreCategories { get; set; } // للعرض
+    }
+
+    // ✅ ViewModel لعرض فئات المتجر الحالية
+    public class StoreCategoryDisplay
+    {
+        public int SubCategory2Id { get; set; }
+        public string CategoryName { get; set; } = "";
+        public string SubCategory1Name { get; set; } = "";
+        public string SubCategory2Name { get; set; } = "";
+        public string FullPath => $"{CategoryName} > {SubCategory1Name} > {SubCategory2Name}";
+    }
+
+    // ✅ ViewModel لتحديث معلومات المتجر
+    public class UpdateStoreViewModel
+    {
+        [Required(ErrorMessage = "اسم المتجر مطلوب")]
+        [StringLength(255, ErrorMessage = "اسم المتجر لا يجب أن يزيد عن 255 حرف")]
+        public string StoreName { get; set; } = "";
+
+        [StringLength(1000, ErrorMessage = "وصف المتجر لا يجب أن يزيد عن 1000 حرف")]
+        public string? StoreDescription { get; set; }
+
+        [Url(ErrorMessage = "الرابط غير صحيح")]
+        [StringLength(500)]
+        public string? WebsiteUrl1 { get; set; }
+
+        [Url(ErrorMessage = "الرابط غير صحيح")]
+        [StringLength(500)]
+        public string? WebsiteUrl2 { get; set; }
+
+        [Url(ErrorMessage = "الرابط غير صحيح")]
+        [StringLength(500)]
+        public string? WebsiteUrl3 { get; set; }
+
+        // فئات المتجر - قائمة SubCategory2 IDs
+        public List<int>? StoreCategories { get; set; }
     }
 }
