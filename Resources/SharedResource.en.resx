@@ -1065,4 +1065,40 @@
   <data name="RequestReviewNote" xml:space="preserve">
     <value>Request Review Note</value>
   </data>
+  <data name="Conversations" xml:space="preserve">
+    <value>Conversations</value>
+  </data>
+  <data name="NoStores" xml:space="preserve">
+    <value>No Stores</value>
+  </data>
+  <data name="NoStoresMatchCriteria" xml:space="preserve">
+    <value>No Stores Match Criteria</value>
+  </data>
+  <data name="RegisterYourStoreNow" xml:space="preserve">
+    <value>Register Your Store Now</value>
+  </data>
+  <data name="VerifyPhone" xml:space="preserve">
+    <value>Verify Phone</value>
+  </data>
+  <data name="VerifyAndLogin" xml:space="preserve">
+    <value>Verify And Login</value>
+  </data>
+  <data name="VerifyAndContinue" xml:space="preserve">
+    <value>Verify And Continue</value>
+  </data>
+  <data name="NewNumberVerifyFirst" xml:space="preserve">
+    <value>New Number Verify First</value>
+  </data>
+  <data name="NextStep" xml:space="preserve">
+    <value>Next Step</value>
+  </data>
+  <data name="AfterVerificationCompleteData" xml:space="preserve">
+    <value>After Verification Complete Data</value>
+  </data>
+  <data name="Complete" xml:space="preserve">
+    <value>Complete</value>
+  </data>
+  <data name="StoreName" xml:space="preserve">
+    <value>Store Name</value>
+  </data>
 </root>

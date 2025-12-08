@@ -1065,4 +1065,40 @@
   <data name="RequestReviewNote" xml:space="preserve">
     <value>طلب ملاحظة المراجعة</value>
   </data>
+  <data name="Conversations" xml:space="preserve">
+    <value>محادثاتي</value>
+  </data>
+  <data name="NoStores" xml:space="preserve">
+    <value>لا يوجد متاجر</value>
+  </data>
+  <data name="NoStoresMatchCriteria" xml:space="preserve">
+    <value>لا توجد متاجر تطابق المعايير</value>
+  </data>
+  <data name="RegisterYourStoreNow" xml:space="preserve">
+    <value>سجل متجرك الآن</value>
+  </data>
+  <data name="VerifyPhone" xml:space="preserve">
+    <value>تأكيد الهاتف</value>
+  </data>
+  <data name="VerifyAndLogin" xml:space="preserve">
+    <value>التحقق وتسجيل الدخول</value>
+  </data>
+  <data name="VerifyAndContinue" xml:space="preserve">
+    <value>التحقق والاستمرار</value>
+  </data>
+  <data name="NewNumberVerifyFirst" xml:space="preserve">
+    <value>رقم جديد اول تأكيد</value>
+  </data>
+  <data name="NextStep" xml:space="preserve">
+    <value>الخطوة القادمة</value>
+  </data>
+  <data name="AfterVerificationCompleteData" xml:space="preserve">
+    <value>بعد التحقق من البيانات الكاملة</value>
+  </data>
+  <data name="Complete" xml:space="preserve">
+    <value>اكتمال</value>
+  </data>
+  <data name="StoreName" xml:space="preserve">
+    <value>اسم المتجر</value>
+  </data>
 </root>

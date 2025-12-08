@@ -1065,4 +1065,40 @@
   <data name="RequestReviewNote" xml:space="preserve">
     <value>داوای پێداچوونەوە بکە تێبینی</value>
   </data>
+  <data name="Conversations" xml:space="preserve">
+    <value>گفتوگۆکان</value>
+  </data>
+  <data name="NoStores" xml:space="preserve">
+    <value>بێ فرۆشگا</value>
+  </data>
+  <data name="NoStoresMatchCriteria" xml:space="preserve">
+    <value>هیچ فرۆشگایەک لەگەڵ پێوەرەکاندا نەگونجێت</value>
+  </data>
+  <data name="RegisterYourStoreNow" xml:space="preserve">
+    <value>ئێستا فرۆشگاکەت تۆمار بکە</value>
+  </data>
+  <data name="VerifyPhone" xml:space="preserve">
+    <value>پشتڕاستکردنەوەی تەلەفۆن</value>
+  </data>
+  <data name="VerifyAndLogin" xml:space="preserve">
+    <value>پشتڕاستکردنەوە و چوونەژوورەوە</value>
+  </data>
+  <data name="VerifyAndContinue" xml:space="preserve">
+    <value>پشتڕاستکردنەوە و بەردەوامبوون</value>
+  </data>
+  <data name="NewNumberVerifyFirst" xml:space="preserve">
+    <value>ژمارەی نوێ سەرەتا پشتڕاست بکەرەوە</value>
+  </data>
+  <data name="NextStep" xml:space="preserve">
+    <value>هەنگاوی داهاتوو</value>
+  </data>
+  <data name="AfterVerificationCompleteData" xml:space="preserve">
+    <value>دوای پشتڕاستکردنەوە داتای تەواو</value>
+  </data>
+  <data name="Complete" xml:space="preserve">
+    <value>تەواو</value>
+  </data>
+  <data name="StoreName" xml:space="preserve">
+    <value>ناوی فرۆشگا</value>
+  </data>
 </root>
