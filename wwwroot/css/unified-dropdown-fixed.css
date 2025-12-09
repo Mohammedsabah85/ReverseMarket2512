@@ -1,0 +1,896 @@
+/* ===================================
+   Unified Dropdown Styles - تنسيقات موحدة للقوائم
+   يعمل على جميع أحجام الشاشات
+   Version: 7.0 - مع دعم كامل للوضع المظلم
+   =================================== */
+
+/* ==========================================
+   1. متغيرات CSS
+   ========================================== */
+:root {
+    /* الوضع الفاتح */
+    --dropdown-bg: #ffffff;
+    --dropdown-text: #1a1d23;
+    --dropdown-text-muted: #6c757d;
+    --dropdown-border: #e9ecef;
+    --dropdown-hover-bg: #f8f9fa;
+    --dropdown-active-bg: rgba(201, 162, 39, 0.15);
+    --dropdown-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    --primary-color: #C9A227;
+    --primary-dark: #9A7B1A;
+}
+
+/* ==========================================
+   2. إصلاح الروابط
+   ========================================== */
+.dropdown-toggle,
+.language-dropdown,
+.user-dropdown,
+#languageMenu,
+#userMenu {
+    cursor: pointer !important;
+    text-decoration: none !important;
+}
+
+/* إخفاء السهم الافتراضي لـ Bootstrap */
+.dropdown-toggle::after {
+    display: inline-block !important;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+    content: "\f107";
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 0.75rem;
+    border: none !important;
+    transition: transform 0.3s ease;
+}
+
+[dir="ltr"] .dropdown-toggle::after {
+    margin-right: 0;
+    margin-left: 0.5rem;
+}
+
+.dropdown-toggle[aria-expanded="true"]::after {
+    transform: rotate(180deg);
+}
+
+/* ==========================================
+   3. تنسيقات Desktop (min-width: 992px)
+   ========================================== */
+@media (min-width: 992px) {
+    .dropdown-menu {
+        position: absolute !important;
+        top: 100% !important;
+        right: 0 !important;
+        left: auto !important;
+        min-width: 220px;
+        padding: 0.5rem;
+        margin-top: 0.5rem !important;
+        background: var(--dropdown-bg);
+        border: 1px solid var(--dropdown-border);
+        border-radius: 12px;
+        box-shadow: var(--dropdown-shadow);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+        z-index: 1050;
+    }
+
+    [dir="ltr"] .dropdown-menu {
+        right: auto !important;
+        left: 0 !important;
+    }
+
+    .dropdown-menu.show {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0) !important;
+        display: block !important;
+    }
+
+    .dropdown-item {
+        display: flex !important;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        color: var(--dropdown-text);
+        font-size: 0.95rem;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+        background: var(--dropdown-hover-bg);
+        color: var(--primary-color);
+    }
+
+    .dropdown-item i {
+        width: 20px;
+        text-align: center;
+        color: var(--dropdown-text-muted);
+    }
+
+    .dropdown-item:hover i {
+        color: var(--primary-color);
+    }
+
+    .dropdown-item.active {
+        background: var(--dropdown-active-bg);
+        color: var(--primary-color);
+    }
+
+    .dropdown-item.text-danger {
+        color: #dc3545 !important;
+    }
+
+    .dropdown-item.text-danger:hover {
+        background: rgba(220, 53, 69, 0.1);
+    }
+
+    .dropdown-divider {
+        margin: 0.5rem 0;
+        border-color: var(--dropdown-border);
+    }
+
+    /* قائمة اللغات Desktop */
+    .language-selector .dropdown-menu {
+        min-width: 180px;
+    }
+
+    .language-form {
+        width: 100%;
+        margin: 0;
+    }
+
+    .language-form button {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: none;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--dropdown-text);
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: right;
+    }
+
+    [dir="ltr"] .language-form button {
+        text-align: left;
+    }
+
+    .language-form button:hover {
+        background: var(--dropdown-hover-bg);
+        color: var(--primary-color);
+    }
+
+    .language-form button.active,
+    .language-form button:disabled {
+        background: var(--dropdown-active-bg);
+        color: var(--primary-color);
+        cursor: default;
+    }
+
+    .language-selector .flag {
+        font-size: 1.2rem;
+        margin-left: 0.5rem;
+    }
+
+    [dir="ltr"] .language-selector .flag {
+        margin-left: 0;
+        margin-right: 0.5rem;
+    }
+
+    /* قائمة المستخدم Desktop */
+    .user-dropdown {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+    }
+
+    .user-dropdown:hover {
+        background: rgba(201, 162, 39, 0.08);
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+}
+
+/* ==========================================
+   4. تنسيقات Mobile/Tablet (max-width: 991.98px)
+   ========================================== */
+@media (max-width: 991.98px) {
+    
+    /* زر القائمة */
+    .navbar-toggler {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        padding: 0;
+        border: 2px solid var(--dropdown-border) !important;
+        border-radius: 10px;
+        background: transparent !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    .navbar-toggler:focus,
+    .navbar-toggler:active {
+        box-shadow: none !important;
+        outline: none !important;
+        border-color: var(--primary-color) !important;
+    }
+
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%231a1d23' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+    }
+
+    /* القائمة المنسدلة الرئيسية */
+    .navbar-collapse {
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        background: var(--dropdown-bg) !important;
+        border-radius: 0 0 20px 20px !important;
+        box-shadow: var(--dropdown-shadow) !important;
+        padding: 1.25rem !important;
+        z-index: 1050 !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+        border-top: 2px solid var(--dropdown-border);
+        display: none !important;
+    }
+
+    .navbar-collapse.show {
+        display: block !important;
+    }
+
+    /* عناصر القائمة */
+    .navbar-nav {
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 0.5rem !important;
+    }
+
+    .navbar-nav .nav-item {
+        width: 100% !important;
+    }
+
+    .navbar-nav .nav-link {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding: 1rem 1.25rem !important;
+        border-radius: 12px !important;
+        color: var(--dropdown-text) !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        transition: all 0.2s ease !important;
+        background: transparent !important;
+        border: 2px solid transparent !important;
+    }
+
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link:focus {
+        background: var(--dropdown-hover-bg) !important;
+        color: var(--primary-color) !important;
+        border-color: rgba(201, 162, 39, 0.3) !important;
+    }
+
+    .navbar-nav .nav-link.active {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+        color: #ffffff !important;
+        border-color: transparent !important;
+    }
+
+    .navbar-nav .nav-link i {
+        width: 28px;
+        font-size: 1.1rem;
+        text-align: center;
+    }
+
+    /* قائمة اللغات Mobile */
+    .language-selector {
+        width: 100% !important;
+        margin: 0.75rem 0 !important;
+    }
+
+    .language-selector .language-dropdown,
+    .language-selector .nav-link.dropdown-toggle,
+    #languageMenu {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        padding: 1rem 1.25rem !important;
+        background: var(--dropdown-hover-bg) !important;
+        border: 2px solid var(--dropdown-border) !important;
+        border-radius: 12px !important;
+        color: var(--dropdown-text) !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .language-selector .language-dropdown:hover,
+    #languageMenu:hover {
+        border-color: var(--primary-color) !important;
+        background: var(--dropdown-bg) !important;
+    }
+
+    .language-selector .flag {
+        font-size: 1.5rem !important;
+        margin-left: 0.75rem !important;
+    }
+
+    [dir="ltr"] .language-selector .flag {
+        margin-left: 0 !important;
+        margin-right: 0.75rem !important;
+    }
+
+    /* قائمة اللغات المنسدلة Mobile */
+    .language-selector .dropdown-menu,
+    #languageDropdown {
+        position: static !important;
+        width: 100% !important;
+        margin-top: 0.75rem !important;
+        padding: 0.75rem !important;
+        border: 2px solid var(--dropdown-border) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+        background: var(--dropdown-bg) !important;
+        transform: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: none !important;
+    }
+
+    .language-selector .dropdown-menu.show,
+    #languageDropdown.show {
+        display: block !important;
+    }
+
+    /* أزرار اللغة Mobile */
+    .language-form {
+        width: 100% !important;
+        margin: 0.25rem 0 !important;
+    }
+
+    .language-form button {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        padding: 0.875rem 1rem !important;
+        border: none !important;
+        border-radius: 10px !important;
+        background: transparent !important;
+        color: var(--dropdown-text) !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        text-align: right !important;
+    }
+
+    [dir="ltr"] .language-form button {
+        text-align: left !important;
+    }
+
+    .language-form button:hover {
+        background: var(--dropdown-hover-bg) !important;
+        color: var(--primary-color) !important;
+    }
+
+    .language-form button.active,
+    .language-form button:disabled {
+        background: var(--dropdown-active-bg) !important;
+        color: var(--primary-color) !important;
+    }
+
+    /* قائمة المستخدم Mobile */
+    .nav-item.dropdown:has(.user-dropdown),
+    .nav-item.dropdown:has(.user-avatar) {
+        width: 100% !important;
+        margin: 0.75rem 0 !important;
+    }
+
+    .user-dropdown,
+    #userMenu {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        padding: 1rem 1.25rem !important;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+        border: 2px solid var(--dropdown-border) !important;
+        border-radius: 12px !important;
+        color: var(--dropdown-text) !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .user-dropdown:hover,
+    #userMenu:hover {
+        border-color: var(--primary-color) !important;
+    }
+
+    .user-avatar {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+        color: #ffffff !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
+        margin-left: 1rem !important;
+        box-shadow: 0 2px 8px rgba(201, 162, 39, 0.3) !important;
+    }
+
+    [dir="ltr"] .user-avatar {
+        margin-left: 0 !important;
+        margin-right: 1rem !important;
+    }
+
+    /* قائمة المستخدم المنسدلة Mobile */
+    .user-dropdown + .dropdown-menu,
+    .nav-item.dropdown:has(.user-dropdown) .dropdown-menu,
+    #userMenu + .dropdown-menu {
+        position: static !important;
+        width: 100% !important;
+        margin-top: 0.75rem !important;
+        padding: 0.75rem !important;
+        border: 2px solid var(--dropdown-border) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+        background: var(--dropdown-bg) !important;
+        transform: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: none !important;
+    }
+
+    .user-dropdown + .dropdown-menu.show,
+    .nav-item.dropdown:has(.user-dropdown) .dropdown-menu.show,
+    #userMenu + .dropdown-menu.show {
+        display: block !important;
+    }
+
+    /* عناصر القوائم المنسدلة Mobile */
+    .dropdown-item {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding: 0.875rem 1rem !important;
+        border-radius: 10px !important;
+        color: var(--dropdown-text) !important;
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+        transition: all 0.2s ease !important;
+        margin: 0.25rem 0 !important;
+        background: transparent !important;
+    }
+
+    .dropdown-item:hover {
+        background: var(--dropdown-hover-bg) !important;
+        color: var(--primary-color) !important;
+    }
+
+    .dropdown-item i {
+        width: 28px !important;
+        text-align: center !important;
+        font-size: 1.1rem !important;
+        margin-left: 0.75rem !important;
+        color: var(--dropdown-text-muted) !important;
+    }
+
+    [dir="ltr"] .dropdown-item i {
+        margin-left: 0 !important;
+        margin-right: 0.75rem !important;
+    }
+
+    .dropdown-item:hover i {
+        color: var(--primary-color) !important;
+    }
+
+    .dropdown-item.text-danger {
+        color: #dc3545 !important;
+    }
+
+    .dropdown-item.text-danger:hover {
+        background: rgba(220, 53, 69, 0.1) !important;
+    }
+
+    .dropdown-item.text-danger i {
+        color: #dc3545 !important;
+    }
+
+    .dropdown-divider {
+        margin: 0.75rem 0 !important;
+        border-color: var(--dropdown-border) !important;
+    }
+
+    /* جرس الإشعارات Mobile */
+    .nav-item:has(.notification-bell) {
+        width: 100% !important;
+        margin: 0.5rem 0 !important;
+    }
+
+    .notification-bell {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        padding: 1rem 1.25rem !important;
+        background: var(--dropdown-hover-bg) !important;
+        border: 2px solid var(--dropdown-border) !important;
+        border-radius: 12px !important;
+        color: var(--dropdown-text) !important;
+        position: relative !important;
+        transition: all 0.2s ease !important;
+        font-weight: 600 !important;
+    }
+
+    .notification-bell:hover {
+        border-color: var(--primary-color) !important;
+        color: var(--primary-color) !important;
+        background: var(--dropdown-bg) !important;
+    }
+
+    #notification-badge {
+        position: absolute !important;
+        top: 0.5rem !important;
+        right: 1rem !important;
+    }
+
+    [dir="ltr"] #notification-badge {
+        right: auto !important;
+        left: 1rem !important;
+    }
+}
+
+/* ==========================================
+   5. الوضع المظلم (Dark Mode) - إصلاح شامل
+   ========================================== */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --dropdown-bg: #1e2530;
+        --dropdown-text: #f0f0f0;
+        --dropdown-text-muted: #a0aec0;
+        --dropdown-border: #2d3748;
+        --dropdown-hover-bg: #2d3748;
+        --dropdown-active-bg: rgba(201, 162, 39, 0.25);
+        --dropdown-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Desktop Dark Mode */
+    @media (min-width: 992px) {
+        .dropdown-menu {
+            background: var(--dropdown-bg) !important;
+            border-color: var(--dropdown-border) !important;
+        }
+
+        .dropdown-item {
+            color: var(--dropdown-text) !important;
+        }
+
+        .dropdown-item:hover {
+            background: var(--dropdown-hover-bg) !important;
+        }
+
+        .dropdown-item i {
+            color: var(--dropdown-text-muted) !important;
+        }
+
+        .language-form button {
+            color: var(--dropdown-text) !important;
+        }
+
+        .language-form button:hover {
+            background: var(--dropdown-hover-bg) !important;
+        }
+
+        .dropdown-divider {
+            border-color: var(--dropdown-border) !important;
+        }
+    }
+
+    /* Mobile Dark Mode */
+    @media (max-width: 991.98px) {
+        
+        /* زر القائمة */
+        .navbar-toggler {
+            border-color: var(--dropdown-border) !important;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23f0f0f0' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+        }
+
+        /* القائمة الرئيسية */
+        .navbar-collapse {
+            background: #1a1d23 !important;
+            border-color: var(--dropdown-border) !important;
+        }
+
+        /* عناصر التنقل */
+        .navbar-nav .nav-link {
+            color: var(--dropdown-text) !important;
+        }
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link:focus {
+            background: var(--dropdown-hover-bg) !important;
+            color: var(--primary-color) !important;
+        }
+
+        /* قائمة اللغات */
+        .language-selector .language-dropdown,
+        .language-selector .nav-link.dropdown-toggle,
+        #languageMenu {
+            background: var(--dropdown-hover-bg) !important;
+            border-color: var(--dropdown-border) !important;
+            color: var(--dropdown-text) !important;
+        }
+
+        .language-selector .language-dropdown:hover,
+        #languageMenu:hover {
+            background: #374151 !important;
+            border-color: var(--primary-color) !important;
+        }
+
+        .language-selector .dropdown-menu,
+        #languageDropdown {
+            background: var(--dropdown-bg) !important;
+            border-color: var(--dropdown-border) !important;
+        }
+
+        .language-form button {
+            color: var(--dropdown-text) !important;
+        }
+
+        .language-form button:hover {
+            background: var(--dropdown-hover-bg) !important;
+            color: var(--primary-color) !important;
+        }
+
+        .language-form button.active,
+        .language-form button:disabled {
+            background: var(--dropdown-active-bg) !important;
+            color: var(--primary-color) !important;
+        }
+
+        /* قائمة المستخدم */
+        .user-dropdown,
+        #userMenu {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+            border-color: var(--dropdown-border) !important;
+            color: var(--dropdown-text) !important;
+        }
+
+        .user-dropdown:hover,
+        #userMenu:hover {
+            border-color: var(--primary-color) !important;
+        }
+
+        .user-dropdown + .dropdown-menu,
+        .nav-item.dropdown:has(.user-dropdown) .dropdown-menu,
+        #userMenu + .dropdown-menu {
+            background: var(--dropdown-bg) !important;
+            border-color: var(--dropdown-border) !important;
+        }
+
+        /* عناصر القوائم المنسدلة */
+        .dropdown-item {
+            color: var(--dropdown-text) !important;
+        }
+
+        .dropdown-item:hover {
+            background: var(--dropdown-hover-bg) !important;
+            color: var(--primary-color) !important;
+        }
+
+        .dropdown-item i {
+            color: var(--dropdown-text-muted) !important;
+        }
+
+        .dropdown-item:hover i {
+            color: var(--primary-color) !important;
+        }
+
+        .dropdown-divider {
+            border-color: var(--dropdown-border) !important;
+        }
+
+        /* جرس الإشعارات */
+        .notification-bell {
+            background: var(--dropdown-hover-bg) !important;
+            border-color: var(--dropdown-border) !important;
+            color: var(--dropdown-text) !important;
+        }
+
+        .notification-bell:hover {
+            background: #374151 !important;
+            border-color: var(--primary-color) !important;
+            color: var(--primary-color) !important;
+        }
+
+        /* قائمة الإشعارات */
+        .notification-dropdown,
+        #notification-menu {
+            background: var(--dropdown-bg) !important;
+            border-color: var(--dropdown-border) !important;
+        }
+
+        .notification-item {
+            color: var(--dropdown-text) !important;
+            border-color: var(--dropdown-border) !important;
+        }
+
+        .notification-item:hover {
+            background: var(--dropdown-hover-bg) !important;
+        }
+
+        .notification-item.unread {
+            background: rgba(201, 162, 39, 0.1) !important;
+        }
+
+        .notification-item strong {
+            color: var(--dropdown-text) !important;
+        }
+
+        .notification-item small,
+        .notification-item p {
+            color: var(--dropdown-text-muted) !important;
+        }
+
+        /* زر تسجيل الدخول */
+        .btn-outline-custom {
+            border-color: var(--primary-color) !important;
+            color: var(--primary-color) !important;
+        }
+
+        .btn-outline-custom:hover {
+            background: var(--primary-color) !important;
+            color: #1a1d23 !important;
+        }
+
+        /* شريط التنقل السفلي */
+        .mobile-bottom-nav {
+            background: #1a1d23 !important;
+            border-color: var(--dropdown-border) !important;
+        }
+
+        .mobile-bottom-nav .nav-link {
+            color: var(--dropdown-text-muted) !important;
+        }
+
+        .mobile-bottom-nav .nav-link.active {
+            color: var(--primary-color) !important;
+            background: rgba(201, 162, 39, 0.15) !important;
+        }
+    }
+}
+
+/* ==========================================
+   6. شاشات صغيرة جداً
+   ========================================== */
+@media (max-width: 575.98px) {
+    .navbar-brand {
+        font-size: 1.1rem !important;
+    }
+
+    .navbar-brand img {
+        max-height: 38px !important;
+    }
+
+    .navbar-collapse {
+        padding: 1rem !important;
+    }
+
+    .user-avatar {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        font-size: 1rem !important;
+    }
+
+    /* التنقل السفلي */
+    .mobile-bottom-nav {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        background: var(--dropdown-bg) !important;
+        border-top: 1px solid var(--dropdown-border) !important;
+        padding: 0.5rem 0 !important;
+        z-index: 1040 !important;
+        display: block !important;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .mobile-bottom-nav .nav {
+        display: flex !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+    }
+
+    .mobile-bottom-nav .nav-link {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        padding: 0.5rem 0.75rem !important;
+        color: var(--dropdown-text-muted) !important;
+        font-size: 0.7rem !important;
+        text-decoration: none !important;
+        transition: all 0.2s ease !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 8px !important;
+    }
+
+    .mobile-bottom-nav .nav-link i {
+        font-size: 1.3rem !important;
+        margin-bottom: 0.25rem !important;
+        width: auto !important;
+    }
+
+    .mobile-bottom-nav .nav-link.active {
+        color: var(--primary-color) !important;
+        background: rgba(201, 162, 39, 0.1) !important;
+    }
+
+    body {
+        padding-bottom: 75px !important;
+    }
+
+    .main-footer {
+        margin-bottom: 65px !important;
+    }
+}
+
+/* ==========================================
+   7. تحسينات التفاعل
+   ========================================== */
+.nav-link,
+.dropdown-item,
+.language-form button,
+.btn,
+.dropdown-toggle {
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation !important;
+}
+
+.nav-link:active,
+.dropdown-item:active,
+.language-form button:active {
+    transform: scale(0.98) !important;
+}
