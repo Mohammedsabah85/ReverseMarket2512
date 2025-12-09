@@ -117,17 +117,17 @@ namespace ReverseMarket.Areas.Admin.Controllers
                     // حفظ التغييرات أولاً
                     await _dbContext.SaveChangesAsync();
 
-                    // ✅ إرسال إشعار للمستخدم بالموافقة باستخدام النظام المحسن
+                    // ✅ إرسال إشعار للمستخدم بالموافقة
                     await SendApprovalNotificationAsync(request);
 
-                    // ✅ إرسال إشعار للمتاجر المتخصصة
+                    // ✅ إرسال إشعار للمتاجر المتخصصة بنفس الفئة الفرعية الثانية
                     await SendStoreNotificationsAsync(request);
                 }
                 else if (requestStatus == RequestStatus.Rejected)
                 {
                     await _dbContext.SaveChangesAsync();
-                    
-                    // ✅ إرسال إشعار بالرفض باستخدام النظام المحسن
+
+                    // ✅ إرسال إشعار بالرفض
                     await SendRejectionNotificationAsync(request);
                 }
                 else
@@ -283,283 +283,7 @@ namespace ReverseMarket.Areas.Admin.Controllers
             }
         }
 
-        // ✅ إرسال إشعار للمستخدم بالموافقة على الطلب
-        private async Task NotifyUserAboutApprovalAsync(Request request)
-        {
-            try
-            {
-                if (request.User != null && !string.IsNullOrEmpty(request.User.PhoneNumber))
-                {
-                    // ✅ بناء رابط مباشر للطلب
-                    var requestUrl = $"{Request.Scheme}://{Request.Host}/Requests/Details/{request.Id}";
-                    
-                    var messageText = $"مرحبا {request.User.FirstName}!\n\n" +
-                                     $"تم الموافقة على طلبك: {request.Title}\n\n" +
-                                     $"سيتم اشعار المتاجر المتخصصة وستبدا بتلقي العروض قريبا.\n\n" +
-                                     $"🔗 لمشاهدة طلبك:\n{requestUrl}\n\n" +
-                                     $"شكرا لاستخدامك السوق العكسي";
-
-                    _logger.LogInformation("📤 إرسال رسالة موافقة للمشتري {Phone}:\n{Message}",
-                        request.User.PhoneNumber, messageText);
-
-                    var whatsAppRequest = new WhatsAppMessageRequest
-                    {
-                        recipient = request.User.PhoneNumber,
-                        message = messageText,
-                        type = "whatsapp",
-                        lang = "ar"
-                    };
-
-                    var result = await _whatsAppService.SendMessageAsync(whatsAppRequest);
-
-                    if (result.Success)
-                    {
-                        _logger.LogInformation("✅ تم إرسال إشعار الموافقة بنجاح إلى {PhoneNumber}",
-                            request.User.PhoneNumber);
-                    }
-                    else
-                    {
-                        _logger.LogError("❌ فشل إرسال إشعار الموافقة إلى {PhoneNumber}: {Error}",
-                            request.User.PhoneNumber, result.Message);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في إرسال إشعار الموافقة");
-            }
-        }
-
-        // ✅ إرسال إشعار للمستخدم برفض الطلب
-        private async Task NotifyUserAboutRejectionAsync(Request request)
-        {
-            try
-            {
-                if (request.User != null && !string.IsNullOrEmpty(request.User.PhoneNumber))
-                {
-                    var messageText = $"مرحبا {request.User.FirstName}!\n\n" +
-                                     $"ناسف لابلاغك بان طلبك: {request.Title}\n" +
-                                     $"لم تتم الموافقة عليه.\n\n";
-
-                    if (!string.IsNullOrEmpty(request.AdminNotes))
-                    {
-                        messageText += $"السبب: {request.AdminNotes}\n\n";
-                    }
-
-                    messageText += "يمكنك اضافة طلب جديد في اي وقت.\n\n" +
-                              "شكرا لتفهمك - السوق العكسي";
-
-                    _logger.LogInformation("📤 إرسال رسالة رفض للمشتري {Phone}:\n{Message}",
-                        request.User.PhoneNumber, messageText);
-
-                    var whatsAppRequest = new WhatsAppMessageRequest
-                    {
-                        recipient = request.User.PhoneNumber,
-                        message = messageText,
-                        type = "whatsapp",
-                        lang = "ar"
-                    };
-
-                    var result = await _whatsAppService.SendMessageAsync(whatsAppRequest);
-
-                    if (result.Success)
-                    {
-                        _logger.LogInformation("✅ تم إرسال إشعار الرفض بنجاح إلى {PhoneNumber}",
-                            request.User.PhoneNumber);
-                    }
-                    else
-                    {
-                        _logger.LogError("❌ فشل إرسال إشعار الرفض إلى {PhoneNumber}: {Error}",
-                            request.User.PhoneNumber, result.Message);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في إرسال إشعار الرفض");
-            }
-        }
-
-        // ✅✅✅ النسخة المصححة الكاملة - إرسال إشعار للمتاجر المتخصصة بعد موافقة الأدمن
-        private async Task NotifyStoresAboutApprovedRequestAsync(Request request)
-        {
-            try
-            {
-                _logger.LogInformation("🔍 بدء عملية البحث عن المتاجر المتخصصة للطلب المعتمد #{RequestId}", request.Id);
-
-                // ✅ جلب بيانات الطلب كاملة مع جميع العلاقات
-                var fullRequest = await _dbContext.Requests
-                    .Include(r => r.User)
-                    .Include(r => r.Category)
-                    .Include(r => r.SubCategory1)
-                    .Include(r => r.SubCategory2)
-                    .FirstOrDefaultAsync(r => r.Id == request.Id);
-
-                if (fullRequest == null)
-                {
-                    _logger.LogError("❌ لم يتم العثور على الطلب #{RequestId} في قاعدة البيانات", request.Id);
-                    return;
-                }
-
-                _logger.LogInformation("✅ تم جلب بيانات الطلب: Category={CategoryId}, SubCat1={SubCat1Id}, SubCat2={SubCat2Id}",
-                    fullRequest.CategoryId, fullRequest.SubCategory1Id, fullRequest.SubCategory2Id);
-
-                // ✅ البحث عن المتاجر المتخصصة بنفس الفئة
-                IQueryable<StoreCategory> relevantStoresQuery = _dbContext.StoreCategories
-                    .Include(sc => sc.User)
-                    .Where(sc =>
-                        sc.User.UserType == UserType.Seller &&
-                        sc.User.IsActive &&
-                        sc.User.IsStoreApproved &&
-                        !string.IsNullOrEmpty(sc.User.PhoneNumber));
-
-                // ✅ تطبيق الفلتر الصحيح بناءً على مستوى الفئة
-                if (fullRequest.SubCategory2Id.HasValue)
-                {
-                    // البحث عن المتاجر التي لديها نفس SubCategory2 بالضبط
-                    relevantStoresQuery = relevantStoresQuery.Where(sc =>
-                        sc.SubCategory2Id == fullRequest.SubCategory2Id);
-
-                    _logger.LogInformation("🔍 البحث بناءً على SubCategory2: {SubCat2Id}", fullRequest.SubCategory2Id);
-                }
-                else if (fullRequest.SubCategory1Id.HasValue)
-                {
-                    // ✅ البحث عن المتاجر التي لديها نفس SubCategory1 
-                    // أو أي SubCategory2 تنتمي لنفس SubCategory1
-                    var subCategory2IdsUnderSubCategory1 = await _dbContext.SubCategories2
-                        .Where(sc2 => sc2.SubCategory1Id == fullRequest.SubCategory1Id)
-                        .Select(sc2 => sc2.Id)
-                        .ToListAsync();
-
-                    _logger.LogInformation("🔍 تم العثور على {Count} فئة فرعية ثانية تحت SubCategory1: {SubCat1Id}",
-                        subCategory2IdsUnderSubCategory1.Count, fullRequest.SubCategory1Id);
-
-                    relevantStoresQuery = relevantStoresQuery.Where(sc =>
-                        sc.SubCategory1Id == fullRequest.SubCategory1Id ||
-                        (sc.SubCategory2Id.HasValue && subCategory2IdsUnderSubCategory1.Contains(sc.SubCategory2Id.Value)));
-
-                    _logger.LogInformation("🔍 البحث بناءً على SubCategory1: {SubCat1Id}", fullRequest.SubCategory1Id);
-                }
-                else
-                {
-                    // البحث عن المتاجر التي لديها نفس Category فقط
-                    relevantStoresQuery = relevantStoresQuery.Where(sc =>
-                        sc.CategoryId == fullRequest.CategoryId);
-
-                    _logger.LogInformation("🔍 البحث بناءً على Category: {CategoryId}", fullRequest.CategoryId);
-                }
-
-                // ✅ الحصول على IDs المستخدمين بشكل فريد أولاً
-                var storeUserIds = await relevantStoresQuery
-                    .Select(sc => sc.UserId)
-                    .Distinct()
-                    .ToListAsync();
-
-                _logger.LogInformation("🔍 تم العثور على {Count} معرف مستخدم فريد", storeUserIds.Count);
-
-                if (!storeUserIds.Any())
-                {
-                    _logger.LogWarning("⚠️ لا توجد متاجر متخصصة لهذا الطلب!");
-                    _logger.LogWarning("⚠️ يرجى التحقق من أن المتاجر قد أضافت الفئات الصحيحة في ملفاتهم الشخصية");
-                    return;
-                }
-
-                // ✅ جلب المستخدمين بناءً على الـ IDs
-                var relevantStores = await _dbContext.Users
-                    .Where(u => storeUserIds.Contains(u.Id))
-                    .ToListAsync();
-
-                _logger.LogInformation("✅ تم العثور على {Count} متجر متخصص للطلب المعتمد #{RequestId}",
-                    relevantStores.Count, request.Id);
-
-                // ✅ إعداد مسار الفئات للعرض
-                var categoryPath = fullRequest.Category?.Name ?? "غير محدد";
-                if (fullRequest.SubCategory1 != null)
-                {
-                    categoryPath += $" > {fullRequest.SubCategory1.Name}";
-                }
-                if (fullRequest.SubCategory2 != null)
-                {
-                    categoryPath += $" > {fullRequest.SubCategory2.Name}";
-                }
-
-                var successCount = 0;
-                var failureCount = 0;
-
-                // ✅ إرسال الإشعارات لكل متجر
-                foreach (var store in relevantStores)
-                {
-                    try
-                    {
-                        // ✅ بناء رابط مباشر للطلب
-                        var requestUrl = $"{Request.Scheme}://{Request.Host}/Requests/Details/{fullRequest.Id}";
-                        
-                        // ✅ بناء رسالة مفصلة وواضحة مع إيموجي للوضوح
-                        var messageText = $"🔔 طلب جديد معتمد في تخصصك!\n\n" +
-                                         $"مرحباً {store.StoreName ?? store.FirstName}!\n\n" +
-                                         $"📌 عنوان الطلب: {fullRequest.Title}\n\n" +
-                                         $"📂 الفئة: {categoryPath}\n\n" +
-                                         $"📍 الموقع: {fullRequest.City} - {fullRequest.District}\n\n" +
-                                         $"📝 التفاصيل:\n{fullRequest.Description}\n\n" +
-                                         $"👤 المشتري: {fullRequest.User?.FirstName} {fullRequest.User?.LastName}\n" +
-                                         $"📞 للتواصل: {fullRequest.User?.PhoneNumber}\n\n" +
-                                         $"📅 تاريخ الطلب: {fullRequest.CreatedAt:yyyy-MM-dd}\n\n" +
-                                         $"🔗 للمشاهدة الكاملة والتفاصيل:\n{requestUrl}\n\n" +
-                                         $"🛒 السوق العكسي";
-
-                        _logger.LogInformation("📤 إرسال رسالة للمتجر {StoreName} ({StoreId}) - {Phone}",
-                            store.StoreName ?? store.FirstName, store.Id, store.PhoneNumber);
-
-                        var whatsAppRequest = new WhatsAppMessageRequest
-                        {
-                            recipient = store.PhoneNumber,
-                            message = messageText,
-                            type = "whatsapp",
-                            lang = "ar",
-                            sender_id = "AliJamal"
-                        };
-
-                        var result = await _whatsAppService.SendMessageAsync(whatsAppRequest);
-
-                        if (result.Success)
-                        {
-                            successCount++;
-                            _logger.LogInformation("✅ تم إرسال إشعار بنجاح إلى المتجر {StoreName} - {PhoneNumber}",
-                                store.StoreName ?? store.FirstName, store.PhoneNumber);
-                        }
-                        else
-                        {
-                            failureCount++;
-                            _logger.LogError("❌ فشل إرسال إشعار إلى المتجر {StoreName} - {PhoneNumber}: {Error}",
-                                store.StoreName ?? store.FirstName, store.PhoneNumber, result.Message ?? "غير معروف");
-                        }
-
-                        // تأخير قصير بين الرسائل لتجنب Rate Limiting
-                        await Task.Delay(500);
-                    }
-                    catch (Exception storeEx)
-                    {
-                        failureCount++;
-                        _logger.LogError(storeEx, "❌ خطأ في إرسال إشعار للمتجر {StoreName} ({StoreId})",
-                            store.StoreName ?? store.FirstName, store.Id);
-                    }
-                }
-
-                _logger.LogInformation("✅ تم الانتهاء من إرسال الإشعارات: {SuccessCount} نجحت، {FailureCount} فشلت",
-                    successCount, failureCount);
-
-                if (successCount == 0 && failureCount > 0)
-                {
-                    _logger.LogError("❌ فشل إرسال جميع الإشعارات! يرجى التحقق من إعدادات WhatsApp API");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "❌ خطأ عام في إرسال إشعارات المتاجر للطلب #{RequestId}", request.Id);
-            }
-        }
-
-        // ✅ دوال الإشعارات المحسنة باستخدام INotificationService
+        #region ✅ نظام الإشعارات المحسن
 
         /// <summary>
         /// إرسال إشعار موافقة للمشتري عبر جميع القنوات (نظام + إيميل + واتساب)
@@ -568,13 +292,18 @@ namespace ReverseMarket.Areas.Admin.Controllers
         {
             try
             {
-                var title = "تم اعتماد طلبك! 🎉";
-                var message = $"مرحباً {request.User?.FirstName}!\n\n" +
-                             $"يسعدنا إبلاغك بأنه تم اعتماد طلبك: \"{request.Title}\"\n\n" +
-                             $"سيتم الآن عرض طلبك للمتاجر المتخصصة وستتلقى عروضاً قريباً.\n\n" +
-                             $"شكراً لاستخدامك السوق العكسي! 🛒";
-
+                // ✅ بناء رابط الطلب الكامل
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
                 var requestLink = $"/Requests/Details/{request.Id}";
+                var fullRequestUrl = $"{baseUrl}{requestLink}";
+
+                var title = "🎉 تم اعتماد طلبك!";
+                var message = $"مرحباً {request.User?.FirstName}!\n\n" +
+                             $"يسعدنا إبلاغك بأنه تم اعتماد طلبك:\n\n" +
+                             $"📋 العنوان: {request.Title}\n\n" +
+                             $"سيتم الآن عرض طلبك للمتاجر المتخصصة وستتلقى عروضاً قريباً.\n\n" +
+                             $"🔗 لمشاهدة طلبك:\n{fullRequestUrl}\n\n" +
+                             $"شكراً لاستخدامك السوق العكسي! 🛒";
 
                 var notification = await _notificationService.CreateNotificationAsync(
                     title: title,
@@ -587,12 +316,12 @@ namespace ReverseMarket.Areas.Admin.Controllers
                     adminId: User.Identity?.Name
                 );
 
-                await _notificationService.SendNotificationAsync(notification, 
-                    sendEmail: true, 
-                    sendWhatsApp: true, 
+                await _notificationService.SendNotificationAsync(notification,
+                    sendEmail: true,
+                    sendWhatsApp: true,
                     sendInApp: true);
 
-                _logger.LogInformation("✅ تم إرسال إشعار الموافقة للمشتري {UserId} للطلب #{RequestId}", 
+                _logger.LogInformation("✅ تم إرسال إشعار الموافقة للمشتري {UserId} للطلب #{RequestId}",
                     request.UserId, request.Id);
             }
             catch (Exception ex)
@@ -630,12 +359,12 @@ namespace ReverseMarket.Areas.Admin.Controllers
                     adminId: User.Identity?.Name
                 );
 
-                await _notificationService.SendNotificationAsync(notification, 
-                    sendEmail: true, 
-                    sendWhatsApp: true, 
+                await _notificationService.SendNotificationAsync(notification,
+                    sendEmail: true,
+                    sendWhatsApp: true,
                     sendInApp: true);
 
-                _logger.LogInformation("✅ تم إرسال إشعار الرفض للمشتري {UserId} للطلب #{RequestId}", 
+                _logger.LogInformation("✅ تم إرسال إشعار الرفض للمشتري {UserId} للطلب #{RequestId}",
                     request.UserId, request.Id);
             }
             catch (Exception ex)
@@ -645,7 +374,8 @@ namespace ReverseMarket.Areas.Admin.Controllers
         }
 
         /// <summary>
-        /// إرسال إشعارات للمتاجر المتخصصة حول طلب جديد معتمد
+        /// ✅ إرسال إشعارات للمتاجر المتخصصة حول طلب جديد معتمد
+        /// يتم الإرسال فقط للمتاجر التي لديها نفس الفئة الفرعية الثانية (SubCategory2)
         /// </summary>
         private async Task SendStoreNotificationsAsync(Request request)
         {
@@ -659,36 +389,108 @@ namespace ReverseMarket.Areas.Admin.Controllers
                     .Include(r => r.Category)
                     .Include(r => r.SubCategory1)
                     .Include(r => r.SubCategory2)
+                    .Include(r => r.Images)
                     .FirstOrDefaultAsync(r => r.Id == request.Id);
 
-                if (fullRequest == null) return;
-
-                // البحث عن المتاجر المتخصصة
-                var relevantStores = await GetRelevantStoresAsync(fullRequest);
-
-                if (!relevantStores.Any())
+                if (fullRequest == null)
                 {
-                    _logger.LogWarning("⚠️ لم يتم العثور على متاجر متخصصة للطلب #{RequestId}", request.Id);
+                    _logger.LogError("❌ لم يتم العثور على الطلب #{RequestId}", request.Id);
                     return;
                 }
 
-                var title = "طلب جديد متاح! 🛒";
-                var message = $"طلب جديد في فئتك المتخصصة:\n\n" +
-                             $"📋 العنوان: {fullRequest.Title}\n" +
-                             $"📂 الفئة: {fullRequest.Category?.Name}\n" +
-                             $"📍 المدينة: {fullRequest.City}\n\n" +
-                             $"اضغط للاطلاع على التفاصيل وتقديم عرضك!";
+                // ✅ التحقق من وجود SubCategory2Id
+                if (!fullRequest.SubCategory2Id.HasValue)
+                {
+                    _logger.LogWarning("⚠️ الطلب #{RequestId} لا يحتوي على فئة فرعية ثانية. لن يتم إرسال إشعارات للمتاجر.", request.Id);
+                    return;
+                }
 
+                // البحث عن المتاجر المتخصصة بنفس الفئة الفرعية الثانية فقط
+                var relevantStores = await GetRelevantStoresBySubCategory2Async(fullRequest.SubCategory2Id.Value);
+
+                if (!relevantStores.Any())
+                {
+                    _logger.LogWarning("⚠️ لم يتم العثور على متاجر متخصصة في الفئة الفرعية الثانية للطلب #{RequestId}", request.Id);
+                    return;
+                }
+
+                _logger.LogInformation("✅ تم العثور على {Count} متجر متخصص في الفئة الفرعية الثانية: {SubCategory2Name}",
+                    relevantStores.Count, fullRequest.SubCategory2?.Name);
+
+                // ✅ بناء مسار الفئات الكامل
+                var categoryPath = fullRequest.Category?.Name ?? "غير محدد";
+                if (fullRequest.SubCategory1 != null)
+                {
+                    categoryPath += $" > {fullRequest.SubCategory1.Name}";
+                }
+                if (fullRequest.SubCategory2 != null)
+                {
+                    categoryPath += $" > {fullRequest.SubCategory2.Name}";
+                }
+
+                // ✅ بناء رابط الطلب الكامل
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
                 var requestLink = $"/Requests/Details/{fullRequest.Id}";
+                var fullRequestUrl = $"{baseUrl}{requestLink}";
+
+                // ✅ تحضير معلومات الصور
+                var hasImages = fullRequest.Images != null && fullRequest.Images.Any();
+                var imagesCount = hasImages ? fullRequest.Images.Count : 0;
+
+                var successCount = 0;
+                var failureCount = 0;
 
                 // إرسال إشعار لكل متجر
                 foreach (var store in relevantStores)
                 {
                     try
                     {
+                        // ✅ بناء عنوان الإشعار
+                        var title = "🛒 طلب جديد في تخصصك!";
+
+                        // ✅ بناء رسالة مفصلة للإشعار داخل التطبيق
+                        var inAppMessage = $"طلب جديد متاح في فئتك المتخصصة:\n\n" +
+                                          $"📋 العنوان: {fullRequest.Title}\n" +
+                                          $"📂 الفئة: {categoryPath}\n" +
+                                          $"📍 الموقع: {fullRequest.City} - {fullRequest.District}\n" +
+                                          $"👤 المشتري: {fullRequest.User?.FirstName} {fullRequest.User?.LastName}\n\n" +
+                                          $"اضغط للاطلاع على التفاصيل وتقديم عرضك!";
+
+                        // ✅ بناء رسالة مفصلة للواتساب والإيميل
+                        var detailedMessage = $"🔔 مرحباً {store.StoreName ?? store.FirstName}!\n\n" +
+                                             $"تم نشر طلب جديد يتوافق مع تخصص متجرك:\n\n" +
+                                             $"━━━━━━━━━━━━━━━━━━━━\n" +
+                                             $"📋 العنوان: {fullRequest.Title}\n" +
+                                             $"━━━━━━━━━━━━━━━━━━━━\n\n" +
+                                             $"📂 الفئة: {categoryPath}\n\n" +
+                                             $"📝 التفاصيل:\n{fullRequest.Description}\n\n" +
+                                             $"📍 الموقع: {fullRequest.City} - {fullRequest.District}";
+
+                        if (!string.IsNullOrEmpty(fullRequest.Location))
+                        {
+                            detailedMessage += $" ({fullRequest.Location})";
+                        }
+
+                        detailedMessage += $"\n\n👤 معلومات المشتري:\n" +
+                                          $"   • الاسم: {fullRequest.User?.FirstName} {fullRequest.User?.LastName}\n" +
+                                          $"   • الهاتف: {fullRequest.User?.PhoneNumber}\n";
+
+                        if (hasImages)
+                        {
+                            detailedMessage += $"\n📸 الصور: {imagesCount} صورة مرفقة\n";
+                        }
+
+                        detailedMessage += $"\n📅 تاريخ الطلب: {fullRequest.CreatedAt:yyyy-MM-dd HH:mm}\n\n" +
+                                          $"🔗 لمشاهدة الطلب الكامل والتفاصيل:\n{fullRequestUrl}\n\n" +
+                                          $"━━━━━━━━━━━━━━━━━━━━\n" +
+                                          $"بادر بالتواصل مع المشتري وتقديم عرضك!\n" +
+                                          $"━━━━━━━━━━━━━━━━━━━━\n\n" +
+                                          $"🛒 السوق العكسي - نوصلك بالعملاء";
+
+                        // ✅ إنشاء الإشعار داخل التطبيق أولاً
                         var notification = await _notificationService.CreateNotificationAsync(
                             title: title,
-                            message: message,
+                            message: inAppMessage,
                             type: NotificationType.NewRequestForStore,
                             userId: store.Id,
                             requestId: fullRequest.Id,
@@ -697,25 +499,66 @@ namespace ReverseMarket.Areas.Admin.Controllers
                             adminId: User.Identity?.Name
                         );
 
-                        await _notificationService.SendNotificationAsync(notification, 
-                            sendEmail: true, 
-                            sendWhatsApp: true, 
+                        // ✅ إرسال الإشعار داخل التطبيق
+                        await _notificationService.SendNotificationAsync(notification,
+                            sendEmail: false,
+                            sendWhatsApp: false,
                             sendInApp: true);
 
-                        _logger.LogInformation("✅ تم إرسال إشعار للمتجر {StoreName} ({StoreId})", 
-                            store.StoreName ?? store.FirstName, store.Id);
+                        // ✅ إرسال رسالة مفصلة عبر الواتساب
+                        if (!string.IsNullOrEmpty(store.PhoneNumber))
+                        {
+                            var whatsAppRequest = new WhatsAppMessageRequest
+                            {
+                                recipient = store.PhoneNumber,
+                                message = detailedMessage,
+                                type = "whatsapp",
+                                lang = "ar",
+                                sender_id = "AliJamal"
+                            };
 
-                        // تأخير قصير بين الإشعارات
-                        await Task.Delay(200);
+                            var whatsAppResult = await _whatsAppService.SendMessageAsync(whatsAppRequest);
+
+                            if (whatsAppResult.Success)
+                            {
+                                _logger.LogInformation("✅ تم إرسال واتساب للمتجر {StoreName} - {Phone}",
+                                    store.StoreName ?? store.FirstName, store.PhoneNumber);
+                            }
+                            else
+                            {
+                                _logger.LogWarning("⚠️ فشل إرسال واتساب للمتجر {StoreName}: {Error}",
+                                    store.StoreName ?? store.FirstName, whatsAppResult.Message);
+                            }
+                        }
+
+                        // ✅ إرسال إيميل مفصل (إذا كان متوفراً)
+                        if (!string.IsNullOrEmpty(store.Email))
+                        {
+                            // تحديث رسالة الإشعار للإيميل
+                            notification.Message = detailedMessage;
+                            await _notificationService.SendNotificationAsync(notification,
+                                sendEmail: true,
+                                sendWhatsApp: false,
+                                sendInApp: false);
+                        }
+
+                        successCount++;
+                        _logger.LogInformation("✅ تم إرسال إشعار للمتجر {StoreName} ({StoreId}) - الهاتف: {Phone}",
+                            store.StoreName ?? store.FirstName, store.Id, store.PhoneNumber);
+
+                        // تأخير قصير بين الإشعارات لتجنب Rate Limiting
+                        await Task.Delay(300);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "❌ خطأ في إرسال إشعار للمتجر {StoreId}", store.Id);
+                        failureCount++;
+                        _logger.LogError(ex, "❌ خطأ في إرسال إشعار للمتجر {StoreName} ({StoreId})",
+                            store.StoreName ?? store.FirstName, store.Id);
                     }
                 }
 
-                _logger.LogInformation("✅ تم الانتهاء من إرسال إشعارات المتاجر للطلب #{RequestId} - تم إرسال {Count} إشعار", 
-                    request.Id, relevantStores.Count);
+                _logger.LogInformation("✅ تم الانتهاء من إرسال إشعارات المتاجر للطلب #{RequestId} - نجح: {Success}، فشل: {Failed}",
+                    request.Id, successCount, failureCount);
             }
             catch (Exception ex)
             {
@@ -724,10 +567,59 @@ namespace ReverseMarket.Areas.Admin.Controllers
         }
 
         /// <summary>
-        /// البحث عن المتاجر المتخصصة بناءً على فئة الطلب
+        /// ✅ البحث عن المتاجر المتخصصة بناءً على الفئة الفرعية الثانية فقط
+        /// </summary>
+        private async Task<List<ApplicationUser>> GetRelevantStoresBySubCategory2Async(int subCategory2Id)
+        {
+            try
+            {
+                // ✅ البحث عن المتاجر التي لديها نفس SubCategory2Id بالضبط
+                var storeUserIds = await _dbContext.StoreCategories
+                    .Include(sc => sc.User)
+                    .Where(sc =>
+                        sc.SubCategory2Id == subCategory2Id &&
+                        sc.User.UserType == UserType.Seller &&
+                        sc.User.IsActive &&
+                        sc.User.IsStoreApproved &&
+                        !string.IsNullOrEmpty(sc.User.PhoneNumber))
+                    .Select(sc => sc.UserId)
+                    .Distinct()
+                    .ToListAsync();
+
+                if (!storeUserIds.Any())
+                {
+                    _logger.LogWarning("⚠️ لا توجد متاجر متخصصة في الفئة الفرعية الثانية: {SubCategory2Id}", subCategory2Id);
+                    return new List<ApplicationUser>();
+                }
+
+                var stores = await _dbContext.Users
+                    .Where(u => storeUserIds.Contains(u.Id))
+                    .ToListAsync();
+
+                _logger.LogInformation("🔍 تم العثور على {Count} متجر متخصص في الفئة الفرعية الثانية: {SubCategory2Id}",
+                    stores.Count, subCategory2Id);
+
+                return stores;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ خطأ في البحث عن المتاجر المتخصصة للفئة الفرعية الثانية: {SubCategory2Id}", subCategory2Id);
+                return new List<ApplicationUser>();
+            }
+        }
+
+        /// <summary>
+        /// البحث عن المتاجر المتخصصة بناءً على فئة الطلب (للتوافقية مع الكود القديم)
         /// </summary>
         private async Task<List<ApplicationUser>> GetRelevantStoresAsync(Request request)
         {
+            // إذا كان هناك SubCategory2Id، استخدم البحث المحدد
+            if (request.SubCategory2Id.HasValue)
+            {
+                return await GetRelevantStoresBySubCategory2Async(request.SubCategory2Id.Value);
+            }
+
+            // للتوافقية: البحث بناءً على SubCategory1 أو Category
             try
             {
                 IQueryable<StoreCategory> relevantStoresQuery = _dbContext.StoreCategories
@@ -738,13 +630,7 @@ namespace ReverseMarket.Areas.Admin.Controllers
                         sc.User.IsStoreApproved &&
                         !string.IsNullOrEmpty(sc.User.PhoneNumber));
 
-                // تطبيق الفلتر بناءً على مستوى الفئة
-                if (request.SubCategory2Id.HasValue)
-                {
-                    relevantStoresQuery = relevantStoresQuery.Where(sc =>
-                        sc.SubCategory2Id == request.SubCategory2Id);
-                }
-                else if (request.SubCategory1Id.HasValue)
+                if (request.SubCategory1Id.HasValue)
                 {
                     var subCategory2Ids = await _dbContext.SubCategories2
                         .Where(sc2 => sc2.SubCategory1Id == request.SubCategory1Id)
@@ -761,7 +647,6 @@ namespace ReverseMarket.Areas.Admin.Controllers
                         sc.CategoryId == request.CategoryId);
                 }
 
-                // الحصول على المستخدمين بشكل فريد
                 var storeUserIds = await relevantStoresQuery
                     .Select(sc => sc.UserId)
                     .Distinct()
@@ -771,9 +656,6 @@ namespace ReverseMarket.Areas.Admin.Controllers
                     .Where(u => storeUserIds.Contains(u.Id))
                     .ToListAsync();
 
-                _logger.LogInformation("🔍 تم العثور على {Count} متجر متخصص للطلب #{RequestId}", 
-                    stores.Count, request.Id);
-
                 return stores;
             }
             catch (Exception ex)
@@ -782,5 +664,85 @@ namespace ReverseMarket.Areas.Admin.Controllers
                 return new List<ApplicationUser>();
             }
         }
+
+        #endregion
+
+        #region الدوال القديمة (للمرجعية)
+
+        // ✅ إرسال إشعار للمستخدم بالموافقة على الطلب (دالة قديمة للمرجعية)
+        private async Task NotifyUserAboutApprovalAsync(Request request)
+        {
+            try
+            {
+                if (request.User != null && !string.IsNullOrEmpty(request.User.PhoneNumber))
+                {
+                    var requestUrl = $"{Request.Scheme}://{Request.Host}/Requests/Details/{request.Id}";
+
+                    var messageText = $"مرحبا {request.User.FirstName}!\n\n" +
+                                     $"تم الموافقة على طلبك: {request.Title}\n\n" +
+                                     $"سيتم اشعار المتاجر المتخصصة وستبدا بتلقي العروض قريبا.\n\n" +
+                                     $"🔗 لمشاهدة طلبك:\n{requestUrl}\n\n" +
+                                     $"شكرا لاستخدامك السوق العكسي";
+
+                    var whatsAppRequest = new WhatsAppMessageRequest
+                    {
+                        recipient = request.User.PhoneNumber,
+                        message = messageText,
+                        type = "whatsapp",
+                        lang = "ar"
+                    };
+
+                    var result = await _whatsAppService.SendMessageAsync(whatsAppRequest);
+
+                    if (result.Success)
+                    {
+                        _logger.LogInformation("✅ تم إرسال إشعار الموافقة بنجاح إلى {PhoneNumber}",
+                            request.User.PhoneNumber);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في إرسال إشعار الموافقة");
+            }
+        }
+
+        // ✅ إرسال إشعار للمستخدم برفض الطلب (دالة قديمة للمرجعية)
+        private async Task NotifyUserAboutRejectionAsync(Request request)
+        {
+            try
+            {
+                if (request.User != null && !string.IsNullOrEmpty(request.User.PhoneNumber))
+                {
+                    var messageText = $"مرحبا {request.User.FirstName}!\n\n" +
+                                     $"ناسف لابلاغك بان طلبك: {request.Title}\n" +
+                                     $"لم تتم الموافقة عليه.\n\n";
+
+                    if (!string.IsNullOrEmpty(request.AdminNotes))
+                    {
+                        messageText += $"السبب: {request.AdminNotes}\n\n";
+                    }
+
+                    messageText += "يمكنك اضافة طلب جديد في اي وقت.\n\n" +
+                              "شكرا لتفهمك - السوق العكسي";
+
+                    var whatsAppRequest = new WhatsAppMessageRequest
+                    {
+                        recipient = request.User.PhoneNumber,
+                        message = messageText,
+                        type = "whatsapp",
+                        lang = "ar"
+                    };
+
+                    await _whatsAppService.SendMessageAsync(whatsAppRequest);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في إرسال إشعار الرفض");
+            }
+        }
+
+        #endregion
     }
 }
