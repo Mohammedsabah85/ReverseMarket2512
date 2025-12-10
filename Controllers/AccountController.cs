@@ -41,7 +41,14 @@ namespace ReverseMarket.Controllers
             _logger = logger;
             _whats = whats;
         }
+        public override void OnActionExecuting(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext context)
+        {
+            base.OnActionExecuting(context);
 
+            // تحميل إعدادات الموقع لجميع الصفحات
+            var siteSettings = _context.SiteSettings.FirstOrDefault();
+            ViewBag.SiteSettings = siteSettings;
+        }
         async Task<int> RegisterUser()
         {
             var adminPhone = "+9647700227211";
@@ -1154,6 +1161,10 @@ namespace ReverseMarket.Controllers
         }
 
         public IActionResult AccessDenied()
+        {
+            return View();
+        }
+        public IActionResult Test()
         {
             return View();
         }

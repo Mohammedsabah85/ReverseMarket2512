@@ -1,4 +1,4 @@
-﻿@model CreateRequestViewModel
+@model CreateRequestViewModel
 @inject IStringLocalizer<SharedResource> Localizer
 @{
     ViewData["Title"] = Localizer["AddRequest"];
@@ -72,11 +72,16 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label asp-for="SubCategory2Id" class="form-label">@Localizer["SubCategory2"]</label>
-                                <select asp-for="SubCategory2Id" class="form-control" id="subCategory2Select">
-                                    <option value="">@Localizer["SelectSubCategory2"]</option>
+                                <label class="form-label">@Localizer["SubCategory2"] *</label>
+                                <select name="SubCategory2Ids" id="subCategory2Select" class="form-control" multiple size="4">
                                 </select>
-                                <span asp-validation-for="SubCategory2Id" class="text-danger"></span>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    اضغط Ctrl + Click للاختيار المتعدد
+                                </small>
+                                <!-- عرض الفئات المختارة -->
+                                <div id="selectedSubCategories2" class="mt-2"></div>
+                                <span class="text-danger" id="subCategory2Error" style="display: none;">يرجى اختيار فئة فرعية واحدة على الأقل</span>
                             </div>
                         </div>
                     </div>
@@ -137,9 +142,9 @@
                         </h5>
 
                         <div class="upload-area">
-                            <label for="images" class="form-label">@Localizer["UploadImages"]</label>
-                            <input type="file" name="Images" id="images" class="form-control"
-                                   multiple accept="image/*" style="display: none;">
+                            <label for="images" class="form-label">@Localizer["UploadImages"] (الحد الأقصى 5 صور)</label>
+                            <input type="file" name="Images" id="images" class="form-control d-none"
+                                   multiple accept=".jpg,.jpeg,.png,.gif">
 
                             <div class="upload-zone" onclick="document.getElementById('images').click()">
                                 <div class="upload-content">
@@ -147,13 +152,14 @@
                                     <h5 class="text-muted">@Localizer["ClickToUpload"]</h5>
                                     <p class="text-muted small mb-0">@Localizer["OrDragImages"]</p>
                                     <small class="text-muted d-block mt-2">
-                                        @Localizer["UploadImagesNote"]
+                                        JPG, PNG, GIF - الحد الأقصى 5 ميجابايت لكل صورة
                                     </small>
                                 </div>
                             </div>
 
                             <!-- Image Preview Container -->
-                            <div id="imagePreview" class="row g-3 mt-3"></div>
+                            <div id="imagePreview" class="row g-2 mt-3"></div>
+                            <div id="imageCount" class="text-muted small mt-2"></div>
                         </div>
                     </div>
 
@@ -182,10 +188,10 @@
         border-bottom: 1px solid var(--border-color);
     }
 
-        .form-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
 
     .section-title {
         color: #b3962d;
@@ -199,7 +205,7 @@
     }
 
     .upload-zone {
-        border: 2px dashed var(--border-color);
+        border: 2px dashed #dee2e6;
         border-radius: 15px;
         padding: 3rem 2rem;
         text-align: center;
@@ -208,16 +214,16 @@
         background: #fafafa;
     }
 
-        .upload-zone:hover {
-            border-color: #b3962d;
-            background: rgba(44, 90, 160, 0.05);
-        }
+    .upload-zone:hover {
+        border-color: #b3962d;
+        background: rgba(179, 150, 45, 0.05);
+    }
 
-        .upload-zone.dragover {
-            border-color: var(--secondary-color);
-            background: rgba(52, 199, 89, 0.1);
-            transform: scale(1.02);
-        }
+    .upload-zone.dragover {
+        border-color: #28a745;
+        background: rgba(40, 167, 69, 0.1);
+        transform: scale(1.02);
+    }
 
     .upload-content {
         pointer-events: none;
@@ -227,25 +233,21 @@
         position: relative;
         border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
-        .image-preview-item:hover {
-            transform: translateY(-2px);
-        }
 
     .remove-image-btn {
         position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 30px;
-        height: 30px;
+        top: 5px;
+        right: 5px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 12px;
+        padding: 0;
     }
 
     .image-info {
@@ -255,44 +257,120 @@
         right: 0;
         background: linear-gradient(transparent, rgba(0,0,0,0.8));
         color: white;
-        padding: 1rem 0.5rem 0.5rem;
+        padding: 0.8rem 0.5rem 0.4rem;
+        font-size: 0.75rem;
+    }
+
+    /* أنماط الفئات المختارة */
+    .selected-badge {
+        display: inline-flex;
+        align-items: center;
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border: 1px solid #4caf50;
+        border-radius: 20px;
+        padding: 4px 12px;
+        margin: 3px;
+        font-size: 0.8rem;
+        color: #2e7d32;
+    }
+
+    .selected-badge .remove-badge {
+        margin-right: 8px;
+        cursor: pointer;
+        color: #c62828;
+        font-weight: bold;
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    .selected-badge .remove-badge:hover {
+        color: #b71c1c;
+    }
+
+    #subCategory2Select {
+        min-height: 100px;
+    }
+
+    #subCategory2Select option:checked {
+        background: linear-gradient(0deg, #b3962d 0%, #d4af37 100%);
+        color: white;
     }
 
     @@media (max-width: 768px) {
-        .upload-zone
-
-    {
-        padding: 2rem 1rem;
-    }
-
-    .form-section {
-        margin-bottom: 2rem;
-    }
-
+        .upload-zone {
+            padding: 2rem 1rem;
+        }
     }
 </style>
 
 @section Scripts {
     <script>
+        // ==========================================
+        // متغيرات الصور
+        // ==========================================
         let uploadedFiles = [];
-        const maxFiles = 3;
+        const maxFiles = 5;
         const maxFileSize = 5 * 1024 * 1024;
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             initializeImageUpload();
             initializeCategoryDropdowns();
             initializeDragAndDrop();
             initializeFormValidation();
+            initializeSubCategory2Display();
         });
 
+        // ==========================================
+        // الفئات الفرعية المتعددة
+        // ==========================================
+        function initializeSubCategory2Display() {
+            const subCat2Select = document.getElementById('subCategory2Select');
+            if (subCat2Select) {
+                subCat2Select.addEventListener('change', updateSelectedCategories);
+            }
+        }
+
+        function updateSelectedCategories() {
+            const subCat2Select = document.getElementById('subCategory2Select');
+            const displayDiv = document.getElementById('selectedSubCategories2');
+            const selectedOptions = Array.from(subCat2Select.selectedOptions);
+
+            displayDiv.innerHTML = '';
+
+            if (selectedOptions.length > 0) {
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = `<small class="text-success d-block mb-1"><i class="fas fa-check-circle me-1"></i>تم اختيار ${selectedOptions.length} فئة:</small>`;
+                displayDiv.appendChild(wrapper);
+
+                selectedOptions.forEach(option => {
+                    const badge = document.createElement('span');
+                    badge.className = 'selected-badge';
+                    badge.innerHTML = `<span class="remove-badge" onclick="removeCategory(${option.value})" title="إزالة">×</span>${option.text}`;
+                    displayDiv.appendChild(badge);
+                });
+
+                document.getElementById('subCategory2Error').style.display = 'none';
+            }
+        }
+
+        function removeCategory(value) {
+            const subCat2Select = document.getElementById('subCategory2Select');
+            const option = subCat2Select.querySelector(`option[value="${value}"]`);
+            if (option) {
+                option.selected = false;
+                updateSelectedCategories();
+            }
+        }
+
+        // ==========================================
+        // رفع الصور المتعددة
+        // ==========================================
         function initializeImageUpload() {
             const imageInput = document.getElementById('images');
-            const previewContainer = document.getElementById('imagePreview');
-
             if (imageInput) {
-                imageInput.addEventListener('change', function(e) {
-                    handleImageSelection(e.target.files, previewContainer);
+                imageInput.addEventListener('change', function (e) {
+                    handleImageSelection(e.target.files);
                 });
             }
         }
@@ -307,14 +385,14 @@
             });
 
             ['dragenter', 'dragover'].forEach(eventName => {
-                uploadZone.addEventListener(eventName, highlight, false);
+                uploadZone.addEventListener(eventName, () => uploadZone.classList.add('dragover'), false);
             });
 
             ['dragleave', 'drop'].forEach(eventName => {
-                uploadZone.addEventListener(eventName, unhighlight, false);
+                uploadZone.addEventListener(eventName, () => uploadZone.classList.remove('dragover'), false);
             });
 
-            uploadZone.addEventListener('drop', handleDrop, false);
+            uploadZone.addEventListener('drop', (e) => handleImageSelection(e.dataTransfer.files), false);
         }
 
         function preventDefaults(e) {
@@ -322,259 +400,197 @@
             e.stopPropagation();
         }
 
-        function highlight(e) {
-            e.currentTarget.classList.add('dragover');
-        }
-
-        function unhighlight(e) {
-            e.currentTarget.classList.remove('dragover');
-        }
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            const previewContainer = document.getElementById('imagePreview');
-            handleImageSelection(files, previewContainer);
-        }
-
-        function handleImageSelection(files, previewContainer) {
-            previewContainer.innerHTML = '';
-            uploadedFiles = [];
-
-            Array.from(files).forEach((file, index) => {
-                if (index >= maxFiles) {
-                    showAlert(`@Localizer["MaxImagesAllowed"]: ${maxFiles}`, 'warning');
+        function handleImageSelection(files) {
+            Array.from(files).forEach(file => {
+                if (uploadedFiles.length >= maxFiles) {
+                    showAlert(`الحد الأقصى ${maxFiles} صور فقط`, 'warning');
                     return;
                 }
 
-                if (!validateFile(file)) {
+                if (!allowedTypes.includes(file.type)) {
+                    showAlert(`نوع غير مدعوم: ${file.name}`, 'error');
                     return;
                 }
 
-                uploadedFiles.push(file);
-                createImagePreview(file, index, previewContainer);
+                if (file.size > maxFileSize) {
+                    showAlert(`حجم كبير: ${file.name}`, 'error');
+                    return;
+                }
+
+                // تجنب التكرار
+                if (!uploadedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                    uploadedFiles.push(file);
+                }
             });
 
+            rebuildPreview();
             updateFileInput();
         }
 
-        function validateFile(file) {
-            if (!allowedTypes.includes(file.type)) {
-                showAlert(`@Localizer["UnsupportedFileType"]: ${file.name}`, 'error');
-                return false;
-            }
+        function rebuildPreview() {
+            const container = document.getElementById('imagePreview');
+            container.innerHTML = '';
 
-            if (file.size > maxFileSize) {
-                showAlert(`@Localizer["FileTooLarge"]: ${file.name}`, 'error');
-                return false;
-            }
-
-            return true;
-        }
-
-        function createImagePreview(file, index, container) {
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                const imageDiv = document.createElement('div');
-                imageDiv.className = 'col-md-4 mb-3';
-                imageDiv.dataset.index = index;
-
-                imageDiv.innerHTML = `
-                    <div class="image-preview-item">
-                        <img src="${e.target.result}"
-                             class="img-fluid w-100"
-                             style="height: 200px; object-fit: cover;"
-                             alt="@Localizer["ImagePreview"] ${index + 1}">
-                        <button type="button"
-                                class="btn btn-danger btn-sm remove-image-btn"
-                                onclick="removeImage(${index})"
-                                title="@Localizer["Delete"]">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <div class="image-info">
-                            <small class="d-block text-truncate fw-bold">${file.name}</small>
-                            <small class="text-light">${formatFileSize(file.size)}</small>
+            uploadedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const col = document.createElement('div');
+                    col.className = 'col-4 col-md-3';
+                    col.innerHTML = `
+                        <div class="image-preview-item">
+                            <img src="${e.target.result}" class="img-fluid w-100" style="height: 120px; object-fit: cover;">
+                            <button type="button" class="btn btn-danger btn-sm remove-image-btn" onclick="removeImage(${index})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div class="image-info text-truncate">${file.name}</div>
                         </div>
-                    </div>
-                `;
+                    `;
+                    container.appendChild(col);
+                };
+                reader.readAsDataURL(file);
+            });
 
-                container.appendChild(imageDiv);
-            };
-
-            reader.readAsDataURL(file);
+            // تحديث العداد
+            const countDiv = document.getElementById('imageCount');
+            countDiv.textContent = uploadedFiles.length > 0 ? `تم اختيار ${uploadedFiles.length} من ${maxFiles} صور` : '';
         }
 
         function removeImage(index) {
             uploadedFiles.splice(index, 1);
-            const previewContainer = document.getElementById('imagePreview');
-            previewContainer.innerHTML = '';
-
-            uploadedFiles.forEach((file, newIndex) => {
-                createImagePreview(file, newIndex, previewContainer);
-            });
-
+            rebuildPreview();
             updateFileInput();
-            showAlert('@Localizer["ImageDeleted"]', 'success');
+            showAlert('تم حذف الصورة', 'success');
         }
 
         function updateFileInput() {
             const dt = new DataTransfer();
             uploadedFiles.forEach(file => dt.items.add(file));
-            const imageInput = document.getElementById('images');
-            if (imageInput) {
-                imageInput.files = dt.files;
-            }
+            document.getElementById('images').files = dt.files;
         }
 
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 @Localizer["Bytes"]';
-            const k = 1024;
-            const sizes = ['@Localizer["Bytes"]', '@Localizer["KB"]', '@Localizer["MB"]'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-        }
-
+        // ==========================================
+        // الفئات المتسلسلة
+        // ==========================================
         function initializeCategoryDropdowns() {
             const categorySelect = document.getElementById('categorySelect');
             const subCategory1Select = document.getElementById('subCategory1Select');
             const subCategory2Select = document.getElementById('subCategory2Select');
 
             if (categorySelect) {
-                categorySelect.addEventListener('change', function() {
-                    const categoryId = this.value;
-                    loadSubCategories1(categoryId, subCategory1Select);
-                    if (subCategory2Select) {
-                        subCategory2Select.innerHTML = '<option value="">@Localizer["SelectSubCategory2"]</option>';
-                    }
+                categorySelect.addEventListener('change', function () {
+                    loadSubCategories1(this.value);
+                    subCategory2Select.innerHTML = '';
+                    document.getElementById('selectedSubCategories2').innerHTML = '';
                 });
             }
 
             if (subCategory1Select) {
-                subCategory1Select.addEventListener('change', function() {
-                    const subCategory1Id = this.value;
-                    loadSubCategories2(subCategory1Id, subCategory2Select);
+                subCategory1Select.addEventListener('change', function () {
+                    loadSubCategories2(this.value);
                 });
             }
         }
 
-        function loadSubCategories1(categoryId, targetSelect) {
-            if (!categoryId || !targetSelect) {
-                if (targetSelect) {
-                    targetSelect.innerHTML = '<option value="">@Localizer["SelectSubCategory1"]</option>';
-                }
-                return;
-            }
+        function loadSubCategories1(categoryId) {
+            const select = document.getElementById('subCategory1Select');
+            select.innerHTML = '<option value="">@Localizer["SelectSubCategory1"]</option>';
 
-            targetSelect.innerHTML = '<option value="">@Localizer["Loading"]...</option>';
+            if (!categoryId) return;
+
+            select.innerHTML = '<option value="">جاري التحميل...</option>';
 
             fetch(`/Requests/GetSubCategories1?categoryId=${categoryId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('@Localizer["NetworkError"]');
-                    }
-                    return response.json();
-                })
+                .then(r => r.json())
                 .then(data => {
-                    targetSelect.innerHTML = '<option value="">@Localizer["SelectSubCategory1"]</option>';
+                    select.innerHTML = '<option value="">@Localizer["SelectSubCategory1"]</option>';
                     data.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.id;
-                        option.textContent = item.name;
-                        targetSelect.appendChild(option);
+                        select.innerHTML += `<option value="${item.id}">${item.name}</option>`;
                     });
                 })
-                .catch(error => {
-                    console.error('@Localizer["LoadingError"]:', error);
-                    targetSelect.innerHTML = '<option value="">@Localizer["LoadingError"]</option>';
-                    showAlert('@Localizer["SubCategoryLoadError"]', 'error');
+                .catch(() => {
+                    select.innerHTML = '<option value="">خطأ في التحميل</option>';
                 });
         }
 
-        function loadSubCategories2(subCategory1Id, targetSelect) {
-            if (!subCategory1Id || !targetSelect) {
-                if (targetSelect) {
-                    targetSelect.innerHTML = '<option value="">@Localizer["SelectSubCategory2"]</option>';
-                }
-                return;
-            }
+        function loadSubCategories2(subCategory1Id) {
+            const select = document.getElementById('subCategory2Select');
+            const displayDiv = document.getElementById('selectedSubCategories2');
 
-            targetSelect.innerHTML = '<option value="">@Localizer["Loading"]...</option>';
+            select.innerHTML = '';
+            displayDiv.innerHTML = '';
+
+            if (!subCategory1Id) return;
+
+            select.innerHTML = '<option disabled>جاري التحميل...</option>';
 
             fetch(`/Requests/GetSubCategories2?subCategory1Id=${subCategory1Id}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('@Localizer["NetworkError"]');
-                    }
-                    return response.json();
-                })
+                .then(r => r.json())
                 .then(data => {
-                    targetSelect.innerHTML = '<option value="">@Localizer["SelectSubCategory2"]</option>';
-                    data.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.id;
-                        option.textContent = item.name;
-                        targetSelect.appendChild(option);
-                    });
+                    select.innerHTML = '';
+                    if (data.length === 0) {
+                        select.innerHTML = '<option disabled>لا توجد فئات</option>';
+                    } else {
+                        data.forEach(item => {
+                            select.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+                        });
+                    }
                 })
-                .catch(error => {
-                    console.error('@Localizer["LoadingError"]:', error);
-                    targetSelect.innerHTML = '<option value="">@Localizer["LoadingError"]</option>';
-                    showAlert('@Localizer["SubCategoryLoadError"]', 'error');
+                .catch(() => {
+                    select.innerHTML = '<option disabled>خطأ</option>';
                 });
         }
 
+        // ==========================================
+        // التحقق من النموذج
+        // ==========================================
         function initializeFormValidation() {
             const form = document.getElementById('requestForm');
             const submitBtn = document.getElementById('submitBtn');
 
             if (form) {
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
+                    const subCat2Select = document.getElementById('subCategory2Select');
+
+                    // التحقق فقط إذا كانت هناك خيارات متاحة
+                    if (subCat2Select.options.length > 0 && subCat2Select.selectedOptions.length === 0) {
+                        e.preventDefault();
+                        document.getElementById('subCategory2Error').style.display = 'block';
+                        subCat2Select.focus();
+                        showAlert('يرجى اختيار فئة فرعية واحدة على الأقل', 'error');
+                        return;
+                    }
+
                     submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>@Localizer["Sending"]...';
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري الإرسال...';
 
                     setTimeout(() => {
-                        if (submitBtn.disabled) {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>@Localizer["Submit"]';
-                        }
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>@Localizer["Submit"]';
                     }, 10000);
                 });
             }
         }
 
+        // ==========================================
+        // التنبيهات
+        // ==========================================
         function showAlert(message, type = 'info') {
-            const existingAlerts = document.querySelectorAll('.alert.auto-dismiss');
-            existingAlerts.forEach(alert => alert.remove());
+            document.querySelectorAll('.alert.auto-dismiss').forEach(a => a.remove());
 
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show auto-dismiss`;
-            alertDiv.style.position = 'fixed';
-            alertDiv.style.top = '20px';
-            alertDiv.style.right = '20px';
-            alertDiv.style.zIndex = '9999';
-            alertDiv.style.maxWidth = '400px';
-
-            const iconClass = {
+            const icons = {
                 'success': 'fa-check-circle',
                 'error': 'fa-exclamation-circle',
                 'warning': 'fa-exclamation-triangle',
                 'info': 'fa-info-circle'
             };
 
-            alertDiv.innerHTML = `
-                <i class="fas ${iconClass[type] || iconClass.info} me-2"></i>
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show auto-dismiss`;
+            alertDiv.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;max-width:350px;';
+            alertDiv.innerHTML = `<i class="fas ${icons[type]} me-2"></i>${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
 
             document.body.appendChild(alertDiv);
-
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                }
-            }, 5000);
+            setTimeout(() => alertDiv.remove(), 4000);
         }
     </script>
 }

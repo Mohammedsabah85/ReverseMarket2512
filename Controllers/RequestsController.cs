@@ -167,11 +167,145 @@ namespace ReverseMarket.Controllers
             return View();
         }
 
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //[Authorize]
+        //public async Task<IActionResult> Create(CreateRequestViewModel model)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        var userId = GetCurrentUserId();
+        //        if (string.IsNullOrEmpty(userId))
+        //        {
+        //            TempData["ErrorMessage"] = "جلسة المستخدم منتهية الصلاحية";
+        //            return RedirectToAction("Login", "Account");
+        //        }
+
+        //        // ✅ التحقق المزدوج من نوع المستخدم
+        //        var user = await _userManager.FindByIdAsync(userId);
+        //        if (user == null || user.UserType != UserType.Buyer)
+        //        {
+        //            TempData["ErrorMessage"] = "عذراً، إضافة الطلبات متاحة للمشترين فقط.";
+        //            return RedirectToAction("Index");
+        //        }
+
+        //        try
+        //        {
+        //            var request = new Request
+        //            {
+        //                Title = model.Title,
+        //                Description = model.Description,
+        //                CategoryId = model.CategoryId,
+        //                SubCategory1Id = model.SubCategory1Id,
+        //                SubCategory2Id = model.SubCategory2Id,
+        //                City = model.City,
+        //                District = model.District,
+        //                Location = model.Location,
+        //                UserId = userId,
+        //                Status = RequestStatus.Pending,
+        //                CreatedAt = DateTime.Now
+        //            };
+
+        //            _context.Requests.Add(request);
+        //            await _context.SaveChangesAsync();
+
+        //            // معالجة رفع الصور
+        //            if (model.Images != null && model.Images.Any())
+        //            {
+        //                await SaveRequestImagesAsync(request.Id, model.Images);
+        //            }
+
+        //            // إرسال إشعار للإدارة عن الطلب الجديد
+        //            await NotifyAdminAboutNewRequestAsync(request);
+
+        //            TempData["SuccessMessage"] = "تم إرسال طلبك بنجاح! سيتم مراجعته والموافقة عليه في أقرب وقت.";
+        //            return RedirectToAction("Index");
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            _logger.LogError(ex, "خطأ في إنشاء الطلب");
+        //            TempData["ErrorMessage"] = "حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.";
+        //        }
+        //    }
+
+        //    ViewBag.Categories = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+        //    return View(model);
+        //}
+
+        //private async Task SaveRequestImagesAsync(int requestId, List<IFormFile> images)
+        //{
+        //    try
+        //    {
+        //        var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "requests");
+
+        //        if (!Directory.Exists(uploadsFolder))
+        //        {
+        //            Directory.CreateDirectory(uploadsFolder);
+        //        }
+
+        //        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+        //        var maxFileSize = 5 * 1024 * 1024; // 5 MB
+
+        //        foreach (var image in images.Take(3))
+        //        {
+        //            if (image?.Length > 0)
+        //            {
+        //                var extension = Path.GetExtension(image.FileName).ToLowerInvariant();
+        //                if (!allowedExtensions.Contains(extension))
+        //                {
+        //                    continue;
+        //                }
+
+        //                if (image.Length > maxFileSize)
+        //                {
+        //                    continue;
+        //                }
+
+        //                var fileName = $"{Guid.NewGuid()}{extension}";
+        //                var filePath = Path.Combine(uploadsFolder, fileName);
+
+        //                using (var fileStream = new FileStream(filePath, FileMode.Create))
+        //                {
+        //                    await image.CopyToAsync(fileStream);
+        //                }
+
+        //                var requestImage = new RequestImage
+        //                {
+        //                    RequestId = requestId,
+        //                    ImagePath = $"/uploads/requests/{fileName}",
+        //                    CreatedAt = DateTime.Now
+        //                };
+
+        //                _context.RequestImages.Add(requestImage);
+        //            }
+        //        }
+
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "خطأ في حفظ الصور");
+        //    }
+        //}
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
         public async Task<IActionResult> Create(CreateRequestViewModel model)
         {
+            // إزالة التحقق من SubCategory2Ids إذا لم تكن هناك فئات فرعية متاحة
+            if (model.SubCategory2Ids == null || !model.SubCategory2Ids.Any())
+            {
+                // التحقق من وجود فئات فرعية ثانية للفئة المختارة
+                var hasSubCategories2 = model.SubCategory1Id.HasValue &&
+                    await _context.SubCategories2.AnyAsync(s => s.SubCategory1Id == model.SubCategory1Id.Value);
+
+                if (!hasSubCategories2)
+                {
+                    ModelState.Remove("SubCategory2Ids");
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 var userId = GetCurrentUserId();
@@ -181,7 +315,6 @@ namespace ReverseMarket.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
-                // ✅ التحقق المزدوج من نوع المستخدم
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user == null || user.UserType != UserType.Buyer)
                 {
@@ -191,13 +324,16 @@ namespace ReverseMarket.Controllers
 
                 try
                 {
+                    // ✅ أخذ أول فئة فرعية كـ SubCategory2Id الرئيسي
+                    int? primarySubCategory2Id = model.SubCategory2Ids?.FirstOrDefault();
+
                     var request = new Request
                     {
                         Title = model.Title,
                         Description = model.Description,
                         CategoryId = model.CategoryId,
                         SubCategory1Id = model.SubCategory1Id,
-                        SubCategory2Id = model.SubCategory2Id,
+                        SubCategory2Id = primarySubCategory2Id > 0 ? primarySubCategory2Id : null,
                         City = model.City,
                         District = model.District,
                         Location = model.Location,
@@ -209,13 +345,12 @@ namespace ReverseMarket.Controllers
                     _context.Requests.Add(request);
                     await _context.SaveChangesAsync();
 
-                    // معالجة رفع الصور
+                    // ✅ معالجة رفع الصور المتعددة (حتى 5 صور)
                     if (model.Images != null && model.Images.Any())
                     {
                         await SaveRequestImagesAsync(request.Id, model.Images);
                     }
 
-                    // إرسال إشعار للإدارة عن الطلب الجديد
                     await NotifyAdminAboutNewRequestAsync(request);
 
                     TempData["SuccessMessage"] = "تم إرسال طلبك بنجاح! سيتم مراجعته والموافقة عليه في أقرب وقت.";
@@ -245,19 +380,30 @@ namespace ReverseMarket.Controllers
 
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
                 var maxFileSize = 5 * 1024 * 1024; // 5 MB
+                var maxImages = 5; // ✅ الحد الأقصى 5 صور
+                int savedCount = 0;
 
-                foreach (var image in images.Take(3))
+                foreach (var image in images)
                 {
+                    if (savedCount >= maxImages)
+                    {
+                        _logger.LogWarning("تم الوصول للحد الأقصى من الصور ({MaxImages}) للطلب #{RequestId}", maxImages, requestId);
+                        break;
+                    }
+
                     if (image?.Length > 0)
                     {
                         var extension = Path.GetExtension(image.FileName).ToLowerInvariant();
+
                         if (!allowedExtensions.Contains(extension))
                         {
+                            _logger.LogWarning("نوع الملف غير مدعوم: {FileName}", image.FileName);
                             continue;
                         }
 
                         if (image.Length > maxFileSize)
                         {
+                            _logger.LogWarning("حجم الملف كبير جداً: {FileName}", image.FileName);
                             continue;
                         }
 
@@ -277,16 +423,22 @@ namespace ReverseMarket.Controllers
                         };
 
                         _context.RequestImages.Add(requestImage);
+                        savedCount++;
                     }
                 }
 
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("✅ تم حفظ {Count} صورة للطلب #{RequestId}", savedCount, requestId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "خطأ في حفظ الصور");
             }
         }
+
+
+
+
 
         private async Task NotifyAdminAboutNewRequestAsync(Request request)
         {

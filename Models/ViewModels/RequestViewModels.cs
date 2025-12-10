@@ -33,7 +33,10 @@ namespace ReverseMarket.Models
 
         public int? SubCategory1Id { get; set; }
 
-        public int? SubCategory2Id { get; set; }
+        //public int? SubCategory2Id { get; set; }
+
+        [Required(ErrorMessage = "يرجى اختيار فئة فرعية واحدة على الأقل")]
+        public List<int> SubCategory2Ids { get; set; } = new List<int>();
 
         [Required(ErrorMessage = "المحافظة مطلوبة")]
         [StringLength(100, ErrorMessage = "اسم المحافظة لا يجب أن يزيد عن 100 حرف")]
@@ -46,6 +49,7 @@ namespace ReverseMarket.Models
         [StringLength(255, ErrorMessage = "العنوان التفصيلي لا يجب أن يزيد عن 255 حرف")]
         public string? Location { get; set; }
 
+     
         public List<IFormFile>? Images { get; set; }
     }
 }

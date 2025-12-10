@@ -2,6 +2,7 @@
 @inject IStringLocalizer<SharedResource> Localizer
 @{
     ViewData["Title"] = Localizer["Login"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container-custom">
@@ -15,7 +16,6 @@
                 </div>
 
                 <div class="alert alert-info mb-4">
-                    <a href="~\account\login.cshtml"></a>
                     <h6 class="fw-bold mb-2">
                         <i class="fas fa-info-circle me-1"></i>
                         @Localizer["HowItWorks"]
@@ -46,8 +46,10 @@
 
                     <div class="mb-3">
                         <div class="form-check">
-                            <input asp-for="AcceptTerms" class="form-check-input" type="checkbox" required id="termsCheck">
-                            <label class="form-check-label" asp-for="AcceptTerms">
+                       @*      <input asp-for="AcceptTerms" class="form-check-input" type="checkbox" required id="termsCheck">
+                            <label class="form-check-label" asp-for="AcceptTerms"> *@
+                            <input asp-for="AcceptTerms" class="form-check-input" type="checkbox" required id="AcceptTerms">
+                            <label class="form-check-label" for="AcceptTerms">
                                 @Localizer["IAgreeToThe"] <a href="/Home/Terms" target="_blank">@Localizer["TermsOfUse"]</a> @Localizer["And"]
                                 <a href="/Home/Privacy" target="_blank">@Localizer["PrivacyPolicy"]</a>
                             </label>
@@ -67,20 +69,6 @@
                         <i class="fab fa-whatsapp text-success me-1"></i>
                         @Localizer["VerificationCodeViaWhatsApp"]
                     </p>
-
-                   @*  <div class="mb-3">
-                        <p class="text-muted small mb-2">@Localizer["ForQuickDemo"]:</p>
-                        <div class="d-flex gap-2 justify-content-center flex-wrap">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fillDemoNumber('7701234567')">
-                                <i class="fas fa-user me-1"></i>
-                                @Localizer["DemoUser1"]
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fillDemoNumber('7509876543')">
-                                <i class="fas fa-store me-1"></i>
-                                @Localizer["DemoStore"]
-                            </button>
-                        </div>
-                    </div> *@
                 </div>
 
                 <div class="row g-3 mt-3">
@@ -114,7 +102,7 @@
             const phoneInput = document.getElementById('phoneInput');
             const form = document.getElementById('loginForm');
             const submitBtn = document.getElementById('submitBtn');
-            const termsCheck = document.getElementById('termsCheck');
+            const termsCheck = document.getElementById('AcceptTerms');
 
             phoneInput.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\D/g, '');
@@ -164,19 +152,6 @@
 
             updateSubmitButton();
         });
-
-        function fillDemoNumber(number) {
-            const phoneInput = document.getElementById('phoneInput');
-            const termsCheck = document.getElementById('termsCheck');
-            phoneInput.value = number;
-            termsCheck.checked = true;
-            const event = new Event('input');
-            phoneInput.dispatchEvent(event);
-            const changeEvent = new Event('change');
-            termsCheck.dispatchEvent(changeEvent);
-            phoneInput.focus();
-            showMessage(`@Localizer["DemoNumberFilled"]: +964${number}`, 'info');
-        }
 
         function showMessage(message, type) {
             const existingAlerts = document.querySelectorAll('.alert.temp-alert');

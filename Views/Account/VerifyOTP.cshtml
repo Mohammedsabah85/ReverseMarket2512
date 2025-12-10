@@ -5,6 +5,7 @@
     var loginType = ViewBag.LoginType as string;
     var isExistingUser = loginType == "ExistingVerifiedUser";
     var isUnverifiedUser = loginType == "ExistingUnverifiedUser";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container-custom">
