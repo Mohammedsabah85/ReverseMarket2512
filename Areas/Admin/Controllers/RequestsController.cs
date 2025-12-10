@@ -228,7 +228,17 @@ namespace ReverseMarket.Areas.Admin.Controllers
                     return RedirectToAction("Index");
                 }
 
-                if (request.Images != null && request.Images.Any())
+            // ✅ حذف الإشعارات المرتبطة بالطلب أولاً
+            var relatedNotifications = await _dbContext.Notifications
+                .Where(n => n.RequestId == id)
+                .ToListAsync();
+
+            if (relatedNotifications.Any())
+            {
+                _dbContext.Notifications.RemoveRange(relatedNotifications);
+            }
+            
+            if (request.Images != null && request.Images.Any())
                 {
                     _dbContext.RequestImages.RemoveRange(request.Images);
                 }
@@ -238,12 +248,13 @@ namespace ReverseMarket.Areas.Admin.Controllers
 
                 TempData["SuccessMessage"] = "تم حذف الطلب بنجاح";
                 return RedirectToAction("Index");
-            }
+        }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "خطأ في حذف الطلب: {RequestId}", id);
                 TempData["ErrorMessage"] = "حدث خطأ أثناء حذف الطلب";
-                return RedirectToAction("Details", new { id });
+                return RedirectToAction("Details", new { id
+    });
             }
         }
 

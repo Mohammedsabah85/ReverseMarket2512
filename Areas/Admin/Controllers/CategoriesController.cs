@@ -349,15 +349,79 @@ namespace ReverseMarket.Areas.Admin.Controllers
             return View(subCategory);
         }
 
+        //[HttpPost]
+        //public async Task<IActionResult> DeleteSubCategory1(int id)
+        //{
+        //    var subCategory1 = await _context.SubCategories1.FindAsync(id);
+        //    if (subCategory1 != null)
+        //    {
+        //        _context.SubCategories1.Remove(subCategory1);
+        //        await _context.SaveChangesAsync();
+        //        TempData["SuccessMessage"] = "تم حذف الفئة الفرعية الأولى بنجاح";
+        //    }
+
+        //    return RedirectToAction("Index");
+        //}
+
+        //[HttpPost]
+        //public async Task<IActionResult> DeleteSubCategory2(int id)
+        //{
+        //    var subCategory2 = await _context.SubCategories2.FindAsync(id);
+        //    if (subCategory2 != null)
+        //    {
+        //        _context.SubCategories2.Remove(subCategory2);
+        //        await _context.SaveChangesAsync();
+        //        TempData["SuccessMessage"] = "تم حذف الفئة الفرعية الثانية بنجاح";
+        //    }
+
+        //    return RedirectToAction("Index");
+        //}
+
         [HttpPost]
         public async Task<IActionResult> DeleteSubCategory1(int id)
         {
-            var subCategory1 = await _context.SubCategories1.FindAsync(id);
-            if (subCategory1 != null)
+            try
             {
+                var subCategory1 = await _context.SubCategories1
+                    .Include(sc => sc.SubCategories2)
+                    .FirstOrDefaultAsync(sc => sc.Id == id);
+
+                if (subCategory1 == null)
+                {
+                    TempData["ErrorMessage"] = "الفئة الفرعية غير موجودة";
+                    return RedirectToAction("Index");
+                }
+
+                // ✅ التحقق من وجود طلبات مرتبطة
+                var subCategory2Ids = subCategory1.SubCategories2.Select(s => s.Id).ToList();
+                var hasRequests = await _context.Requests.AnyAsync(r =>
+                    r.SubCategory1Id == id ||
+                    (r.SubCategory2Id.HasValue && subCategory2Ids.Contains(r.SubCategory2Id.Value)));
+
+                if (hasRequests)
+                {
+                    TempData["ErrorMessage"] = "لا يمكن حذف هذه الفئة لأن هناك طلبات مرتبطة بها أو بفئاتها الفرعية.";
+                    return RedirectToAction("Index");
+                }
+
+                // ✅ حذف ارتباطات المتاجر
+                var relatedStoreCategories = await _context.StoreCategories
+                    .Where(sc => sc.SubCategory1Id == id ||
+                           (sc.SubCategory2Id.HasValue && subCategory2Ids.Contains(sc.SubCategory2Id.Value)))
+                    .ToListAsync();
+                if (relatedStoreCategories.Any())
+                {
+                    _context.StoreCategories.RemoveRange(relatedStoreCategories);
+                }
+
                 _context.SubCategories1.Remove(subCategory1);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "تم حذف الفئة الفرعية الأولى بنجاح";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"خطأ في حذف الفئة الفرعية: {ex.Message}");
+                TempData["ErrorMessage"] = "حدث خطأ أثناء حذف الفئة الفرعية";
             }
 
             return RedirectToAction("Index");
@@ -366,16 +430,45 @@ namespace ReverseMarket.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteSubCategory2(int id)
         {
-            var subCategory2 = await _context.SubCategories2.FindAsync(id);
-            if (subCategory2 != null)
+            try
             {
+                var subCategory2 = await _context.SubCategories2.FindAsync(id);
+                if (subCategory2 == null)
+                {
+                    TempData["ErrorMessage"] = "الفئة الفرعية غير موجودة";
+                    return RedirectToAction("Index");
+                }
+
+                // ✅ التحقق من وجود طلبات مرتبطة
+                var hasRequests = await _context.Requests.AnyAsync(r => r.SubCategory2Id == id);
+                if (hasRequests)
+                {
+                    TempData["ErrorMessage"] = "لا يمكن حذف هذه الفئة لأن هناك طلبات مرتبطة بها. قم بحذف الطلبات أولاً أو نقلها لفئة أخرى.";
+                    return RedirectToAction("Index");
+                }
+
+                // ✅ حذف ارتباطات المتاجر (StoreCategories)
+                var relatedStoreCategories = await _context.StoreCategories
+                    .Where(sc => sc.SubCategory2Id == id)
+                    .ToListAsync();
+                if (relatedStoreCategories.Any())
+                {
+                    _context.StoreCategories.RemoveRange(relatedStoreCategories);
+                }
+
                 _context.SubCategories2.Remove(subCategory2);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "تم حذف الفئة الفرعية الثانية بنجاح";
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"خطأ في حذف الفئة الفرعية الثانية: {ex.Message}");
+                TempData["ErrorMessage"] = "حدث خطأ أثناء حذف الفئة الفرعية";
+            }
 
             return RedirectToAction("Index");
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
