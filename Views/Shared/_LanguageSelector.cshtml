@@ -1,0 +1,91 @@
+@* 
+    _LanguageSelector.cshtml - قائمة اللغات مع الأعلام
+    استبدل ملف قائمة اللغات الحالي بهذا الكود
+*@
+
+@{
+    var currentCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+    var currentFlag = currentCulture switch
+    {
+        "ar" or "ar-IQ" => "🇮🇶",
+        "en" or "en-US" or "en-GB" => "🇬🇧",
+        "ku" or "ckb" => "🇮🇶",
+        _ => "🌐"
+    };
+    var currentLangName = currentCulture switch
+    {
+        "ar" or "ar-IQ" => "العربية",
+        "en" or "en-US" or "en-GB" => "English",
+        "ku" or "ckb" => "کوردی",
+        _ => "Language"
+    };
+}
+
+<li class="nav-item dropdown language-selector">
+    <a class="nav-link dropdown-toggle language-dropdown" 
+       href="#" 
+       id="languageMenu" 
+       role="button" 
+       data-bs-toggle="dropdown" 
+       aria-expanded="false">
+        <span class="current-language-flag">@currentFlag</span>
+        <span class="current-language-name d-none d-md-inline">@currentLangName</span>
+        <i class="fas fa-chevron-down ms-auto d-md-none"></i>
+    </a>
+    
+    <ul class="dropdown-menu" id="languageDropdown" aria-labelledby="languageMenu">
+        @* العربية *@
+        <li>
+            <form asp-controller="Home" asp-action="SetLanguage" method="post" class="language-form">
+                <input type="hidden" name="culture" value="ar" />
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                <button type="submit" 
+                        class="dropdown-item language-option @(currentCulture.StartsWith("ar") ? "active" : "")"
+                        @(currentCulture.StartsWith("ar") ? "disabled" : "")>
+                    <span class="flag">🇮🇶</span>
+                    <span class="lang-name">العربية</span>
+                    @if(currentCulture.StartsWith("ar"))
+                    {
+                        <i class="fas fa-check ms-auto text-success"></i>
+                    }
+                </button>
+            </form>
+        </li>
+        
+        @* English *@
+        <li>
+            <form asp-controller="Home" asp-action="SetLanguage" method="post" class="language-form">
+                <input type="hidden" name="culture" value="en" />
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                <button type="submit" 
+                        class="dropdown-item language-option @(currentCulture.StartsWith("en") ? "active" : "")"
+                        @(currentCulture.StartsWith("en") ? "disabled" : "")>
+                    <span class="flag">🇬🇧</span>
+                    <span class="lang-name">English</span>
+                    @if(currentCulture.StartsWith("en"))
+                    {
+                        <i class="fas fa-check ms-auto text-success"></i>
+                    }
+                </button>
+            </form>
+        </li>
+        
+        @* کوردی *@
+        <li>
+            <form asp-controller="Home" asp-action="SetLanguage" method="post" class="language-form">
+                <input type="hidden" name="culture" value="ku" />
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                <button type="submit" 
+                        class="dropdown-item language-option @(currentCulture.StartsWith("ku") || currentCulture == "ckb" ? "active" : "")"
+                        @(currentCulture.StartsWith("ku") || currentCulture == "ckb" ? "disabled" : "")>
+                    <span class="flag">🇮🇶</span>
+                    <span class="lang-name">کوردی</span>
+                    @if(currentCulture.StartsWith("ku") || currentCulture == "ckb")
+                    {
+                        <i class="fas fa-check ms-auto text-success"></i>
+                    }
+                </button>
+            </form>
+        </li>
+    </ul>
+</li>
