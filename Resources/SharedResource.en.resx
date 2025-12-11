@@ -1101,4 +1101,37 @@
   <data name="StoreName" xml:space="preserve">
     <value>Store Name</value>
   </data>
+  <data name="Specializations" xml:space="preserve">
+    <value>Specializations</value>
+  </data>
+  <data name="VeiwStore" xml:space="preserve">
+    <value>Veiw Store</value>
+  </data>
+  <data name="QuickActions" xml:space="preserve">
+    <value>Quick Actions</value>
+  </data>
+  <data name="SimilarStores" xml:space="preserve">
+    <value>Similar Stores</value>
+  </data>
+  <data name="Website1" xml:space="preserve">
+    <value>Website1</value>
+  </data>
+  <data name="Website2" xml:space="preserve">
+    <value>Website2</value>
+  </data>
+  <data name="Website3" xml:space="preserve">
+    <value>Website3</value>
+  </data>
+  <data name="RequestsInSameSpecialization" xml:space="preserve">
+    <value>Requests In Same Specialization</value>
+  </data>
+  <data name="MemberSince" xml:space="preserve">
+    <value>Member Since</value>
+  </data>
+  <data name="ViewStore" xml:space="preserve">
+    <value>View Store</value>
+  </data>
+  <data name="BackToStores" xml:space="preserve">
+    <value>Back To Stores</value>
+  </data>
 </root>

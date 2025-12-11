@@ -1101,4 +1101,37 @@
   <data name="StoreName" xml:space="preserve">
     <value>اسم المتجر</value>
   </data>
+  <data name="Specializations" xml:space="preserve">
+    <value>التخصص</value>
+  </data>
+  <data name="VeiwStore" xml:space="preserve">
+    <value>عرض المتجر</value>
+  </data>
+  <data name="QuickActions" xml:space="preserve">
+    <value>روابط سريعة</value>
+  </data>
+  <data name="SimilarStores" xml:space="preserve">
+    <value>متاجر مماثلة</value>
+  </data>
+  <data name="Website1" xml:space="preserve">
+    <value>الرابط الاول</value>
+  </data>
+  <data name="Website2" xml:space="preserve">
+    <value>الرابط الثاني</value>
+  </data>
+  <data name="Website3" xml:space="preserve">
+    <value>الرابط الثالث</value>
+  </data>
+  <data name="RequestsInSameSpecialization" xml:space="preserve">
+    <value>طلبات من نفس الفئة</value>
+  </data>
+  <data name="MemberSince" xml:space="preserve">
+    <value>عضو منذ</value>
+  </data>
+  <data name="ViewStore" xml:space="preserve">
+    <value>عرض المتجر</value>
+  </data>
+  <data name="BackToStores" xml:space="preserve">
+    <value>العودة للمتاجر</value>
+  </data>
 </root>

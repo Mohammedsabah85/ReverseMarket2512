@@ -3,11 +3,17 @@
 
 @inject IStringLocalizer<SharedResource> Localizer
 @{
+    // ViewData["Title"] = Model.StoreName;
+    // var isLoggedIn = Context.Session.GetString("IsLoggedIn") == "true";
+    // var currentUserId = Context.Session.GetInt32("UserId");
+    // var userType = Context.Session.GetString("UserType");
+    // bool canViewContact = isLoggedIn && (userType == "Admin" || currentUserId.HasValue);
+   
     ViewData["Title"] = Model.StoreName;
-    var isLoggedIn = Context.Session.GetString("IsLoggedIn") == "true";
-    var currentUserId = Context.Session.GetInt32("UserId");
-    var userType = Context.Session.GetString("UserType");
-    bool canViewContact = isLoggedIn && (userType == "Admin" || currentUserId.HasValue);
+    var isLoggedIn = User.Identity?.IsAuthenticated ?? false;
+    var isAdmin = User.IsInRole("Admin");
+    bool canViewContact = isLoggedIn;
+
 }
 
 <div class="container-custom">
@@ -102,7 +108,50 @@
                 </div>
 
                 <!-- Websites -->
+              
                 @if (!string.IsNullOrEmpty(Model.WebsiteUrl1) || !string.IsNullOrEmpty(Model.WebsiteUrl2) || !string.IsNullOrEmpty(Model.WebsiteUrl3))
+                {
+                    <div class="mb-4">
+                        <h4 class="text-primary mb-3">
+                            <i class="fas fa-link me-2"></i>
+                            @Localizer["Links"]
+                        </h4>
+                        @if (canViewContact)
+                        {
+                            <div class="d-flex flex-wrap gap-2">
+                                @if (!string.IsNullOrEmpty(Model.WebsiteUrl1))
+                                {
+                                    <a href="@Model.WebsiteUrl1" target="_blank" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-external-link-alt me-1"></i>
+                                        @Localizer["Website1"]
+                                    </a>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.WebsiteUrl2))
+                                {
+                                    <a href="@Model.WebsiteUrl2" target="_blank" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-external-link-alt me-1"></i>
+                                        @Localizer["Website2"]
+                                    </a>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.WebsiteUrl3))
+                                {
+                                    <a href="@Model.WebsiteUrl3" target="_blank" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-external-link-alt me-1"></i>
+                                        @Localizer["Website3"]
+                                    </a>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info py-2">
+                                <i class="fas fa-lock me-2"></i>
+                                <a href="/Account/Login" class="alert-link">@Localizer["LoginToViewLinks"]</a>
+                            </div>
+                        }
+                    </div>
+                }
+                @* @if (!string.IsNullOrEmpty(Model.WebsiteUrl1) || !string.IsNullOrEmpty(Model.WebsiteUrl2) || !string.IsNullOrEmpty(Model.WebsiteUrl3))
                 {
                     <div class="mb-4">
                         <h4 class="text-primary mb-3">
@@ -132,8 +181,8 @@
                                 </a>
                             }
                         </div>
-                    </div>
-                }
+                    </div> *@
+                
             </div>
         </div>
 
