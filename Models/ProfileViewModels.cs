@@ -65,6 +65,9 @@ namespace ReverseMarket.Models
         // ✅ فئات المتجر للبائعين
         public string? StoreCategories { get; set; } // JSON string of selected SubCategory2 IDs
         public List<StoreCategoryDisplay>? CurrentStoreCategories { get; set; } // للعرض
+        public string? PendingUrl1Status { get;  set; }
+        public string? PendingUrl2Status { get;  set; }
+        public string? PendingUrl3Status { get;  set; }
     }
 
     // ✅ ViewModel لعرض فئات المتجر الحالية
