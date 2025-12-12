@@ -1,0 +1,452 @@
+@model ContactPreferencesViewModel
+@{
+    ViewData["Title"] = "إعدادات التواصل";
+}
+
+<div class="container-custom">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-custom">
+                <div class="text-center mb-4">
+                    <i class="fas fa-address-book fa-3x text-primary mb-3"></i>
+                    <h1 class="h3 text-primary">إعدادات التواصل</h1>
+                    <p class="text-muted">حدد كيف تريد أن يتواصل معك البائعون</p>
+                </div>
+
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>ملاحظة:</strong> سيتمكن البائعون من التواصل معك فقط عبر الوسائل التي تقوم بتفعيلها هنا.
+                </div>
+
+                <form asp-action="ContactSettings" method="post" id="contactSettingsForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- وسائل التواصل -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-toggle-on me-2"></i>
+                            وسائل التواصل المتاحة
+                        </h5>
+
+                        <div class="row g-3">
+                            <!-- الاتصال الهاتفي -->
+                            <div class="col-md-6">
+                                <div class="contact-option-card @(Model.AllowPhoneCall ? "active" : "")" id="phoneCallCard">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="contact-icon-wrapper bg-primary-subtle">
+                                                <i class="fas fa-phone-alt text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">الاتصال الهاتفي</h6>
+                                                <small class="text-muted">اتصال صوتي مباشر</small>
+                                            </div>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input asp-for="AllowPhoneCall" class="form-check-input contact-toggle" 
+                                                   type="checkbox" role="switch" data-card="phoneCallCard">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- واتساب -->
+                            <div class="col-md-6">
+                                <div class="contact-option-card @(Model.AllowWhatsApp ? "active" : "")" id="whatsAppCard">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="contact-icon-wrapper bg-success-subtle">
+                                                <i class="fab fa-whatsapp text-success"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">واتساب</h6>
+                                                <small class="text-muted">رسائل ومكالمات واتساب</small>
+                                            </div>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input asp-for="AllowWhatsApp" class="form-check-input contact-toggle" 
+                                                   type="checkbox" role="switch" data-card="whatsAppCard">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- البريد الإلكتروني -->
+                            <div class="col-md-6">
+                                <div class="contact-option-card @(Model.AllowEmail ? "active" : "")" id="emailCard">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="contact-icon-wrapper bg-info-subtle">
+                                                <i class="fas fa-envelope text-info"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">البريد الإلكتروني</h6>
+                                                <small class="text-muted">تواصل عبر الإيميل</small>
+                                            </div>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input asp-for="AllowEmail" class="form-check-input contact-toggle" 
+                                                   type="checkbox" role="switch" data-card="emailCard">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- الرسائل النصية -->
+                            <div class="col-md-6">
+                                <div class="contact-option-card @(Model.AllowSMS ? "active" : "")" id="smsCard">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="contact-icon-wrapper bg-warning-subtle">
+                                                <i class="fas fa-sms text-warning"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">رسائل SMS</h6>
+                                                <small class="text-muted">رسائل نصية قصيرة</small>
+                                            </div>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input asp-for="AllowSMS" class="form-check-input contact-toggle" 
+                                                   type="checkbox" role="switch" data-card="smsCard">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- الدردشة الداخلية -->
+                            <div class="col-md-6">
+                                <div class="contact-option-card @(Model.AllowInAppChat ? "active" : "")" id="chatCard">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="contact-icon-wrapper bg-secondary-subtle">
+                                                <i class="fas fa-comments text-secondary"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">الدردشة الداخلية</h6>
+                                                <small class="text-muted">محادثة داخل التطبيق</small>
+                                            </div>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input asp-for="AllowInAppChat" class="form-check-input contact-toggle" 
+                                                   type="checkbox" role="switch" data-card="chatCard">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- تحذير عدم وجود وسيلة -->
+                        <div id="noContactWarning" class="alert alert-danger mt-3" style="display: none;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>تنبيه:</strong> يجب تفعيل وسيلة تواصل واحدة على الأقل!
+                        </div>
+                    </div>
+
+                    <!-- معلومات إضافية -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-cog me-2"></i>
+                            إعدادات إضافية
+                        </h5>
+
+                        <div class="row g-3">
+                            <!-- رقم واتساب بديل -->
+                            <div class="col-md-6" id="alternativeWhatsAppSection">
+                                <label asp-for="AlternativeWhatsApp" class="form-label">
+                                    <i class="fab fa-whatsapp text-success me-1"></i>
+                                    رقم واتساب بديل
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">+</span>
+                                    <input asp-for="AlternativeWhatsApp" class="form-control" 
+                                           placeholder="964xxxxxxxxxx">
+                                </div>
+                                <small class="form-text text-muted">
+                                    اتركه فارغاً لاستخدام رقم هاتفك الأساسي
+                                </small>
+                                <span asp-validation-for="AlternativeWhatsApp" class="text-danger"></span>
+                            </div>
+
+                            <!-- أفضل وقت للاتصال -->
+                            <div class="col-md-6">
+                                <label asp-for="PreferredContactTime" class="form-label">
+                                    <i class="fas fa-clock text-primary me-1"></i>
+                                    أفضل وقت للاتصال
+                                </label>
+                                <select asp-for="PreferredContactTime" class="form-select">
+                                    <option value="">-- اختر الوقت المفضل --</option>
+                                    <option value="صباحاً (8 ص - 12 ظ)">صباحاً (8 ص - 12 ظ)</option>
+                                    <option value="ظهراً (12 ظ - 4 م)">ظهراً (12 ظ - 4 م)</option>
+                                    <option value="مساءً (4 م - 8 م)">مساءً (4 م - 8 م)</option>
+                                    <option value="ليلاً (8 م - 11 م)">ليلاً (8 م - 11 م)</option>
+                                    <option value="أي وقت">أي وقت</option>
+                                    <option value="أيام العمل فقط">أيام العمل فقط</option>
+                                    <option value="عطلة نهاية الأسبوع فقط">عطلة نهاية الأسبوع فقط</option>
+                                </select>
+                            </div>
+
+                            <!-- ملاحظات التواصل -->
+                            <div class="col-12">
+                                <label asp-for="ContactNotes" class="form-label">
+                                    <i class="fas fa-sticky-note text-warning me-1"></i>
+                                    ملاحظات إضافية للتواصل
+                                </label>
+                                <textarea asp-for="ContactNotes" class="form-control" rows="3"
+                                          placeholder="مثال: أفضل التواصل عبر الواتساب أولاً، لا تتصل بعد الساعة 9 مساءً، يمكنك ترك رسالة صوتية..."></textarea>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <small class="text-muted">هذه الملاحظات ستظهر للبائعين</small>
+                                    <small class="text-muted"><span id="notesCount">0</span>/500</small>
+                                </div>
+                                <span asp-validation-for="ContactNotes" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- معاينة -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-eye me-2"></i>
+                            معاينة كيف سيرى البائعون خيارات التواصل
+                        </h5>
+
+                        <div class="preview-card">
+                            <div class="d-grid gap-2" id="previewButtons">
+                                <!-- سيتم تحديثها بالجافاسكريبت -->
+                            </div>
+                            <div id="previewNotes" class="mt-3" style="display: none;">
+                                <hr>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <span id="previewNotesText"></span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- أزرار الحفظ -->
+                    <div class="form-section border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="/Profile" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-right me-2"></i>
+                                العودة للملف الشخصي
+                            </a>
+                            <button type="submit" class="btn btn-custom btn-lg" id="submitBtn">
+                                <i class="fas fa-save me-2"></i>
+                                حفظ الإعدادات
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .section-title {
+        color: #b3962d;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .contact-option-card {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 20px;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .contact-option-card:hover {
+        border-color: #b3962d;
+        box-shadow: 0 4px 12px rgba(179, 150, 45, 0.15);
+    }
+
+    .contact-option-card.active {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-color: #4caf50;
+    }
+
+    .contact-option-card:not(.active) {
+        opacity: 0.6;
+    }
+
+    .contact-icon-wrapper {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .form-check-input {
+        width: 50px;
+        height: 26px;
+        cursor: pointer;
+    }
+
+    .form-check-input:checked {
+        background-color: #4caf50;
+        border-color: #4caf50;
+    }
+
+    .preview-card {
+        background: #fafafa;
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .preview-btn {
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .bg-primary-subtle { background-color: rgba(13, 110, 253, 0.1); }
+    .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1); }
+    .bg-info-subtle { background-color: rgba(13, 202, 240, 0.1); }
+    .bg-warning-subtle { background-color: rgba(255, 193, 7, 0.1); }
+    .bg-secondary-subtle { background-color: rgba(108, 117, 125, 0.1); }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggles = document.querySelectorAll('.contact-toggle');
+            const noContactWarning = document.getElementById('noContactWarning');
+            const submitBtn = document.getElementById('submitBtn');
+            const contactNotes = document.querySelector('[name="ContactNotes"]');
+            const notesCount = document.getElementById('notesCount');
+            const alternativeWhatsAppSection = document.getElementById('alternativeWhatsAppSection');
+            const whatsAppToggle = document.querySelector('[name="AllowWhatsApp"]');
+
+            // تحديث البطاقات والمعاينة
+            function updateAll() {
+                updateCards();
+                checkContactMethods();
+                updatePreview();
+                updateWhatsAppSection();
+            }
+
+            // تحديث مظهر البطاقات
+            function updateCards() {
+                toggles.forEach(toggle => {
+                    const cardId = toggle.getAttribute('data-card');
+                    const card = document.getElementById(cardId);
+                    if (card) {
+                        if (toggle.checked) {
+                            card.classList.add('active');
+                        } else {
+                            card.classList.remove('active');
+                        }
+                    }
+                });
+            }
+
+            // التحقق من وجود وسيلة واحدة على الأقل
+            function checkContactMethods() {
+                const anyEnabled = Array.from(toggles).some(t => t.checked);
+                noContactWarning.style.display = anyEnabled ? 'none' : 'block';
+                submitBtn.disabled = !anyEnabled;
+            }
+
+            // تحديث المعاينة
+            function updatePreview() {
+                const previewContainer = document.getElementById('previewButtons');
+                const previewNotes = document.getElementById('previewNotes');
+                const previewNotesText = document.getElementById('previewNotesText');
+                
+                let html = '';
+
+                if (document.querySelector('[name="AllowPhoneCall"]').checked) {
+                    html += '<button type="button" class="btn btn-outline-primary preview-btn"><i class="fas fa-phone me-2"></i>اتصال مباشر</button>';
+                }
+                if (document.querySelector('[name="AllowWhatsApp"]').checked) {
+                    html += '<button type="button" class="btn btn-success preview-btn"><i class="fab fa-whatsapp me-2"></i>واتساب</button>';
+                }
+                if (document.querySelector('[name="AllowEmail"]').checked) {
+                    html += '<button type="button" class="btn btn-outline-info preview-btn"><i class="fas fa-envelope me-2"></i>بريد إلكتروني</button>';
+                }
+                if (document.querySelector('[name="AllowSMS"]').checked) {
+                    html += '<button type="button" class="btn btn-outline-warning preview-btn"><i class="fas fa-sms me-2"></i>رسالة نصية</button>';
+                }
+                if (document.querySelector('[name="AllowInAppChat"]').checked) {
+                    html += '<button type="button" class="btn btn-outline-secondary preview-btn"><i class="fas fa-comments me-2"></i>دردشة داخلية</button>';
+                }
+
+                if (!html) {
+                    html = '<div class="text-center text-muted"><i class="fas fa-ban fa-2x mb-2"></i><p>لا توجد وسائل تواصل مفعّلة</p></div>';
+                }
+
+                previewContainer.innerHTML = html;
+
+                // ملاحظات التواصل
+                const notes = contactNotes.value.trim();
+                const time = document.querySelector('[name="PreferredContactTime"]').value;
+                
+                if (notes || time) {
+                    let notesHtml = '';
+                    if (time) notesHtml += '<strong>أفضل وقت:</strong> ' + time + '<br>';
+                    if (notes) notesHtml += notes;
+                    previewNotesText.innerHTML = notesHtml;
+                    previewNotes.style.display = 'block';
+                } else {
+                    previewNotes.style.display = 'none';
+                }
+            }
+
+            // إظهار/إخفاء حقل واتساب البديل
+            function updateWhatsAppSection() {
+                if (whatsAppToggle && alternativeWhatsAppSection) {
+                    alternativeWhatsAppSection.style.display = whatsAppToggle.checked ? 'block' : 'none';
+                }
+            }
+
+            // عداد الأحرف
+            if (contactNotes && notesCount) {
+                notesCount.textContent = contactNotes.value.length;
+                contactNotes.addEventListener('input', function() {
+                    if (this.value.length > 500) {
+                        this.value = this.value.substring(0, 500);
+                    }
+                    notesCount.textContent = this.value.length;
+                    updatePreview();
+                });
+            }
+
+            // الأحداث
+            toggles.forEach(toggle => {
+                toggle.addEventListener('change', updateAll);
+            });
+
+            document.querySelector('[name="PreferredContactTime"]').addEventListener('change', updatePreview);
+
+            // التحقق عند الإرسال
+            document.getElementById('contactSettingsForm').addEventListener('submit', function(e) {
+                const anyEnabled = Array.from(toggles).some(t => t.checked);
+                if (!anyEnabled) {
+                    e.preventDefault();
+                    noContactWarning.style.display = 'block';
+                    alert('يجب تفعيل وسيلة تواصل واحدة على الأقل');
+                    return false;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري الحفظ...';
+            });
+
+            // تشغيل التحديث الأولي
+            updateAll();
+        });
+    </script>
+}

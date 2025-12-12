@@ -1,8 +1,22 @@
-﻿@model ReverseMarket.Models.Identity.ApplicationUser
+@* Views/Shared/_ContactVerificationPartial.cshtml *@
+@* عرض أزرار التواصل بناءً على تفضيلات المشتري *@
+@model ReverseMarket.Models.Identity.ApplicationUser
+
 @{
-    var isLoggedIn = User.Identity?.IsAuthenticated ?? false;
-    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-    var canViewContact = isLoggedIn && (User.IsInRole("Admin") || !string.IsNullOrEmpty(currentUserId));
+    // التحقق من صلاحية عرض معلومات التواصل
+    var isLoggedIn = User.Identity?.IsAuthenticated == true;
+    var isAdmin = User.IsInRole("Admin");
+    
+    // هل يمكن للمستخدم الحالي رؤية معلومات التواصل؟
+    bool canViewContact = isLoggedIn;
+    
+    // الحصول على رقم الواتساب الفعلي
+    var whatsAppNumber = !string.IsNullOrEmpty(Model.AlternativeWhatsApp) 
+        ? Model.AlternativeWhatsApp 
+        : Model.PhoneNumber;
+    
+    // تنظيف رقم الواتساب
+    var cleanWhatsAppNumber = whatsAppNumber?.Replace("+", "").Replace(" ", "").Replace("-", "");
 }
 
 <h5 class="text-primary mb-3">
@@ -10,93 +24,210 @@
     التواصل
 </h5>
 
-@if (canViewContact)
+@if (!isLoggedIn)
 {
-    <div class="d-grid gap-2">
-        <!-- زر المحادثة عبر الموقع -->
-        <a href="@Url.Action("Index", "Chat", new { withUser = Model.PhoneNumber })"
-           class="btn btn-primary">
-            <i class="fas fa-comments me-2"></i>
-            محادثة عبر الموقع
-        </a>
-
-        <!-- زر واتساب -->
-        <a href="https://wa.me/@Model.PhoneNumber.Replace("+", "")"
-           target="_blank"
-           class="btn btn-success">
-            <i class="fab fa-whatsapp me-2"></i>
-            واتساب
-        </a>
-
-        <!-- زر اتصال مباشر -->
-        <a href="tel:@Model.PhoneNumber"
-           class="btn btn-outline-primary">
-            <i class="fas fa-phone me-2"></i>
-            اتصال مباشر
-        </a>
-
-        <!-- زر البريد الإلكتروني (إذا متوفر) -->
-        @if (!string.IsNullOrEmpty(Model.Email))
-        {
-            <a href="mailto:@Model.Email"
-               class="btn btn-outline-info">
-                <i class="fas fa-envelope me-2"></i>
-                بريد إلكتروني
-            </a>
-        }
+    <div class="alert alert-warning">
+        <i class="fas fa-lock me-2"></i>
+        <strong>يجب تسجيل الدخول</strong><br>
+        <small>لرؤية معلومات التواصل يرجى تسجيل الدخول أولاً</small>
     </div>
-
-    <div class="alert alert-info mt-3" role="alert">
+    <a href="/Account/Login" class="btn btn-primary w-100">
+        <i class="fas fa-sign-in-alt me-2"></i>
+        تسجيل الدخول
+    </a>
+}
+else if (!Model.HasAnyContactMethod)
+{
+    <div class="alert alert-info">
         <i class="fas fa-info-circle me-2"></i>
-        <small>
-            <strong>نصيحة:</strong> استخدم المحادثة عبر الموقع للتواصل الآمن وحفظ محادثاتك،
-            أو تواصل مباشرة عبر واتساب أو الهاتف.
-        </small>
+        <strong>لا توجد وسائل تواصل متاحة</strong><br>
+        <small>المستخدم لم يحدد أي وسيلة للتواصل</small>
     </div>
 }
 else
 {
-    <div class="alert alert-warning" role="alert">
-        <i class="fas fa-lock me-2"></i>
-        <strong>سجل دخولك لرؤية معلومات التواصل</strong>
-        <p class="mb-0 mt-2">
-            يجب تسجيل الدخول أولاً لتتمكن من التواصل مع صاحب الطلب.
-        </p>
+    <div class="d-grid gap-2">
+        @* ✅ الاتصال الهاتفي *@
+        @if (Model.AllowPhoneCall && !string.IsNullOrEmpty(Model.PhoneNumber))
+        {
+            <a href="tel:@Model.PhoneNumber" class="btn btn-outline-primary contact-btn">
+                <i class="fas fa-phone me-2"></i>
+                اتصال مباشر
+            </a>
+        }
+
+        @* ✅ واتساب *@
+        @if (Model.AllowWhatsApp && !string.IsNullOrEmpty(cleanWhatsAppNumber))
+        {
+            <a href="https://wa.me/@cleanWhatsAppNumber" target="_blank" class="btn btn-success contact-btn">
+                <i class="fab fa-whatsapp me-2"></i>
+                واتساب
+            </a>
+        }
+
+        @* ✅ البريد الإلكتروني *@
+        @if (Model.AllowEmail && !string.IsNullOrEmpty(Model.Email))
+        {
+            <a href="mailto:@Model.Email" class="btn btn-outline-info contact-btn">
+                <i class="fas fa-envelope me-2"></i>
+                بريد إلكتروني
+            </a>
+        }
+
+        @* ✅ الرسائل النصية SMS *@
+        @if (Model.AllowSMS && !string.IsNullOrEmpty(Model.PhoneNumber))
+        {
+            <a href="sms:@Model.PhoneNumber" class="btn btn-outline-warning contact-btn">
+                <i class="fas fa-sms me-2"></i>
+                رسالة نصية
+            </a>
+        }
+
+        @* ✅ الدردشة الداخلية *@
+        @if (Model.AllowInAppChat)
+        {
+            <a href="/Chat/Start/@Model.Id" class="btn btn-outline-secondary contact-btn">
+                <i class="fas fa-comments me-2"></i>
+                دردشة داخلية
+            </a>
+        }
     </div>
 
-    <div class="d-grid gap-2">
-        <a href="@Url.Action("Login", "Account", new { returnUrl = Context.Request.Path })"
-           class="btn btn-primary">
-            <i class="fas fa-sign-in-alt me-2"></i>
-            تسجيل الدخول
-        </a>
-        <a href="@Url.Action("Login", "Account", new { returnUrl = Context.Request.Path })"
-           class="btn btn-outline-secondary">
-            <i class="fas fa-user-plus me-2"></i>
-            إنشاء حساب جديد
-        </a>
+    @* ✅ عرض ملاحظات التواصل إن وجدت *@
+    @if (!string.IsNullOrEmpty(Model.ContactNotes) || !string.IsNullOrEmpty(Model.PreferredContactTime))
+    {
+        <hr class="my-3">
+        <div class="contact-notes">
+            <h6 class="text-muted mb-2">
+                <i class="fas fa-sticky-note me-1"></i>
+                ملاحظات التواصل
+            </h6>
+            
+            @if (!string.IsNullOrEmpty(Model.PreferredContactTime))
+            {
+                <div class="mb-2">
+                    <i class="fas fa-clock text-primary me-1"></i>
+                    <small><strong>أفضل وقت للاتصال:</strong> @Model.PreferredContactTime</small>
+                </div>
+            }
+            
+            @if (!string.IsNullOrEmpty(Model.ContactNotes))
+            {
+                <div class="alert alert-light border small mb-0">
+                    <i class="fas fa-info-circle text-info me-1"></i>
+                    @Model.ContactNotes
+                </div>
+            }
+        </div>
+    }
+
+    @* ✅ عرض وسائل التواصل المتاحة كأيقونات صغيرة *@
+    <hr class="my-3">
+    <div class="text-center">
+        <small class="text-muted d-block mb-2">وسائل التواصل المتاحة:</small>
+        <div class="contact-icons">
+            @if (Model.AllowPhoneCall)
+            {
+                <span class="contact-icon-badge" title="الاتصال الهاتفي">
+                    <i class="fas fa-phone text-primary"></i>
+                </span>
+            }
+            @if (Model.AllowWhatsApp)
+            {
+                <span class="contact-icon-badge" title="واتساب">
+                    <i class="fab fa-whatsapp text-success"></i>
+                </span>
+            }
+            @if (Model.AllowEmail && !string.IsNullOrEmpty(Model.Email))
+            {
+                <span class="contact-icon-badge" title="البريد الإلكتروني">
+                    <i class="fas fa-envelope text-info"></i>
+                </span>
+            }
+            @if (Model.AllowSMS)
+            {
+                <span class="contact-icon-badge" title="رسائل SMS">
+                    <i class="fas fa-sms text-warning"></i>
+                </span>
+            }
+            @if (Model.AllowInAppChat)
+            {
+                <span class="contact-icon-badge" title="الدردشة الداخلية">
+                    <i class="fas fa-comments text-secondary"></i>
+                </span>
+            }
+        </div>
+    </div>
+}
+
+@* ✅ للمسؤولين: عرض جميع المعلومات *@
+@if (isAdmin)
+{
+    <hr class="my-3">
+    <div class="admin-info bg-light p-2 rounded">
+        <small class="text-muted">
+            <i class="fas fa-shield-alt text-danger me-1"></i>
+            <strong>معلومات للمسؤول:</strong>
+        </small>
+        <ul class="small mb-0 mt-1">
+            <li>الهاتف: @Model.PhoneNumber</li>
+            @if (!string.IsNullOrEmpty(Model.Email))
+            {
+                <li>البريد: @Model.Email</li>
+            }
+            @if (!string.IsNullOrEmpty(Model.AlternativeWhatsApp))
+            {
+                <li>واتساب بديل: @Model.AlternativeWhatsApp</li>
+            }
+        </ul>
     </div>
 }
 
 <style>
-    .btn {
+    .contact-btn {
+        padding: 12px 20px;
+        font-weight: 500;
         transition: all 0.3s ease;
     }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-    .alert-info {
-        background-color: #e7f3ff;
-        border-color: #b3d9ff;
-        color: #004085;
+    .contact-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
-    .alert-warning {
-        background-color: #fff3cd;
-        border-color: #ffeaa7;
-        color: #856404;
+    .contact-icons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .contact-icon-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .contact-icon-badge:hover {
+        transform: scale(1.1);
+        border-color: #b3962d;
+    }
+
+    .contact-notes {
+        background: #fafafa;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+    }
+
+    .admin-info {
+        font-size: 0.85rem;
     }
 </style>

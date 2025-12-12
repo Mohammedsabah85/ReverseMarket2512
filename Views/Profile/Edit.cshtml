@@ -1,9 +1,10 @@
-﻿@using ReverseMarket.Controllers
+@using ReverseMarket.Controllers
 @using ReverseMarket.Models.Identity
 @model EditProfileViewModel
 @{
     ViewData["Title"] = "تعديل الملف الشخصي";
     var isSeller = Model.UserType == UserType.Seller;
+    var isBuyer = Model.UserType == UserType.Buyer;
 }
 
 <div class="container-custom">
@@ -180,6 +181,149 @@
                             </div>
                         </div>
                     </div>
+
+                    @* ═══════════════════════════════════════════════════════════════════════════════ *@
+                    @* ✅ قسم تفضيلات التواصل - للمشترين فقط *@
+                    @* ═══════════════════════════════════════════════════════════════════════════════ *@
+                    @if (isBuyer)
+                    {
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-address-book me-2"></i>
+                                تفضيلات التواصل
+                            </h5>
+
+                            <div class="alert alert-info mb-4">
+                                <i class="fas fa-info-circle me-2"></i>
+                                حدد طرق التواصل التي تفضلها. سيتمكن البائعون من التواصل معك فقط عبر الوسائل المفعّلة.
+                            </div>
+
+                            <div class="row g-4">
+                                <!-- وسائل التواصل الأساسية -->
+                                <div class="col-12">
+                                    <label class="form-label fw-bold mb-3">وسائل التواصل المتاحة:</label>
+                                    
+                                    <div class="row g-3">
+                                        <!-- الاتصال الهاتفي -->
+                                        <div class="col-md-4 col-6">
+                                            <div class="contact-option-card @(Model.AllowPhoneCall ? "active" : "")">
+                                                <div class="form-check form-switch">
+                                                    <input asp-for="AllowPhoneCall" class="form-check-input contact-toggle" type="checkbox" role="switch" id="allowPhoneCallSwitch">
+                                                    <label class="form-check-label" for="allowPhoneCallSwitch">
+                                                        <i class="fas fa-phone-alt contact-icon text-primary"></i>
+                                                        <span>الاتصال الهاتفي</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- واتساب -->
+                                        <div class="col-md-4 col-6">
+                                            <div class="contact-option-card @(Model.AllowWhatsApp ? "active" : "")">
+                                                <div class="form-check form-switch">
+                                                    <input asp-for="AllowWhatsApp" class="form-check-input contact-toggle" type="checkbox" role="switch" id="allowWhatsAppSwitch">
+                                                    <label class="form-check-label" for="allowWhatsAppSwitch">
+                                                        <i class="fab fa-whatsapp contact-icon text-success"></i>
+                                                        <span>واتساب</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- البريد الإلكتروني -->
+                                        <div class="col-md-4 col-6">
+                                            <div class="contact-option-card @(Model.AllowEmail ? "active" : "")">
+                                                <div class="form-check form-switch">
+                                                    <input asp-for="AllowEmail" class="form-check-input contact-toggle" type="checkbox" role="switch" id="allowEmailSwitch">
+                                                    <label class="form-check-label" for="allowEmailSwitch">
+                                                        <i class="fas fa-envelope contact-icon text-info"></i>
+                                                        <span>البريد الإلكتروني</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- الرسائل النصية -->
+                                        <div class="col-md-4 col-6">
+                                            <div class="contact-option-card @(Model.AllowSMS ? "active" : "")">
+                                                <div class="form-check form-switch">
+                                                    <input asp-for="AllowSMS" class="form-check-input contact-toggle" type="checkbox" role="switch" id="allowSMSSwitch">
+                                                    <label class="form-check-label" for="allowSMSSwitch">
+                                                        <i class="fas fa-sms contact-icon text-warning"></i>
+                                                        <span>رسائل SMS</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- الدردشة الداخلية -->
+                                        <div class="col-md-4 col-6">
+                                            <div class="contact-option-card @(Model.AllowInAppChat ? "active" : "")">
+                                                <div class="form-check form-switch">
+                                                    <input asp-for="AllowInAppChat" class="form-check-input contact-toggle" type="checkbox" role="switch" id="allowInAppChatSwitch">
+                                                    <label class="form-check-label" for="allowInAppChatSwitch">
+                                                        <i class="fas fa-comments contact-icon text-secondary"></i>
+                                                        <span>الدردشة الداخلية</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- تحذير إذا لم يتم اختيار أي وسيلة -->
+                                    <div id="noContactMethodWarning" class="alert alert-warning mt-3" style="display: none;">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>تنبيه:</strong> يجب تفعيل وسيلة تواصل واحدة على الأقل حتى يتمكن البائعون من التواصل معك.
+                                    </div>
+                                </div>
+
+                                <!-- معلومات إضافية للتواصل -->
+                                <div class="col-md-6" id="whatsappAlternativeSection">
+                                    <label asp-for="AlternativeWhatsApp" class="form-label">
+                                        <i class="fab fa-whatsapp text-success me-1"></i>
+                                        رقم واتساب بديل
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">+964</span>
+                                        <input asp-for="AlternativeWhatsApp" class="form-control" placeholder="اختياري - إذا كان مختلفاً عن رقم الهاتف">
+                                    </div>
+                                    <small class="form-text text-muted">اتركه فارغاً لاستخدام رقم الهاتف الأساسي</small>
+                                    <span asp-validation-for="AlternativeWhatsApp" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="PreferredContactTime" class="form-label">
+                                        <i class="fas fa-clock text-primary me-1"></i>
+                                        أفضل وقت للاتصال
+                                    </label>
+                                    <select asp-for="PreferredContactTime" class="form-control">
+                                        <option value="">-- اختر الوقت المفضل --</option>
+                                        <option value="صباحاً (8 ص - 12 ظ)">صباحاً (8 ص - 12 ظ)</option>
+                                        <option value="ظهراً (12 ظ - 4 م)">ظهراً (12 ظ - 4 م)</option>
+                                        <option value="مساءً (4 م - 8 م)">مساءً (4 م - 8 م)</option>
+                                        <option value="ليلاً (8 م - 11 م)">ليلاً (8 م - 11 م)</option>
+                                        <option value="أي وقت">أي وقت</option>
+                                        <option value="أيام العمل فقط">أيام العمل فقط</option>
+                                        <option value="عطلة نهاية الأسبوع فقط">عطلة نهاية الأسبوع فقط</option>
+                                    </select>
+                                    <span asp-validation-for="PreferredContactTime" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-12">
+                                    <label asp-for="ContactNotes" class="form-label">
+                                        <i class="fas fa-sticky-note text-warning me-1"></i>
+                                        ملاحظات إضافية للتواصل
+                                    </label>
+                                    <textarea asp-for="ContactNotes" class="form-control" rows="2"
+                                              placeholder="مثال: يفضل التواصل عبر الواتساب أولاً، أو لا تتصل بعد الساعة 9 مساءً..."></textarea>
+                                    <small class="form-text text-muted">
+                                        <span id="contactNotesCount">0</span>/500 حرف
+                                    </small>
+                                    <span asp-validation-for="ContactNotes" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    }
 
                     @* ✅ قسم معلومات المتجر - للبائعين فقط *@
                     @if (isSeller)
@@ -390,6 +534,66 @@
         #selectedCategoriesList li:last-child {
             border-bottom: none;
         }
+
+    /* ═══════════════════════════════════════════════════════════════════════════════ */
+    /* ✅ أنماط قسم تفضيلات التواصل */
+    /* ═══════════════════════════════════════════════════════════════════════════════ */
+    .contact-option-card {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 15px;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .contact-option-card:hover {
+        border-color: #b3962d;
+        box-shadow: 0 4px 12px rgba(179, 150, 45, 0.15);
+    }
+
+    .contact-option-card.active {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-color: #4caf50;
+    }
+
+    .contact-option-card .form-check-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .contact-option-card .contact-icon {
+        font-size: 1.5rem;
+        width: 35px;
+        text-align: center;
+    }
+
+    .contact-option-card .form-check-input {
+        width: 50px;
+        height: 26px;
+        cursor: pointer;
+    }
+
+    .contact-option-card .form-check-input:checked {
+        background-color: #4caf50;
+        border-color: #4caf50;
+    }
+
+    .contact-toggle:focus {
+        box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+    }
+
+    /* تأثير عند إيقاف التفعيل */
+    .contact-option-card:not(.active) {
+        opacity: 0.7;
+    }
+
+    .contact-option-card:not(.active) .contact-icon {
+        filter: grayscale(100%);
+    }
 </style>
 
 @section Scripts {
@@ -405,21 +609,21 @@
         // ✅ تحميل الفئات الحالية عند فتح الصفحة
         @if (Model.CurrentStoreCategories != null && Model.CurrentStoreCategories.Any())
         {
-                <text>
-                $(document).ready(function() {
-                    @foreach (var cat in Model.CurrentStoreCategories)
-                    {
-                            <text>
-                            selectedCategories.set('@cat.SubCategory2Id', {
-                                id: '@cat.SubCategory2Id',
-                                path: '@cat.FullPath',
-                                subCategory1Id: '0'
-                            });
-                            </text>
-                    }
-                    updateSelectedCategoriesDisplay();
-                });
-                </text>
+            <text>
+            $(document).ready(function() {
+                @foreach (var cat in Model.CurrentStoreCategories)
+                {
+                    <text>
+                    selectedCategories.set('@cat.SubCategory2Id', {
+                        id: '@cat.SubCategory2Id',
+                        path: '@cat.FullPath',
+                        subCategory1Id: '0'
+                    });
+                    </text>
+                }
+                updateSelectedCategoriesDisplay();
+            });
+            </text>
         }
 
         // ✅ معاينة الصورة قبل الرفع
@@ -428,14 +632,12 @@
             const file = input.files[0];
 
             if (file) {
-                // التحقق من حجم الملف (5MB)
                 if (file.size > 5 * 1024 * 1024) {
                     alert('حجم الصورة كبير جداً! الحد الأقصى 5 ميجابايت');
                     input.value = '';
                     return;
                 }
 
-                // التحقق من نوع الملف
                 const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
                 if (!allowedTypes.includes(file.type)) {
                     alert('نوع الملف غير مدعوم! استخدم JPG أو PNG أو GIF');
@@ -445,12 +647,9 @@
 
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // إذا كان الـ preview صورة
                     if (preview.tagName === 'IMG') {
                         preview.src = e.target.result;
-                    }
-                    // إذا كان div (الحالة الافتراضية)
-                    else {
+                    } else {
                         const img = document.createElement('img');
                         img.src = e.target.result;
                         img.id = 'profileImagePreview';
@@ -467,6 +666,68 @@
             const form = document.getElementById('editProfileForm');
             const submitBtn = document.getElementById('submitBtn');
 
+            // ═══════════════════════════════════════════════════════════════════════════════
+            // ✅ معالجة تفضيلات التواصل
+            // ═══════════════════════════════════════════════════════════════════════════════
+            const contactToggles = document.querySelectorAll('.contact-toggle');
+            
+            contactToggles.forEach(toggle => {
+                toggle.addEventListener('change', function() {
+                    // تحديث مظهر البطاقة
+                    const card = this.closest('.contact-option-card');
+                    if (this.checked) {
+                        card.classList.add('active');
+                    } else {
+                        card.classList.remove('active');
+                    }
+
+                    // التحقق من وجود وسيلة واحدة على الأقل
+                    checkContactMethods();
+
+                    // إظهار/إخفاء حقل واتساب البديل
+                    const whatsappToggle = document.getElementById('allowWhatsAppSwitch');
+                    const whatsappSection = document.getElementById('whatsappAlternativeSection');
+                    if (whatsappToggle && whatsappSection) {
+                        whatsappSection.style.display = whatsappToggle.checked ? 'block' : 'none';
+                    }
+                });
+            });
+
+            // التحقق من وجود وسيلة تواصل واحدة على الأقل
+            function checkContactMethods() {
+                const warning = document.getElementById('noContactMethodWarning');
+                if (!warning) return;
+
+                const anyEnabled = Array.from(contactToggles).some(t => t.checked);
+                warning.style.display = anyEnabled ? 'none' : 'block';
+            }
+
+            // تشغيل التحقق عند تحميل الصفحة
+            checkContactMethods();
+
+            // إظهار/إخفاء حقل واتساب البديل عند التحميل
+            const whatsappToggle = document.getElementById('allowWhatsAppSwitch');
+            const whatsappSection = document.getElementById('whatsappAlternativeSection');
+            if (whatsappToggle && whatsappSection) {
+                whatsappSection.style.display = whatsappToggle.checked ? 'block' : 'none';
+            }
+
+            // عداد الأحرف لملاحظات التواصل
+            const contactNotes = document.querySelector('[name="ContactNotes"]');
+            const contactNotesCount = document.getElementById('contactNotesCount');
+            if (contactNotes && contactNotesCount) {
+                contactNotesCount.textContent = contactNotes.value.length;
+                contactNotes.addEventListener('input', function() {
+                    contactNotesCount.textContent = this.value.length;
+                    if (this.value.length > 500) {
+                        this.value = this.value.substring(0, 500);
+                        contactNotesCount.textContent = 500;
+                    }
+                });
+            }
+
+            // ═══════════════════════════════════════════════════════════════════════════════
+
             // Set minimum date for date of birth (18 years ago)
             const dateInput = document.querySelector('[name="DateOfBirth"]');
             if (dateInput) {
@@ -474,13 +735,24 @@
                 eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
                 dateInput.max = eighteenYearsAgo.toISOString().split('T')[0];
 
-                // Set maximum date (100 years ago)
                 const hundredYearsAgo = new Date();
                 hundredYearsAgo.setFullYear(hundredYearsAgo.getFullYear() - 100);
                 dateInput.min = hundredYearsAgo.toISOString().split('T')[0];
             }
 
             form.addEventListener('submit', function(e) {
+                // التحقق من وجود وسيلة تواصل واحدة على الأقل (للمشترين)
+                const isBuyer = @(isBuyer ? "true" : "false");
+                if (isBuyer) {
+                    const anyEnabled = Array.from(contactToggles).some(t => t.checked);
+                    if (!anyEnabled) {
+                        e.preventDefault();
+                        alert('يجب تفعيل وسيلة تواصل واحدة على الأقل');
+                        document.getElementById('noContactMethodWarning').style.display = 'block';
+                        return false;
+                    }
+                }
+
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري الحفظ...';
             });
@@ -532,7 +804,6 @@
                 var subCategory1Name = $('#subCategory1Select option:selected').text();
                 var currentSubCat1 = $('#subCategory1Select').val();
 
-                // إضافة الفئات المختارة
                 selectedOptions.each(function() {
                     var id = $(this).val();
                     var name = $(this).text();
